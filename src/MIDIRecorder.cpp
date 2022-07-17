@@ -31,11 +31,15 @@ struct MIDIRecorder : Module {
 
 	MIDIRecorder() {
 		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
-		configInput(BPM_INPUT, "");
-		configInput(RUN_INPUT, "");
-		int i;
-		for (i = T1_NOTE_INPUT; i < INPUTS_LEN; i++) {
-			configInput(i, "");
+		configInput(BPM_INPUT, "Tempo/BPM");
+		configInput(RUN_INPUT, "Start/Stop Gate");
+		int i,t;
+		for (t = 0; t < NUM_TRACKS; t++) {
+			for (i = 0; i < 5; i++) {
+				auto e = T1_NOTE_INPUT + t*5 + i;
+				const char* paramName[5] = {"Note pitch (V/oct)", "Note gate", "Note velocity", "Pitchbend", "Modwheel"};
+				configInput(e, string::f("Track %d %s", t+1, paramName[i]));
+			}
 		}
 	}
 
