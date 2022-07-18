@@ -29,6 +29,8 @@ struct MIDIRecorder : Module {
 		LIGHTS_LEN
 	};
 
+	float bpm;
+	
 	MIDIRecorder() {
 		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
 		configInput(BPM_INPUT, "Tempo/BPM");
@@ -44,6 +46,17 @@ struct MIDIRecorder : Module {
 	}
 
 	void process(const ProcessArgs& args) override {
+		// From Impromptu's Clocked : bpm = 120*2^V
+		float new_bpm;
+		if (inputs[BPM_INPUT].isConnected()) {
+			new_bpm = 120.0f * std::pow(2.0f, inputs[BPM_INPUT].getVoltage());
+		} else {
+			new_bpm = 120.0f; // default
+		}
+		if (new_bpm != bpm) {
+			INFO("BPM: %f", new_bpm);
+		}
+		bpm = new_bpm;
 	}
 };
 
