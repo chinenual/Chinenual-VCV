@@ -1,12 +1,25 @@
 #include "plugin.hpp"
 
+#include "MidiFile.h"
+
 #define NUM_TRACKS 10
 #define NUM_PER_TRACK_INPUTS 6
+#define MIDI_FILE_PPQ 960
+#define SEC_PER_MINUTE 60
 
+struct MidiCollector : dsp::MidiGenerator<PORT_MAX_CHANNELS> {
 
-struct MidiTrack : dsp::MidiGenerator<PORT_MAX_CHANNELS> {
+	smf::MidiFile &midiFile;
+	int track;
+	int &tick;
+
+	MidiCollector(smf::MidiFile &midiFile, int track, int &tick) : midiFile(midiFile), track(track), tick(tick) { }
+	
 	void onMessage(const midi::Message& message) override {
 		/// do something
+		// convert to the smf library's classes:
+		smf::MidiMessage smfMsg(message.bytes);
+		midiFile.addEvent(track, tick, smfMsg);
 	}
 
 	void reset() {
@@ -44,7 +57,23 @@ struct MIDIRecorder : Module {
 
 	float bpm;
 	bool running;
-	MidiTrack midiTracks[NUM_TRACKS];
+	int tick;
+	float total_time_s;
+	
+	smf::MidiFile midiFile;
+	MidiCollector MidiCollectors[NUM_TRACKS] = {
+		MidiCollector(midiFile, 0,tick),
+		MidiCollector(midiFile, 1,tick),
+		MidiCollector(midiFile, 2,tick),
+		MidiCollector(midiFile, 3,tick),
+		MidiCollector(midiFile, 4,tick),
+		MidiCollector(midiFile, 5,tick),
+		MidiCollector(midiFile, 6,tick),
+		MidiCollector(midiFile, 7,tick),
+		MidiCollector(midiFile, 8,tick),
+		MidiCollector(midiFile, 9,tick),
+	};
+	
 	dsp::Timer rateLimiterTimer;
 
 	MIDIRecorder() {
@@ -65,12 +94,15 @@ struct MIDIRecorder : Module {
 		}
 	}
 
+	void clearRecording() {
+		midiFile.clear();
+	}
+	
 	void onReset() override {
 		bpm = 120.0f;
 		running = false;
-		for (int i = 0; i < NUM_TRACKS; i++) {
-			midiTracks[i].reset();
-		}
+		tick = 0;
+		clearRecording();
 	}
 	
 	void processMidiTrack(const ProcessArgs& args, const int track)  {
@@ -91,41 +123,80 @@ struct MIDIRecorder : Module {
 		if (rateLimiterTriggered)
 			rateLimiterTimer.time -= rateLimiterPeriod;
 
-		midiTracks[track].setFrame(args.frame);
+		MidiCollectors[track].setFrame(args.frame);
 
 		for (int c = 0; c < inputs[PITCH_INPUT].getChannels(); c++) {
 			int vel = (int) std::round(inputs[VEL_INPUT].getNormalPolyVoltage(10.f * 100 / 127, c) / 10.f * 127);
 			vel = clamp(vel, 0, 127);
-			midiTracks[track].setVelocity(vel, c);
+			MidiCollectors[track].setVelocity(vel, c);
 
 			int note = (int) std::round(inputs[PITCH_INPUT].getVoltage(c) * 12.f + 60.f);
 			note = clamp(note, 0, 127);
 			bool gate = inputs[GATE_INPUT].getPolyVoltage(c) >= 1.f;
-			midiTracks[track].setNoteGate(note, gate, c);
+			MidiCollectors[track].setNoteGate(note, gate, c);
 
 			int aft = (int) std::round(inputs[AFT_INPUT].getPolyVoltage(c) / 10.f * 127);
 			aft = clamp(aft, 0, 127);
-			midiTracks[track].setKeyPressure(aft, c);
+			MidiCollectors[track].setKeyPressure(aft, c);
 		}
 
 		if (rateLimiterTriggered) {
 			int pw = (int) std::round((inputs[PW_INPUT].getVoltage() + 5.f) / 10.f * 0x4000);
 			pw = clamp(pw, 0, 0x3fff);
-			midiTracks[track].setPitchWheel(pw);
+			MidiCollectors[track].setPitchWheel(pw);
 
 			int mw = (int) std::round(inputs[MW_INPUT].getVoltage() / 10.f * 127);
 			mw = clamp(mw, 0, 127);
-			midiTracks[track].setModWheel(mw);
+			MidiCollectors[track].setModWheel(mw);
 		}
 
 	}
 	
 	void processMidi(const ProcessArgs& args)  {
+		total_time_s += args.sampleTime;
+		// PPQ = ticks/beat;  BPM = beat/minute;
+		tick = std::round(total_time_s * bpm / SEC_PER_MINUTE * MIDI_FILE_PPQ);
 		for (int i = 0; i < NUM_TRACKS; i++) {
 			processMidiTrack(args, i);
 		}
 	}
 
+	void startRecording(const ProcessArgs& args) {
+		clearRecording();
+		// max track where inputs are connected?
+		int num_tracks = 10;
+		/*
+		for (int t = NUM_TRACKS-1; t>=0; t--) {
+			// are any of the inputs on this row connected?
+			for (int i = 0; i < NUM_PER_TRACK_INPUTS; i++) {
+				auto id = T1_PITCH_INPUT + i + t*NUM_PER_TRACK_INPUTS;
+				if (inputs[id].isConnected()) {
+					num_tracks = t+1;
+					break;
+				}
+			}
+		}
+		*/
+		midiFile.addTracks(num_tracks);
+
+		midiFile.setTPQ(MIDI_FILE_PPQ);		
+		midiFile.makeAbsoluteTicks();
+
+		for (int t = 0; t < num_tracks; t++) {
+			midiFile.addTempo(t, 0, bpm);
+		}
+		
+		total_time_s = 0.0f;
+		INFO("Start Recording... BPM: %f num_tracks: %d", bpm, num_tracks);
+		running = true;
+	}
+	
+	void stopRecording(const ProcessArgs& args) {
+		running = false;
+		INFO("Stop Recording.  total_time_s=%f ticks=%d",total_time_s,tick);
+		midiFile.write("/tmp/test.mid");
+	}
+	
 	void process(const ProcessArgs& args) override {
 		// From Impromptu's Clocked : bpm = 120*2^V
 		float new_bpm;
@@ -139,17 +210,26 @@ struct MIDIRecorder : Module {
 		}
 		bpm = new_bpm;
 
+		auto was_running = running;
+		int run_requested;
 		// Run button:
 		if (inputs[RUN_INPUT].isConnected()) {
-			running = params[RUN_INPUT].getValue() > 0.0f;
+			run_requested = params[RUN_INPUT].getValue() > 0.0f;
 		} else {
-			running = params[RUN_PARAM].getValue() > 0.0f;
+			run_requested = params[RUN_PARAM].getValue() > 0.0f;
+		}
+
+		if (run_requested) {
+			if (! was_running) {
+				startRecording(args);
+			}
+			processMidi(args);
+		} else {
+			if (was_running) {
+				stopRecording(args);
+			}
 		}
 		lights[RUN_LIGHT].setBrightness(running);
-
-		if (running) {
-			processMidi(args);
-		}
 	}
 };
 
