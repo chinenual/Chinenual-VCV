@@ -15,11 +15,21 @@ The [Changelog](./CHANGELOG.md) describes changes.
 
 ![module-screenshot](./doc/MIDIRecorder.png)
 
-A multi-track recorder to capture a VCV performance in a standard MIDI
+A multi-track recorder to capture a VCV performance to a standard MIDI
 file.   Supports up to 10 polyphonic tracks, capturing CV in the same
 way the VCV core CV-MIDI module does.
 
 Each row of inputs corresponds to one track of MIDI. 
+
+#### Motivation
+
+I run VCV Rack on a fairly low performance laptop (by current
+standards).  I can't run Rack and a DAW at the same time, so I can't
+just stream MIDI out of Rack and record it in my DAW.   I suspect I'm
+not alone.   This module lets me capture 10 tracks of MIDI into a standard MIDI
+file and then import it into my DAW.
+
+####  How it works
 
 * **RUN**  - If the **GATE** input is unconnected, you can press
   this button to start and end the recording.  It changes color to red
@@ -42,7 +52,7 @@ target MIDI file:
 * **V/OCT** - polyphonic. Note pitch (1V/oct)
 * **GATE** - polyphonic. Note gates (0 .. 10V)
 * **VEL**  - polyphonic. Note "velocity" (0 .. 10V)
-* **AFT** - polyphonic. Channel pressure (not polyphonic aftertouch)
+* **AFT** - polyphonic. Aftertouch/Key Pressure (0V .. 10V)
 * **PW** - monophonic. Pitchbend (-5V .. 5V)
 * **MW** - monophonic. Mod Wheel (0V .. 10V)
 
@@ -51,5 +61,5 @@ target MIDI file:
 
 The MIDIRecorder leverages builtin functionality of the VCV Rack core
 MIDI support and uses the same third party MIDI File library as
-@squinkylabs SEQ++ (Craig Stewart's [midifile](https://github.com/craigsapp/midifile) library). 
+Squinky Lab's SEQ++ (Craig Stewart's [midifile](https://github.com/craigsapp/midifile) library). 
 
