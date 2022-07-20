@@ -8,10 +8,10 @@
   "authorEmail": "support@chinenual.com",
   "authorUrl": "https://chinenual.com",
   "pluginUrl": "https://github.com/chinenual/chinenual-vcv",
-  "manualUrl": "https://github.com/chinenual/chinenual-vcv",
+  "manualUrl": "https://github.com/chinenual/chinenual-vcv/README.md",
   "sourceUrl": "https://github.com/chinenual/chinenual-vcv",
-  "donateUrl": "FIXME:donate-url",
-  "changelogUrl": "",
+  "donateUrl": "https://ko-fi.com/chinenual",
+  "changelogUrl": "https://github.com/chinenual/chinenual-vcv/CHANGELOG.md",
   "modules": [
     {
       "slug": "MIDIRecorder",

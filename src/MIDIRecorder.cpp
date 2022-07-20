@@ -164,7 +164,7 @@ struct MIDIRecorder : Module {
 	void startRecording(const ProcessArgs& args) {
 		clearRecording();
 		// max track where inputs are connected?
-		int num_tracks = 10;
+		int num_tracks = NUM_TRACKS;
 		/*
 		for (int t = NUM_TRACKS-1; t>=0; t--) {
 			// are any of the inputs on this row connected?
@@ -194,6 +194,14 @@ struct MIDIRecorder : Module {
 	void stopRecording(const ProcessArgs& args) {
 		running = false;
 		INFO("Stop Recording.  total_time_s=%f ticks=%d",total_time_s,tick);
+		for (int t = 0; t < midiFile.getNumTracks(); t++) {
+			INFO("TRACK %d: %d\n",t, midiFile[t].size());
+			if (midiFile[t].size() <= 2) {
+				// unused track - just the tempo info
+				midiFile[t].clear();
+			}
+			INFO("TRACK NOW %d: %d\n",t, midiFile[t].size());
+		}
 		midiFile.write("/tmp/test.mid");
 	}
 	
