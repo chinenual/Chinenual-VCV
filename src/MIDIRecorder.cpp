@@ -195,12 +195,10 @@ struct MIDIRecorder : Module {
 		running = false;
 		INFO("Stop Recording.  total_time_s=%f ticks=%d",total_time_s,tick);
 		for (int t = 0; t < midiFile.getNumTracks(); t++) {
-			INFO("TRACK %d: %d\n",t, midiFile[t].size());
 			if (midiFile[t].size() <= 2) {
 				// unused track - just the tempo info
 				midiFile[t].clear();
 			}
-			INFO("TRACK NOW %d: %d\n",t, midiFile[t].size());
 		}
 		midiFile.write("/tmp/test.mid");
 	}
@@ -222,7 +220,7 @@ struct MIDIRecorder : Module {
 		int run_requested;
 		// Run button:
 		if (inputs[RUN_INPUT].isConnected()) {
-			run_requested = params[RUN_INPUT].getValue() > 0.0f;
+			run_requested = inputs[RUN_INPUT].getVoltage() > 0.0f;
 		} else {
 			run_requested = params[RUN_PARAM].getValue() > 0.0f;
 		}
