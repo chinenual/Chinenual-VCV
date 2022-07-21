@@ -1,3 +1,4 @@
+#include <osdialog.h>
 #include "plugin.hpp"
 
 #include "MidiFile.h"
@@ -27,6 +28,8 @@ struct MidiCollector : dsp::MidiGenerator<PORT_MAX_CHANNELS> {
 	}
 };
 
+static void selectPath(Module *module);
+
 struct MIDIRecorder : Module {
 	enum ParamId {
 		RUN_PARAM,
@@ -51,7 +54,7 @@ struct MIDIRecorder : Module {
 		OUTPUTS_LEN
 	};
 	enum LightId {
-		RUN_LIGHT,
+		REC_LIGHT,
 		LIGHTS_LEN
 	};
 
@@ -59,7 +62,15 @@ struct MIDIRecorder : Module {
 	bool running;
 	int tick;
 	float total_time_s;
-	
+	bool rec_clicked;
+	std::string path_directory;
+	std::string path_basename;
+	std::string path_ext;
+
+	// persisted state:
+	std::string path;
+	bool increment_path;
+
 	smf::MidiFile midiFile;
 	MidiCollector MidiCollectors[NUM_TRACKS] = {
 		MidiCollector(midiFile, 0,tick),
@@ -94,6 +105,29 @@ struct MIDIRecorder : Module {
 		}
 	}
 
+	void setPath(std::string new_path) {
+		if (this->path == new_path)
+			return;
+
+		if (new_path == "") {
+			this->path = "";
+			path_directory = "";
+			path_basename = "";
+			return;
+		}
+
+		path_directory = system::getDirectory(new_path);
+		path_basename = system::getStem(new_path);
+		path_ext = system::getExtension(new_path);
+		
+		if (path_basename == "") {
+			path = "";
+			return;
+		}
+		path = path_directory + "/" + path_basename + ".mid";
+
+	}
+	
 	void clearRecording() {
 		midiFile.clear();
 	}
@@ -102,7 +136,30 @@ struct MIDIRecorder : Module {
 		bpm = 120.0f;
 		running = false;
 		tick = 0;
+		path = "";
+		path_directory = "";
+		path_basename = "";
+		increment_path = true;
+		rec_clicked = false;
+		
 		clearRecording();
+	}
+
+	json_t *dataToJson() override {
+		json_t *rootJ = json_object();
+		json_object_set_new(rootJ, "path", json_string(path.c_str()));
+		json_object_set_new(rootJ, "increment_path", json_boolean(increment_path));
+		return rootJ;
+	}
+
+	void dataFromJson(json_t *rootJ) override {
+		json_t *pathJ = json_object_get(rootJ, "path");
+		if (pathJ)
+			setPath(json_string_value(pathJ));
+
+		json_t *increment_pathJ = json_object_get(rootJ, "increment_path");
+		if (increment_pathJ)
+			increment_path = json_boolean_value(increment_pathJ);
 	}
 	
 	void processMidiTrack(const ProcessArgs& args, const int track)  {
@@ -162,6 +219,11 @@ struct MIDIRecorder : Module {
 	}
 
 	void startRecording(const ProcessArgs& args) {
+		if (path == "") {
+			INFO("ERROR: No Path in startRecording");
+			return;
+		}
+		
 		clearRecording();
 		// max track where inputs are connected?
 		int num_tracks = NUM_TRACKS;
@@ -193,14 +255,28 @@ struct MIDIRecorder : Module {
 	
 	void stopRecording(const ProcessArgs& args) {
 		running = false;
-		INFO("Stop Recording.  total_time_s=%f ticks=%d",total_time_s,tick);
 		for (int t = 0; t < midiFile.getNumTracks(); t++) {
 			if (midiFile[t].size() <= 2) {
 				// unused track - just the tempo info
 				midiFile[t].clear();
 			}
 		}
-		midiFile.write("/tmp/test.mid");
+		std::string newPath = path;
+		if (increment_path) {
+			std::string extension = "mid";
+			for (int i = 0; i <= 999; i++) {
+				newPath = path_directory + "/" + path_basename;
+				if (i > 0)
+					newPath += string::f("-%03d", i);
+				newPath += "." + extension;
+				// Skip if file exists
+				if (!system::isFile(newPath))
+					break;
+			}
+		}
+
+		INFO("Stop Recording.  total_time_s=%f ticks=%d.  Writing to %s",total_time_s,tick,newPath.c_str());
+		midiFile.write(newPath);
 	}
 	
 	void process(const ProcessArgs& args) override {
@@ -222,7 +298,8 @@ struct MIDIRecorder : Module {
 		if (inputs[RUN_INPUT].isConnected()) {
 			run_requested = inputs[RUN_INPUT].getVoltage() > 0.0f;
 		} else {
-			run_requested = params[RUN_PARAM].getValue() > 0.0f;
+			//			run_requested = params[RUN_PARAM].getValue() > 0.0f;
+			run_requested = rec_clicked;
 		}
 
 		if (run_requested) {
@@ -235,7 +312,64 @@ struct MIDIRecorder : Module {
 				stopRecording(args);
 			}
 		}
-		lights[RUN_LIGHT].setBrightness(running);
+		lights[REC_LIGHT].setBrightness(running);
+	}
+};
+
+static const char MIDI_FILTERS[] = "MIDI files (.mid):mid";
+
+static void selectPath(Module *m) {
+	MIDIRecorder *module = dynamic_cast<MIDIRecorder*>(m);
+	std::string dir;
+	std::string filename;
+
+	if (module->path != "") {
+		dir = system::getDirectory(module->path);
+		filename = system::getFilename(module->path);
+	} else {
+		dir = asset::user("recordings");
+		system::createDirectory(dir);
+		filename = "Untitled";
+	}
+
+	osdialog_filters* filters = osdialog_filters_parse(MIDI_FILTERS);
+	DEFER({
+                        osdialog_filters_free(filters);
+                });
+
+	char *path = osdialog_file(OSDIALOG_SAVE, dir.c_str(), filename.c_str(), filters);
+	if (path) {
+		module->setPath(path);
+		free(path);
+	}
+}
+
+struct RecButton : SvgButton {
+	MIDIRecorder* module;
+
+	RecButton() {
+		addFrame(Svg::load(asset::plugin(pluginInstance, "res/rec_button.svg")));
+	}
+
+	void onDragStart(const event::DragStart &e) override {
+		if (e.button == GLFW_MOUSE_BUTTON_LEFT) {
+			if (module && module->path == "") {
+				selectPath(module);
+			}
+			if (module && module->path != "") {
+				module->rec_clicked = !module->rec_clicked;
+			}
+		}
+
+		SvgButton::onDragStart(e);
+	}
+};
+
+
+struct RecLight : RedLight {
+	RecLight() {
+		bgColor = nvgRGB(0x66, 0x66, 0x66);
+		box.size = mm2px(Vec(9.0, 9.00));
 	}
 };
 
@@ -254,7 +388,11 @@ struct MIDIRecorderWidget : ModuleWidget {
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));			       
 
-		addParam(createLightParamCentered<VCVLightBezelLatch<RedLight>>(mm2px(Vec(FIRST_X, FIRST_Y+4*SPACING)), module, MIDIRecorder::RUN_PARAM, MIDIRecorder::RUN_LIGHT));
+		RecButton* recButton = createWidgetCentered<RecButton>(mm2px(Vec(FIRST_X, FIRST_Y+4*SPACING)));
+		recButton->module = module;
+		addChild(recButton);
+
+		addChild(createLightCentered<RecLight>(mm2px(Vec(FIRST_X, FIRST_Y+4*SPACING)), module, MIDIRecorder::REC_LIGHT));
 		
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(FIRST_X, FIRST_Y+7*SPACING)), module, MIDIRecorder::RUN_INPUT));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(FIRST_X, FIRST_Y+9*SPACING)), module, MIDIRecorder::BPM_INPUT));
@@ -268,6 +406,22 @@ struct MIDIRecorderWidget : ModuleWidget {
 			}
 		}
 	}
+
+	void appendContextMenu(Menu *menu) override {
+		MIDIRecorder *module = dynamic_cast<MIDIRecorder*>(this->module);
+
+		menu->addChild(new MenuSeparator);
+		menu->addChild(createMenuLabel("Output file"));
+
+		std::string path = string::ellipsizePrefix(module->path, 30);
+		menu->addChild(createMenuItem((path != "") ? path : "Select...", "",
+			[=]() {selectPath(module);}
+		));
+
+		menu->addChild(createBoolPtrMenuItem("Append -001, -002, etc.", "", &module->increment_path));
+	}
+
+
 };
 
 
