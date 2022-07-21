@@ -57,6 +57,17 @@ target MIDI file:
 * **MW** - monophonic. Mod Wheel (0V .. 10V)
 
 
+Target file selection works in a similar way to the VCV Recorder
+plugin.  You can select a file from the context menu, or if none has
+been selected, you'll get a popup dialog the first time you try to
+record something:
+
+* **Output File** - the path to the target MIDI file to be produced.
+* **Append -001, -002, etc.** - If checked, the plugin creates unique files if the target
+  file already exists (`/my/file.mid`,  `/my/file-001.mid`,
+  `/my/file-002.mid`). If unchecked, the file is overwritten.
+
+
 ## Acknowledgements
 
 The MIDIRecorder leverages builtin functionality of the VCV Rack core
