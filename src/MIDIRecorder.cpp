@@ -63,6 +63,7 @@ struct MIDIRecorder : Module {
 	int tick;
 	float total_time_s;
 	bool rec_clicked;
+	bool first_note_seen;
 	std::string path_directory;
 	std::string path_basename;
 	std::string path_ext;
@@ -70,6 +71,7 @@ struct MIDIRecorder : Module {
 	// persisted state:
 	std::string path;
 	bool increment_path;
+	bool align_to_first_note;
 
 	smf::MidiFile midiFile;
 	MidiCollector MidiCollectors[NUM_TRACKS] = {
@@ -130,6 +132,7 @@ struct MIDIRecorder : Module {
 	
 	void clearRecording() {
 		midiFile.clear();
+		first_note_seen = false;
 	}
 	
 	void onReset() override {
@@ -140,7 +143,9 @@ struct MIDIRecorder : Module {
 		path_directory = "";
 		path_basename = "";
 		increment_path = true;
+		align_to_first_note = true;
 		rec_clicked = false;
+		first_note_seen = false;
 		
 		clearRecording();
 	}
@@ -149,6 +154,7 @@ struct MIDIRecorder : Module {
 		json_t *rootJ = json_object();
 		json_object_set_new(rootJ, "path", json_string(path.c_str()));
 		json_object_set_new(rootJ, "increment_path", json_boolean(increment_path));
+		json_object_set_new(rootJ, "align_to_first_note", json_boolean(align_to_first_note));
 		return rootJ;
 	}
 
@@ -160,6 +166,10 @@ struct MIDIRecorder : Module {
 		json_t *increment_pathJ = json_object_get(rootJ, "increment_path");
 		if (increment_pathJ)
 			increment_path = json_boolean_value(increment_pathJ);
+
+		json_t *align_to_first_noteJ = json_object_get(rootJ, "align_to_first_note");
+		if (align_to_first_noteJ)
+			align_to_first_note = json_boolean_value(align_to_first_noteJ);
 	}
 	
 	void processMidiTrack(const ProcessArgs& args, const int track)  {
@@ -182,6 +192,19 @@ struct MIDIRecorder : Module {
 
 		MidiCollectors[track].setFrame(args.frame);
 
+		if (align_to_first_note && !first_note_seen) {
+			// any note gates in this frame?
+			for (int c = 0; c < inputs[PITCH_INPUT].getChannels(); c++) {
+				bool gate = inputs[GATE_INPUT].getPolyVoltage(c) >= 1.f;
+				if (gate) {
+					first_note_seen = true;
+					break;
+				}
+			}
+			// no gates seen yet - nothing to record
+			return;
+		}
+		
 		for (int c = 0; c < inputs[PITCH_INPUT].getChannels(); c++) {
 			int vel = (int) std::round(inputs[VEL_INPUT].getNormalPolyVoltage(10.f * 100 / 127, c) / 10.f * 127);
 			vel = clamp(vel, 0, 127);
@@ -189,6 +212,7 @@ struct MIDIRecorder : Module {
 
 			int note = (int) std::round(inputs[PITCH_INPUT].getVoltage(c) * 12.f + 60.f);
 			note = clamp(note, 0, 127);
+			
 			bool gate = inputs[GATE_INPUT].getPolyVoltage(c) >= 1.f;
 			MidiCollectors[track].setNoteGate(note, gate, c);
 
@@ -255,10 +279,13 @@ struct MIDIRecorder : Module {
 	
 	void stopRecording(const ProcessArgs& args) {
 		running = false;
+		int num_events = 0;
 		for (int t = 0; t < midiFile.getNumTracks(); t++) {
 			if (midiFile[t].size() <= 2) {
 				// unused track - just the tempo info
 				midiFile[t].clear();
+			} else {
+				num_events += midiFile[t].size();
 			}
 		}
 		std::string newPath = path;
@@ -275,7 +302,7 @@ struct MIDIRecorder : Module {
 			}
 		}
 
-		INFO("Stop Recording.  total_time_s=%f ticks=%d.  Writing to %s",total_time_s,tick,newPath.c_str());
+		INFO("Stop Recording.  total_time_s=%f ticks=%d events=%d.  Writing to %s",total_time_s,tick,num_events,newPath.c_str());
 		midiFile.write(newPath);
 	}
 	
@@ -419,6 +446,7 @@ struct MIDIRecorderWidget : ModuleWidget {
 		));
 
 		menu->addChild(createBoolPtrMenuItem("Append -001, -002, etc.", "", &module->increment_path));
+		menu->addChild(createBoolPtrMenuItem("Start at first note gate", "", &module->align_to_first_note));
 	}
 
 

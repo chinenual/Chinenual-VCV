@@ -51,7 +51,8 @@ target MIDI file:
 
 * **V/OCT** - polyphonic. Note pitch (1V/oct)
 * **GATE** - polyphonic. Note gates (0 .. 10V)
-* **VEL**  - polyphonic. Note "velocity" (0 .. 10V)
+* **VEL**  - polyphonic. Note "velocity" (0 .. 10V).  Defaults to 100
+  if no input.
 * **AFT** - polyphonic. Aftertouch/Key Pressure (0V .. 10V)
 * **PW** - monophonic. Pitchbend (-5V .. 5V)
 * **MW** - monophonic. Mod Wheel (0V .. 10V)
@@ -66,7 +67,14 @@ record something:
 * **Append -001, -002, etc.** - If checked, the plugin creates unique files if the target
   file already exists (`/my/file.mid`,  `/my/file-001.mid`,
   `/my/file-002.mid`). If unchecked, the file is overwritten.
-
+* **Start at first note gate** - when checked (the default), even
+  after the recording is "started", the
+  recording is delayed until it sees the first note.  This ensures that the
+  resulting midi events are aligned to the beginning of a bar.   This
+  also means that any non-note events (PW, MW, AFT) will be ignored
+  until that first note plays.    Turn this off to record the events
+  immediately (in which case you may need to shift the events in your
+  DAW to get them to line up nicely on a bar division.
 
 ## Acknowledgements
 
