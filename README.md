@@ -45,7 +45,7 @@ file and then import it into my DAW.
   conventions as Impromptu's CLOCKED BPM output (BPM = 120 * 2^voltage).  If unconnected, sets the MIDI tempo
   to 120 BPM.
 
-The remaining inputs accept the same signals that the VCV core
+The remaining inputs accept the same signals as the VCV core
 CV-MIDI module, each row feeding a separate polyphonic track in the
 target MIDI file:
 
