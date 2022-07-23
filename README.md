@@ -1,7 +1,6 @@
 # Chinenual-VCV
 
 Virtual Eurorack modules for [VCV Rack](https://vcvrack.com), available in the [plugin library](https://library.vcvrack.com/).
-Version 2.0.0b1
 
 **(NOTE: not yet submitted to the library - pending beta testing).**
 
@@ -16,7 +15,7 @@ The [Changelog](./CHANGELOG.md) describes changes.
 ![module-screenshot](./doc/MIDIRecorder.png)
 
 A multi-track recorder to capture a VCV performance to a standard MIDI
-file.   Supports up to 10 polyphonic tracks, capturing CV in the same
+file.   Supports up to 10 polyphonic tracks, converting CV in the same
 way the VCV core CV-MIDI module does.
 
 Each row of inputs corresponds to one track of MIDI. 
@@ -51,8 +50,7 @@ target MIDI file:
 
 * **V/OCT** - polyphonic. Note pitch (1V/oct)
 * **GATE** - polyphonic. Note gates (0 .. 10V)
-* **VEL**  - polyphonic. Note "velocity" (0 .. 10V).  Defaults to 100
-  if no input.
+* **VEL**  - polyphonic. Note velocity (0 .. 10V).  Defaults to 100 if unconnected.
 * **AFT** - polyphonic. Aftertouch/Key Pressure (0V .. 10V)
 * **PW** - monophonic. Pitchbend (-5V .. 5V)
 * **MW** - monophonic. Mod Wheel (0V .. 10V)
@@ -61,12 +59,14 @@ target MIDI file:
 Target file selection works in a similar way to the VCV Recorder
 module.  You can select a file from the context menu, or if none has
 been selected, you'll get a popup dialog the first time you try to
-record something:
+record something. 
+
+Right-click Context menu:
 
 * **Output File** - the path to the target MIDI file to be produced.
 * **Append -001, -002, etc.** - If checked, the recorder creates unique files if the target
   file already exists (`/my/file.mid`,  `/my/file-001.mid`,
-  `/my/file-002.mid`). If unchecked, the file is overwritten.
+  `/my/file-002.mid`, ...). If unchecked, the file is overwritten.
 * **Start at first note gate** - when checked (the default), even
   after the recording is "started", the
   recording is delayed until it sees the first note.  This ensures that the
