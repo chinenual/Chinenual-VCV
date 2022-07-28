@@ -455,8 +455,8 @@ struct MIDIRecorderWidget : ModuleWidget {
 
 		addChild(createLightCentered<RecLight>(mm2px(Vec(FIRST_X, FIRST_Y+4*SPACING)), module, MIDIRecorder::REC_LIGHT));
 		
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(FIRST_X, FIRST_Y+7*SPACING)), module, MIDIRecorder::RUN_INPUT));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(FIRST_X, FIRST_Y+9*SPACING)), module, MIDIRecorder::BPM_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(FIRST_X, FIRST_Y+7*SPACING)), module, MIDIRecorder::BPM_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(FIRST_X, FIRST_Y+9*SPACING)), module, MIDIRecorder::RUN_INPUT));
 
 		int t, i;
 		for (t = 0; t < NUM_TRACKS; t++) {
@@ -470,7 +470,7 @@ struct MIDIRecorderWidget : ModuleWidget {
 		SvgPanel* svgPanel = (SvgPanel*)getPanel();
 		auto bpmDisplay = new BPMDisplayWidget(&module->bpm);
 		bpmDisplay->box.size = Vec(30, 10);
-		bpmDisplay->box.pos = mm2px(Vec(FIRST_X, FIRST_Y+5*SPACING).minus(bpmDisplay->box.size.div(2)));
+		bpmDisplay->box.pos = mm2px(Vec(FIRST_X, FIRST_Y+5*SPACING + SPACING/2).minus(bpmDisplay->box.size.div(2)));
 		addChild(bpmDisplay);
 		//		svgPanel->fb->addChild(new DisplayBackground(bpmDisplay->box.pos, bpmDispla->box.size));
 
