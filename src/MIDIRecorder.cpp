@@ -28,6 +28,40 @@ struct MidiCollector : dsp::MidiGenerator<PORT_MAX_CHANNELS> {
 	}
 };
 
+static const NVGcolor bpmTextColor = nvgRGB(0xff, 0x00, 0x00);
+
+struct BPMDisplayWidget : TransparentWidget {
+	std::shared_ptr<Font> font;
+	std::string fontPath;
+	char displayStr[16];
+	float *bpm_ptr;
+		
+	BPMDisplayWidget(float *bpm) {
+		bpm_ptr = bpm;
+		fontPath = std::string(asset::plugin(pluginInstance, "res/fonts/Segment14.ttf"));
+	}
+		
+	void drawLayer(const DrawArgs &args, int layer) override {
+		if (layer == 1) {
+			if (!(font = APP->window->loadFont(fontPath))) {
+				return;
+			}
+			nvgFontSize(args.vg, 12);
+			nvgFontFaceId(args.vg, font->handle);
+
+			Vec textPos = Vec(6, 24);
+				
+			nvgFillColor(args.vg, bpmTextColor);
+
+			unsigned int bpm = std::round(*bpm_ptr);
+			snprintf(displayStr, 16, "  %3u", bpm);
+			
+			nvgText(args.vg, textPos.x, textPos.y, displayStr, NULL);
+		}
+	}
+};
+	
+	
 static void selectPath(Module *module);
 
 struct MIDIRecorder : Module {
@@ -252,16 +286,16 @@ struct MIDIRecorder : Module {
 		// max track where inputs are connected?
 		int num_tracks = NUM_TRACKS;
 		/*
-		for (int t = NUM_TRACKS-1; t>=0; t--) {
-			// are any of the inputs on this row connected?
-			for (int i = 0; i < NUM_PER_TRACK_INPUTS; i++) {
-				auto id = T1_PITCH_INPUT + i + t*NUM_PER_TRACK_INPUTS;
-				if (inputs[id].isConnected()) {
-					num_tracks = t+1;
-					break;
-				}
-			}
-		}
+		  for (int t = NUM_TRACKS-1; t>=0; t--) {
+		  // are any of the inputs on this row connected?
+		  for (int i = 0; i < NUM_PER_TRACK_INPUTS; i++) {
+		  auto id = T1_PITCH_INPUT + i + t*NUM_PER_TRACK_INPUTS;
+		  if (inputs[id].isConnected()) {
+		  num_tracks = t+1;
+		  break;
+		  }
+		  }
+		  }
 		*/
 		midiFile.addTracks(num_tracks);
 
@@ -432,6 +466,14 @@ struct MIDIRecorderWidget : ModuleWidget {
 				addInput(createInputCentered<PJ301MPort>(mm2px(Vec(FIRST_X + SPACING + i*SPACING, y)), module, e));
 			}
 		}
+		
+		SvgPanel* svgPanel = (SvgPanel*)getPanel();
+		auto bpmDisplay = new BPMDisplayWidget(&module->bpm);
+		bpmDisplay->box.size = Vec(30, 10);
+		bpmDisplay->box.pos = mm2px(Vec(FIRST_X, FIRST_Y+5*SPACING).minus(bpmDisplay->box.size.div(2)));
+		addChild(bpmDisplay);
+		//		svgPanel->fb->addChild(new DisplayBackground(bpmDisplay->box.pos, bpmDispla->box.size));
+
 	}
 
 	void appendContextMenu(Menu *menu) override {
@@ -442,8 +484,8 @@ struct MIDIRecorderWidget : ModuleWidget {
 
 		std::string path = string::ellipsizePrefix(module->path, 30);
 		menu->addChild(createMenuItem((path != "") ? path : "Select...", "",
-			[=]() {selectPath(module);}
-		));
+					      [=]() {selectPath(module);}
+					      ));
 
 		menu->addChild(createBoolPtrMenuItem("Append -001, -002, etc.", "", &module->increment_path));
 		menu->addChild(createBoolPtrMenuItem("Start at first note gate", "", &module->align_to_first_note));
