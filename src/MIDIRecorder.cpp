@@ -53,7 +53,7 @@ struct BPMDisplayWidget : TransparentWidget {
 				
 			nvgFillColor(args.vg, bpmTextColor);
 
-			unsigned int bpm = std::round(*bpm_ptr);
+			unsigned int bpm = bpm_ptr ? std::round(*bpm_ptr) : 120;
 			snprintf(displayStr, 16, "  %3u", bpm);
 			
 			nvgText(args.vg, textPos.x, textPos.y, displayStr, NULL);
@@ -468,7 +468,7 @@ struct MIDIRecorderWidget : ModuleWidget {
 		}
 		
 		SvgPanel* svgPanel = (SvgPanel*)getPanel();
-		auto bpmDisplay = new BPMDisplayWidget(&module->bpm);
+		auto bpmDisplay = new BPMDisplayWidget(module ? &module->bpm : NULL);
 		bpmDisplay->box.size = Vec(30, 10);
 		bpmDisplay->box.pos = mm2px(Vec(FIRST_X, FIRST_Y+5*SPACING + SPACING/2).minus(bpmDisplay->box.size.div(2)));
 		addChild(bpmDisplay);
