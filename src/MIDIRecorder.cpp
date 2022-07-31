@@ -8,86 +8,147 @@
 #define MIDI_FILE_PPQ 960
 #define SEC_PER_MINUTE 60
 
-struct MidiCollector : dsp::MidiGenerator<PORT_MAX_CHANNELS> {
-
+struct MidiCollector : dsp::MidiGenerator<PORT_MAX_CHANNELS>
+{
 	smf::MidiFile &midiFile;
 	int track;
 	int &tick;
 
-	MidiCollector(smf::MidiFile &midiFile, int track, int &tick) : midiFile(midiFile), track(track), tick(tick) { }
-	
-	void onMessage(const midi::Message& message) override {
+	MidiCollector(smf::MidiFile &midiFile, int track, int &tick) : midiFile(midiFile), track(track), tick(tick) {}
+
+	void onMessage(const midi::Message &message) override
+	{
 		/// do something
 		// convert to the smf library's classes:
 		smf::MidiMessage smfMsg(message.bytes);
 		midiFile.addEvent(track, tick, smfMsg);
 	}
 
-	void reset() {
+	void reset()
+	{
 		MidiGenerator::reset();
 	}
 };
 
 static const NVGcolor bpmTextColor = nvgRGB(0xff, 0x00, 0x00);
 
-struct BPMDisplayWidget : TransparentWidget {
+struct BPMDisplayWidget : TransparentWidget
+{
 	std::shared_ptr<Font> font;
 	std::string fontPath;
 	char displayStr[16];
 	float *bpm_ptr;
-		
-	BPMDisplayWidget(float *bpm) {
+
+	BPMDisplayWidget(float *bpm)
+	{
 		bpm_ptr = bpm;
 		fontPath = std::string(asset::plugin(pluginInstance, "res/fonts/Segment14.ttf"));
 	}
-		
-	void drawLayer(const DrawArgs &args, int layer) override {
-		if (layer == 1) {
-			if (!(font = APP->window->loadFont(fontPath))) {
+
+	void drawLayer(const DrawArgs &args, int layer) override
+	{
+		if (layer == 1)
+		{
+			if (!(font = APP->window->loadFont(fontPath)))
+			{
 				return;
 			}
 			nvgFontSize(args.vg, 12);
 			nvgFontFaceId(args.vg, font->handle);
 
 			Vec textPos = Vec(6, 24);
-				
+
 			nvgFillColor(args.vg, bpmTextColor);
 
 			unsigned int bpm = bpm_ptr ? std::round(*bpm_ptr) : 120;
 			snprintf(displayStr, 16, "  %3u", bpm);
-			
+
 			nvgText(args.vg, textPos.x, textPos.y, displayStr, NULL);
 		}
 	}
 };
-	
-	
+
 static void selectPath(Module *module);
 
-struct MIDIRecorder : Module {
-	enum ParamId {
+struct MIDIRecorder : Module
+{
+	enum ParamId
+	{
 		RUN_PARAM,
 		PARAMS_LEN
 	};
-	enum InputId {
+	enum InputId
+	{
 		BPM_INPUT,
 		RUN_INPUT,
-		T1_PITCH_INPUT, T1_GATE_INPUT, T1_VEL_INPUT, T1_AFT_INPUT, T1_PW_INPUT, T1_MW_INPUT,
-		T2_PITCH_INPUT, T2_GATE_INPUT, T2_VEL_INPUT, T2_AFT_INPUT, T2_PW_INPUT, T2_MW_INPUT,
-		T3_PITCH_INPUT, T3_GATE_INPUT, T3_VEL_INPUT, T3_AFT_INPUT, T3_PW_INPUT, T3_MW_INPUT,
-		T4_PITCH_INPUT, T4_GATE_INPUT, T4_VEL_INPUT, T4_AFT_INPUT, T4_PW_INPUT, T4_MW_INPUT,
-		T5_PITCH_INPUT, T5_GATE_INPUT, T5_VEL_INPUT, T5_AFT_INPUT, T5_PW_INPUT, T5_MW_INPUT,
-		T6_PITCH_INPUT, T6_GATE_INPUT, T6_VEL_INPUT, T6_AFT_INPUT, T6_PW_INPUT, T6_MW_INPUT,
-		T7_PITCH_INPUT, T7_GATE_INPUT, T7_VEL_INPUT, T7_AFT_INPUT, T7_PW_INPUT, T7_MW_INPUT,
-		T8_PITCH_INPUT, T8_GATE_INPUT, T8_VEL_INPUT, T8_AFT_INPUT, T8_PW_INPUT, T8_MW_INPUT,
-		T9_PITCH_INPUT, T9_GATE_INPUT, T9_VEL_INPUT, T9_AFT_INPUT, T9_PW_INPUT, T9_MW_INPUT,
-		T10_PITCH_INPUT, T10_GATE_INPUT, T10_VEL_INPUT, T10_AFT_INPUT, T10_PW_INPUT, T10_MW_INPUT,
+		T1_PITCH_INPUT,
+		T1_GATE_INPUT,
+		T1_VEL_INPUT,
+		T1_AFT_INPUT,
+		T1_PW_INPUT,
+		T1_MW_INPUT,
+		T2_PITCH_INPUT,
+		T2_GATE_INPUT,
+		T2_VEL_INPUT,
+		T2_AFT_INPUT,
+		T2_PW_INPUT,
+		T2_MW_INPUT,
+		T3_PITCH_INPUT,
+		T3_GATE_INPUT,
+		T3_VEL_INPUT,
+		T3_AFT_INPUT,
+		T3_PW_INPUT,
+		T3_MW_INPUT,
+		T4_PITCH_INPUT,
+		T4_GATE_INPUT,
+		T4_VEL_INPUT,
+		T4_AFT_INPUT,
+		T4_PW_INPUT,
+		T4_MW_INPUT,
+		T5_PITCH_INPUT,
+		T5_GATE_INPUT,
+		T5_VEL_INPUT,
+		T5_AFT_INPUT,
+		T5_PW_INPUT,
+		T5_MW_INPUT,
+		T6_PITCH_INPUT,
+		T6_GATE_INPUT,
+		T6_VEL_INPUT,
+		T6_AFT_INPUT,
+		T6_PW_INPUT,
+		T6_MW_INPUT,
+		T7_PITCH_INPUT,
+		T7_GATE_INPUT,
+		T7_VEL_INPUT,
+		T7_AFT_INPUT,
+		T7_PW_INPUT,
+		T7_MW_INPUT,
+		T8_PITCH_INPUT,
+		T8_GATE_INPUT,
+		T8_VEL_INPUT,
+		T8_AFT_INPUT,
+		T8_PW_INPUT,
+		T8_MW_INPUT,
+		T9_PITCH_INPUT,
+		T9_GATE_INPUT,
+		T9_VEL_INPUT,
+		T9_AFT_INPUT,
+		T9_PW_INPUT,
+		T9_MW_INPUT,
+		T10_PITCH_INPUT,
+		T10_GATE_INPUT,
+		T10_VEL_INPUT,
+		T10_AFT_INPUT,
+		T10_PW_INPUT,
+		T10_MW_INPUT,
 		INPUTS_LEN
 	};
-	enum OutputId {
+	enum OutputId
+	{
 		OUTPUTS_LEN
 	};
-	enum LightId {
+	enum LightId
+	{
 		REC_LIGHT,
 		LIGHTS_LEN
 	};
@@ -109,43 +170,48 @@ struct MIDIRecorder : Module {
 
 	smf::MidiFile midiFile;
 	MidiCollector MidiCollectors[NUM_TRACKS] = {
-		MidiCollector(midiFile, 0,tick),
-		MidiCollector(midiFile, 1,tick),
-		MidiCollector(midiFile, 2,tick),
-		MidiCollector(midiFile, 3,tick),
-		MidiCollector(midiFile, 4,tick),
-		MidiCollector(midiFile, 5,tick),
-		MidiCollector(midiFile, 6,tick),
-		MidiCollector(midiFile, 7,tick),
-		MidiCollector(midiFile, 8,tick),
-		MidiCollector(midiFile, 9,tick),
+		MidiCollector(midiFile, 0, tick),
+		MidiCollector(midiFile, 1, tick),
+		MidiCollector(midiFile, 2, tick),
+		MidiCollector(midiFile, 3, tick),
+		MidiCollector(midiFile, 4, tick),
+		MidiCollector(midiFile, 5, tick),
+		MidiCollector(midiFile, 6, tick),
+		MidiCollector(midiFile, 7, tick),
+		MidiCollector(midiFile, 8, tick),
+		MidiCollector(midiFile, 9, tick),
 	};
-	
+
 	dsp::Timer rateLimiterTimer;
 
-	MIDIRecorder() {
+	MIDIRecorder()
+	{
 		onReset();
-		
+
 		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
 		configInput(BPM_INPUT, "Tempo/BPM");
 		configInput(RUN_INPUT, "Start/Stop Gate");
 		configSwitch(RUN_PARAM, 0.0f, 1.0f, 0.0f, "Start/Stop");
-		
-		int i,t;
-		for (t = 0; t < NUM_TRACKS; t++) {
-			for (i = 0; i < NUM_PER_TRACK_INPUTS; i++) {
-				auto e = T1_PITCH_INPUT + t*NUM_PER_TRACK_INPUTS + i;
-				const char* paramName[NUM_PER_TRACK_INPUTS] = {"Note pitch (V/oct)", "Note gate", "Note velocity", "Aftertouch", "Pitchbend", "Modwheel"};
-				configInput(e, string::f("Track %d %s", t+1, paramName[i]));
+
+		int i, t;
+		for (t = 0; t < NUM_TRACKS; t++)
+		{
+			for (i = 0; i < NUM_PER_TRACK_INPUTS; i++)
+			{
+				auto e = T1_PITCH_INPUT + t * NUM_PER_TRACK_INPUTS + i;
+				const char *paramName[NUM_PER_TRACK_INPUTS] = {"Note pitch (V/oct)", "Note gate", "Note velocity", "Aftertouch", "Pitchbend", "Modwheel"};
+				configInput(e, string::f("Track %d %s", t + 1, paramName[i]));
 			}
 		}
 	}
 
-	void setPath(std::string new_path) {
+	void setPath(std::string new_path)
+	{
 		if (this->path == new_path)
 			return;
 
-		if (new_path == "") {
+		if (new_path == "")
+		{
 			this->path = "";
 			path_directory = "";
 			path_basename = "";
@@ -155,21 +221,23 @@ struct MIDIRecorder : Module {
 		path_directory = system::getDirectory(new_path);
 		path_basename = system::getStem(new_path);
 		path_ext = system::getExtension(new_path);
-		
-		if (path_basename == "") {
+
+		if (path_basename == "")
+		{
 			path = "";
 			return;
 		}
 		path = path_directory + "/" + path_basename + ".mid";
-
 	}
-	
-	void clearRecording() {
+
+	void clearRecording()
+	{
 		midiFile.clear();
 		first_note_seen = false;
 	}
-	
-	void onReset() override {
+
+	void onReset() override
+	{
 		bpm = 120.0f;
 		running = false;
 		tick = 0;
@@ -180,11 +248,12 @@ struct MIDIRecorder : Module {
 		align_to_first_note = true;
 		rec_clicked = false;
 		first_note_seen = false;
-		
+
 		clearRecording();
 	}
 
-	json_t *dataToJson() override {
+	json_t *dataToJson() override
+	{
 		json_t *rootJ = json_object();
 		json_object_set_new(rootJ, "path", json_string(path.c_str()));
 		json_object_set_new(rootJ, "increment_path", json_boolean(increment_path));
@@ -192,7 +261,8 @@ struct MIDIRecorder : Module {
 		return rootJ;
 	}
 
-	void dataFromJson(json_t *rootJ) override {
+	void dataFromJson(json_t *rootJ) override
+	{
 		json_t *pathJ = json_object_get(rootJ, "path");
 		if (pathJ)
 			setPath(json_string_value(pathJ));
@@ -205,8 +275,9 @@ struct MIDIRecorder : Module {
 		if (align_to_first_noteJ)
 			align_to_first_note = json_boolean_value(align_to_first_noteJ);
 	}
-	
-	void processMidiTrack(const ProcessArgs& args, const int track)  {
+
+	void processMidiTrack(const ProcessArgs &args, const int track)
+	{
 		const auto PITCH_INPUT = T1_PITCH_INPUT + track * NUM_PER_TRACK_INPUTS;
 		const auto GATE_INPUT = T1_GATE_INPUT + track * NUM_PER_TRACK_INPUTS;
 		const auto VEL_INPUT = T1_VEL_INPUT + track * NUM_PER_TRACK_INPUTS;
@@ -215,7 +286,7 @@ struct MIDIRecorder : Module {
 		const auto MW_INPUT = T1_MW_INPUT + track * NUM_PER_TRACK_INPUTS;
 
 		// MIDI specific processing adapted from VCV Core's CV_MIDI.cpp:
-		
+
 		// MIDI baud rate is 31250 b/s, or 3125 B/s.
 		// CC messages are 3 bytes, so we can send a maximum of 1041 CC messages per second.
 		// Since multiple CCs can be generated, play it safe and limit the CC rate to 200 Hz.
@@ -226,11 +297,14 @@ struct MIDIRecorder : Module {
 
 		MidiCollectors[track].setFrame(args.frame);
 
-		if (align_to_first_note && !first_note_seen) {
+		if (align_to_first_note && !first_note_seen)
+		{
 			// any note gates in this frame?
-			for (int c = 0; c < inputs[PITCH_INPUT].getChannels(); c++) {
+			for (int c = 0; c < inputs[PITCH_INPUT].getChannels(); c++)
+			{
 				bool gate = inputs[GATE_INPUT].getPolyVoltage(c) >= 1.f;
-				if (gate) {
+				if (gate)
+				{
 					first_note_seen = true;
 					break;
 				}
@@ -238,50 +312,55 @@ struct MIDIRecorder : Module {
 			// no gates seen yet - nothing to record
 			return;
 		}
-		
-		for (int c = 0; c < inputs[PITCH_INPUT].getChannels(); c++) {
-			int vel = (int) std::round(inputs[VEL_INPUT].getNormalPolyVoltage(10.f * 100 / 127, c) / 10.f * 127);
+
+		for (int c = 0; c < inputs[PITCH_INPUT].getChannels(); c++)
+		{
+			int vel = (int)std::round(inputs[VEL_INPUT].getNormalPolyVoltage(10.f * 100 / 127, c) / 10.f * 127);
 			vel = clamp(vel, 0, 127);
 			MidiCollectors[track].setVelocity(vel, c);
 
-			int note = (int) std::round(inputs[PITCH_INPUT].getVoltage(c) * 12.f + 60.f);
+			int note = (int)std::round(inputs[PITCH_INPUT].getVoltage(c) * 12.f + 60.f);
 			note = clamp(note, 0, 127);
-			
+
 			bool gate = inputs[GATE_INPUT].getPolyVoltage(c) >= 1.f;
 			MidiCollectors[track].setNoteGate(note, gate, c);
 
-			int aft = (int) std::round(inputs[AFT_INPUT].getPolyVoltage(c) / 10.f * 127);
+			int aft = (int)std::round(inputs[AFT_INPUT].getPolyVoltage(c) / 10.f * 127);
 			aft = clamp(aft, 0, 127);
 			MidiCollectors[track].setKeyPressure(aft, c);
 		}
 
-		if (rateLimiterTriggered) {
-			int pw = (int) std::round((inputs[PW_INPUT].getVoltage() + 5.f) / 10.f * 0x4000);
+		if (rateLimiterTriggered)
+		{
+			int pw = (int)std::round((inputs[PW_INPUT].getVoltage() + 5.f) / 10.f * 0x4000);
 			pw = clamp(pw, 0, 0x3fff);
 			MidiCollectors[track].setPitchWheel(pw);
 
-			int mw = (int) std::round(inputs[MW_INPUT].getVoltage() / 10.f * 127);
+			int mw = (int)std::round(inputs[MW_INPUT].getVoltage() / 10.f * 127);
 			mw = clamp(mw, 0, 127);
 			MidiCollectors[track].setModWheel(mw);
 		}
-
 	}
-	
-	void processMidi(const ProcessArgs& args)  {
+
+	void processMidi(const ProcessArgs &args)
+	{
 		total_time_s += args.sampleTime;
 		// PPQ = ticks/beat;  BPM = beat/minute;
 		tick = std::round(total_time_s * bpm / SEC_PER_MINUTE * MIDI_FILE_PPQ);
-		for (int i = 0; i < NUM_TRACKS; i++) {
+		for (int i = 0; i < NUM_TRACKS; i++)
+		{
 			processMidiTrack(args, i);
 		}
 	}
 
-	void startRecording(const ProcessArgs& args) {
-		if (path == "") {
+	void startRecording(const ProcessArgs &args)
+	{
+		if (path == "")
+		{
 			INFO("ERROR: No Path in startRecording");
 			return;
 		}
-		
+
 		clearRecording();
 		// max track where inputs are connected?
 		int num_tracks = NUM_TRACKS;
@@ -299,33 +378,41 @@ struct MIDIRecorder : Module {
 		*/
 		midiFile.addTracks(num_tracks);
 
-		midiFile.setTPQ(MIDI_FILE_PPQ);		
+		midiFile.setTPQ(MIDI_FILE_PPQ);
 		midiFile.makeAbsoluteTicks();
 
-		for (int t = 0; t < num_tracks; t++) {
+		for (int t = 0; t < num_tracks; t++)
+		{
 			midiFile.addTempo(t, 0, bpm);
 		}
-		
+
 		total_time_s = 0.0f;
 		INFO("Start Recording... BPM: %f num_tracks: %d", bpm, num_tracks);
 		running = true;
 	}
-	
-	void stopRecording(const ProcessArgs& args) {
+
+	void stopRecording(const ProcessArgs &args)
+	{
 		running = false;
 		int num_events = 0;
-		for (int t = 0; t < midiFile.getNumTracks(); t++) {
-			if (midiFile[t].size() <= 2) {
+		for (int t = 0; t < midiFile.getNumTracks(); t++)
+		{
+			if (midiFile[t].size() <= 2)
+			{
 				// unused track - just the tempo info
 				midiFile[t].clear();
-			} else {
+			}
+			else
+			{
 				num_events += midiFile[t].size();
 			}
 		}
 		std::string newPath = path;
-		if (increment_path) {
+		if (increment_path)
+		{
 			std::string extension = "mid";
-			for (int i = 0; i <= 999; i++) {
+			for (int i = 0; i <= 999; i++)
+			{
 				newPath = path_directory + "/" + path_basename;
 				if (i > 0)
 					newPath += string::f("-%03d", i);
@@ -336,19 +423,24 @@ struct MIDIRecorder : Module {
 			}
 		}
 
-		INFO("Stop Recording.  total_time_s=%f ticks=%d events=%d.  Writing to %s",total_time_s,tick,num_events,newPath.c_str());
+		INFO("Stop Recording.  total_time_s=%f ticks=%d events=%d.  Writing to %s", total_time_s, tick, num_events, newPath.c_str());
 		midiFile.write(newPath);
 	}
-	
-	void process(const ProcessArgs& args) override {
+
+	void process(const ProcessArgs &args) override
+	{
 		// From Impromptu's Clocked : bpm = 120*2^V
 		float new_bpm;
-		if (inputs[BPM_INPUT].isConnected()) {
+		if (inputs[BPM_INPUT].isConnected())
+		{
 			new_bpm = 120.0f * std::pow(2.0f, inputs[BPM_INPUT].getVoltage());
-		} else {
+		}
+		else
+		{
 			new_bpm = 120.0f; // default
 		}
-		if (new_bpm != bpm) {
+		if (new_bpm != bpm)
+		{
 			INFO("BPM: %f", new_bpm);
 		}
 		bpm = new_bpm;
@@ -356,20 +448,28 @@ struct MIDIRecorder : Module {
 		auto was_running = running;
 		int run_requested;
 		// Run button:
-		if (inputs[RUN_INPUT].isConnected()) {
+		if (inputs[RUN_INPUT].isConnected())
+		{
 			run_requested = inputs[RUN_INPUT].getVoltage() > 0.0f;
-		} else {
+		}
+		else
+		{
 			//			run_requested = params[RUN_PARAM].getValue() > 0.0f;
 			run_requested = rec_clicked;
 		}
 
-		if (run_requested) {
-			if (! was_running) {
+		if (run_requested)
+		{
+			if (!was_running)
+			{
 				startRecording(args);
 			}
 			processMidi(args);
-		} else {
-			if (was_running) {
+		}
+		else
+		{
+			if (was_running)
+			{
 				stopRecording(args);
 			}
 		}
@@ -379,45 +479,56 @@ struct MIDIRecorder : Module {
 
 static const char MIDI_FILTERS[] = "MIDI files (.mid):mid";
 
-static void selectPath(Module *m) {
-	MIDIRecorder *module = dynamic_cast<MIDIRecorder*>(m);
+static void selectPath(Module *m)
+{
+	MIDIRecorder *module = dynamic_cast<MIDIRecorder *>(m);
 	std::string dir;
 	std::string filename;
 
-	if (module->path != "") {
+	if (module->path != "")
+	{
 		dir = system::getDirectory(module->path);
 		filename = system::getFilename(module->path);
-	} else {
+	}
+	else
+	{
 		dir = asset::user("recordings");
 		system::createDirectory(dir);
 		filename = "Untitled";
 	}
 
-	osdialog_filters* filters = osdialog_filters_parse(MIDI_FILTERS);
+	osdialog_filters *filters = osdialog_filters_parse(MIDI_FILTERS);
 	DEFER({
-                        osdialog_filters_free(filters);
-                });
+		osdialog_filters_free(filters);
+	});
 
 	char *path = osdialog_file(OSDIALOG_SAVE, dir.c_str(), filename.c_str(), filters);
-	if (path) {
+	if (path)
+	{
 		module->setPath(path);
 		free(path);
 	}
 }
 
-struct RecButton : SvgButton {
-	MIDIRecorder* module;
+struct RecButton : SvgButton
+{
+	MIDIRecorder *module;
 
-	RecButton() {
+	RecButton()
+	{
 		addFrame(Svg::load(asset::plugin(pluginInstance, "res/rec_button.svg")));
 	}
 
-	void onDragStart(const event::DragStart &e) override {
-		if (e.button == GLFW_MOUSE_BUTTON_LEFT) {
-			if (module && module->path == "") {
+	void onDragStart(const event::DragStart &e) override
+	{
+		if (e.button == GLFW_MOUSE_BUTTON_LEFT)
+		{
+			if (module && module->path == "")
+			{
 				selectPath(module);
 			}
-			if (module && module->path != "") {
+			if (module && module->path != "")
+			{
 				module->rec_clicked = !module->rec_clicked;
 			}
 		}
@@ -426,9 +537,10 @@ struct RecButton : SvgButton {
 	}
 };
 
-
-struct RecLight : RedLight {
-	RecLight() {
+struct RecLight : RedLight
+{
+	RecLight()
+	{
 		bgColor = nvgRGB(0x66, 0x66, 0x66);
 		box.size = mm2px(Vec(9.0, 9.00));
 	}
@@ -438,61 +550,61 @@ struct RecLight : RedLight {
 #define FIRST_Y 19.0
 #define SPACING 11.0
 
-struct MIDIRecorderWidget : ModuleWidget {
-	MIDIRecorderWidget(MIDIRecorder* module) {
+struct MIDIRecorderWidget : ModuleWidget
+{
+	MIDIRecorderWidget(MIDIRecorder *module)
+	{
 		setModule(module);
 		setPanel(createPanel(asset::plugin(pluginInstance, "res/MIDIRecorder.svg")));
-
 
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));			       
+		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		RecButton* recButton = createWidgetCentered<RecButton>(mm2px(Vec(FIRST_X, FIRST_Y+4*SPACING)));
+		RecButton *recButton = createWidgetCentered<RecButton>(mm2px(Vec(FIRST_X, FIRST_Y + 4 * SPACING)));
 		recButton->module = module;
 		addChild(recButton);
 
-		addChild(createLightCentered<RecLight>(mm2px(Vec(FIRST_X, FIRST_Y+4*SPACING)), module, MIDIRecorder::REC_LIGHT));
-		
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(FIRST_X, FIRST_Y+7*SPACING)), module, MIDIRecorder::BPM_INPUT));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(FIRST_X, FIRST_Y+9*SPACING)), module, MIDIRecorder::RUN_INPUT));
+		addChild(createLightCentered<RecLight>(mm2px(Vec(FIRST_X, FIRST_Y + 4 * SPACING)), module, MIDIRecorder::REC_LIGHT));
+
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(FIRST_X, FIRST_Y + 7 * SPACING)), module, MIDIRecorder::BPM_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(FIRST_X, FIRST_Y + 9 * SPACING)), module, MIDIRecorder::RUN_INPUT));
 
 		int t, i;
-		for (t = 0; t < NUM_TRACKS; t++) {
+		for (t = 0; t < NUM_TRACKS; t++)
+		{
 			auto y = FIRST_Y + t * SPACING;
-			for (i = 0; i < NUM_PER_TRACK_INPUTS; i++) {
-				auto e = MIDIRecorder::T1_PITCH_INPUT + t*NUM_PER_TRACK_INPUTS + i;
-				addInput(createInputCentered<PJ301MPort>(mm2px(Vec(FIRST_X + SPACING + i*SPACING, y)), module, e));
+			for (i = 0; i < NUM_PER_TRACK_INPUTS; i++)
+			{
+				auto e = MIDIRecorder::T1_PITCH_INPUT + t * NUM_PER_TRACK_INPUTS + i;
+				addInput(createInputCentered<PJ301MPort>(mm2px(Vec(FIRST_X + SPACING + i * SPACING, y)), module, e));
 			}
 		}
-		
-		SvgPanel* svgPanel = (SvgPanel*)getPanel();
+
+		SvgPanel *svgPanel = (SvgPanel *)getPanel();
 		auto bpmDisplay = new BPMDisplayWidget(module ? &module->bpm : NULL);
 		bpmDisplay->box.size = Vec(30, 10);
-		bpmDisplay->box.pos = mm2px(Vec(FIRST_X, FIRST_Y+5*SPACING + SPACING/2).minus(bpmDisplay->box.size.div(2)));
+		bpmDisplay->box.pos = mm2px(Vec(FIRST_X, FIRST_Y + 5 * SPACING + SPACING / 2).minus(bpmDisplay->box.size.div(2)));
 		addChild(bpmDisplay);
 		//		svgPanel->fb->addChild(new DisplayBackground(bpmDisplay->box.pos, bpmDispla->box.size));
-
 	}
 
-	void appendContextMenu(Menu *menu) override {
-		MIDIRecorder *module = dynamic_cast<MIDIRecorder*>(this->module);
+	void appendContextMenu(Menu *menu) override
+	{
+		MIDIRecorder *module = dynamic_cast<MIDIRecorder *>(this->module);
 
 		menu->addChild(new MenuSeparator);
 		menu->addChild(createMenuLabel("Output file"));
 
 		std::string path = string::ellipsizePrefix(module->path, 30);
 		menu->addChild(createMenuItem((path != "") ? path : "Select...", "",
-					      [=]() {selectPath(module);}
-					      ));
+									  [=]()
+									  { selectPath(module); }));
 
 		menu->addChild(createBoolPtrMenuItem("Append -001, -002, etc.", "", &module->increment_path));
 		menu->addChild(createBoolPtrMenuItem("Start at first note gate", "", &module->align_to_first_note));
 	}
-
-
 };
 
-
-Model* modelMIDIRecorder = createModel<MIDIRecorder, MIDIRecorderWidget>("MIDIRecorder");
+Model *modelMIDIRecorder = createModel<MIDIRecorder, MIDIRecorderWidget>("MIDIRecorder");
