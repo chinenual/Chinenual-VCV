@@ -37,9 +37,9 @@ struct BPMDisplayWidget : TransparentWidget
 	std::shared_ptr<Font> font;
 	std::string fontPath;
 	char displayStr[16];
-	float *bpm_ptr;
+	double *bpm_ptr;
 
-	BPMDisplayWidget(float *bpm)
+	BPMDisplayWidget(double *bpm)
 	{
 		bpm_ptr = bpm;
 		fontPath = std::string(asset::plugin(pluginInstance, "res/fonts/Segment14.ttf"));
@@ -153,10 +153,10 @@ struct MIDIRecorder : Module
 		LIGHTS_LEN
 	};
 
-	float bpm;
+	double bpm;
 	bool running;
 	int tick;
-	float total_time_s;
+	double total_time_s;
 	bool rec_clicked;
 	bool first_note_seen;
 	std::string path_directory;
@@ -290,7 +290,7 @@ struct MIDIRecorder : Module
 		// MIDI baud rate is 31250 b/s, or 3125 B/s.
 		// CC messages are 3 bytes, so we can send a maximum of 1041 CC messages per second.
 		// Since multiple CCs can be generated, play it safe and limit the CC rate to 200 Hz.
-		const float rateLimiterPeriod = 1 / 200.f;
+		const double rateLimiterPeriod = 1 / 200.f;
 		bool rateLimiterTriggered = (rateLimiterTimer.process(args.sampleTime) >= rateLimiterPeriod);
 		if (rateLimiterTriggered)
 			rateLimiterTimer.time -= rateLimiterPeriod;
@@ -430,7 +430,7 @@ struct MIDIRecorder : Module
 	void process(const ProcessArgs &args) override
 	{
 		// From Impromptu's Clocked : bpm = 120*2^V
-		float new_bpm;
+		double new_bpm;
 		if (inputs[BPM_INPUT].isConnected())
 		{
 			new_bpm = 120.0f * std::pow(2.0f, inputs[BPM_INPUT].getVoltage());
