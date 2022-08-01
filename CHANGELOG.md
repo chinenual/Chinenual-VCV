@@ -1,5 +1,10 @@
 # Change log for Chinenual-VCV
 
+## 2.0.0b5
+
+* Fixes timing error that caused recorded notes to drift off tempo.  
+* Adds support for tracking tempo changes during the recording.
+
 ## 2.0.0b4
 
 * Fixes bug that caused crash when the module library browser creates a preview image of the module.

@@ -24,3 +24,10 @@ DISTRIBUTABLES += $(wildcard presets)
 
 # Include the Rack plugin Makefile framework
 include $(RACK_DIR)/plugin.mk
+
+# When building for debugging, stop the debug symbols from being stripped, and set the optimization level to none
+debug: STRIP = : DEBUG MODE, THIS LINE IS COMMENTED OUT:  strip
+debug: EXTRA_FLAGS = -O0
+debug: install
+
+release: clean install
