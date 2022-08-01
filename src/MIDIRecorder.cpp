@@ -70,6 +70,49 @@ struct BPMDisplayWidget : TransparentWidget
 
 static void selectPath(Module *module);
 
+struct MIDIClock
+{
+	int tick;
+	double last_tick; // unrounded
+	double time_at_last_tempo_change;
+	double tick_at_last_tempo_change;
+	double total_time_s;
+	double bpm;
+
+	void reset(double new_bpm)
+	{
+		bpm = new_bpm;
+		total_time_s = 0.0f;
+		last_tick = 0.0f;
+		tick = 0;
+		time_at_last_tempo_change = 0.0f;
+		tick_at_last_tempo_change = 0.0f;
+	}
+
+	void incrementTick(float sampleTime, bool tempoChanged)
+	{
+		// this is called just before the first event of the tick is called.  So the resulting "tick"
+		// is used for this sample's timestamp.  We want the very first event to be at tick=0, so
+		// increment the "total_time_s" after computing the tick.
+
+		// keep track of the time and tick the last time the temp changed.  If we naively
+		// increment the tick one "samples worth" at a time, we risk accumulating error.
+		// So, optimize by making a snapshot at each tempo change and then adding the elapsed time
+		// since the tempo change as a chunk rather than as a series of small increments.
+		if (tempoChanged)
+		{
+			time_at_last_tempo_change = total_time_s;
+			tick_at_last_tempo_change = last_tick;
+		}
+		// PPQ = ticks/beat;  BPM = beat/minute;
+		double incremental_tick = (total_time_s - time_at_last_tempo_change) * bpm / SEC_PER_MINUTE * MIDI_FILE_PPQ;
+		last_tick = incremental_tick + tick_at_last_tempo_change;
+		tick = std::round(last_tick);
+
+		total_time_s += sampleTime;
+	}
+};
+
 struct MIDIRecorder : Module
 {
 	enum ParamId
@@ -143,6 +186,11 @@ struct MIDIRecorder : Module
 		T10_MW_INPUT,
 		INPUTS_LEN
 	};
+
+	// range of one row of input:
+	const InputId T1_FIRST_COLUMN = T1_PITCH_INPUT;
+	const InputId T1_LAST_COLUMN = T1_MW_INPUT;
+
 	enum OutputId
 	{
 		OUTPUTS_LEN
@@ -153,10 +201,8 @@ struct MIDIRecorder : Module
 		LIGHTS_LEN
 	};
 
-	double bpm;
+	MIDIClock clock;
 	bool running;
-	int tick;
-	double total_time_s;
 	bool rec_clicked;
 	bool first_note_seen;
 	std::string path_directory;
@@ -170,16 +216,16 @@ struct MIDIRecorder : Module
 
 	smf::MidiFile midiFile;
 	MidiCollector MidiCollectors[NUM_TRACKS] = {
-		MidiCollector(midiFile, 0, tick),
-		MidiCollector(midiFile, 1, tick),
-		MidiCollector(midiFile, 2, tick),
-		MidiCollector(midiFile, 3, tick),
-		MidiCollector(midiFile, 4, tick),
-		MidiCollector(midiFile, 5, tick),
-		MidiCollector(midiFile, 6, tick),
-		MidiCollector(midiFile, 7, tick),
-		MidiCollector(midiFile, 8, tick),
-		MidiCollector(midiFile, 9, tick),
+		MidiCollector(midiFile, 0, clock.tick),
+		MidiCollector(midiFile, 1, clock.tick),
+		MidiCollector(midiFile, 2, clock.tick),
+		MidiCollector(midiFile, 3, clock.tick),
+		MidiCollector(midiFile, 4, clock.tick),
+		MidiCollector(midiFile, 5, clock.tick),
+		MidiCollector(midiFile, 6, clock.tick),
+		MidiCollector(midiFile, 7, clock.tick),
+		MidiCollector(midiFile, 8, clock.tick),
+		MidiCollector(midiFile, 9, clock.tick),
 	};
 
 	dsp::Timer rateLimiterTimer;
@@ -238,9 +284,8 @@ struct MIDIRecorder : Module
 
 	void onReset() override
 	{
-		bpm = 120.0f;
+		clock.reset(120.0f);
 		running = false;
-		tick = 0;
 		path = "";
 		path_directory = "";
 		path_basename = "";
@@ -276,7 +321,21 @@ struct MIDIRecorder : Module
 			align_to_first_note = json_boolean_value(align_to_first_noteJ);
 	}
 
-	void processMidiTrack(const ProcessArgs &args, const int track)
+	bool trackIsActive(const int track)
+	{
+		const auto FIRST_INPUT = T1_FIRST_COLUMN + track * NUM_PER_TRACK_INPUTS;
+		const auto LAST_INPUT = T1_LAST_COLUMN + track * NUM_PER_TRACK_INPUTS;
+		for (int i = FIRST_INPUT; i <= LAST_INPUT; i++)
+		{
+			if (inputs[i].isConnected())
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	void processMidiTrack(const ProcessArgs &args, const int track, const bool tempoChanged)
 	{
 		const auto PITCH_INPUT = T1_PITCH_INPUT + track * NUM_PER_TRACK_INPUTS;
 		const auto GATE_INPUT = T1_GATE_INPUT + track * NUM_PER_TRACK_INPUTS;
@@ -306,11 +365,30 @@ struct MIDIRecorder : Module
 				if (gate)
 				{
 					first_note_seen = true;
+					// reset the clock so that first event is at tick=0:
+					clock.reset(clock.bpm);
 					break;
 				}
 			}
 			// no gates seen yet - nothing to record
 			return;
+		}
+
+		if (tempoChanged)
+		{
+			midiFile.addTempo(track, clock.tick, clock.bpm);
+		}
+
+		if (rateLimiterTriggered)
+		{
+
+			int pw = (int)std::round((inputs[PW_INPUT].getVoltage() + 5.f) / 10.f * 0x4000);
+			pw = clamp(pw, 0, 0x3fff);
+			MidiCollectors[track].setPitchWheel(pw);
+
+			int mw = (int)std::round(inputs[MW_INPUT].getVoltage() / 10.f * 127);
+			mw = clamp(mw, 0, 127);
+			MidiCollectors[track].setModWheel(mw);
 		}
 
 		for (int c = 0; c < inputs[PITCH_INPUT].getChannels(); c++)
@@ -329,27 +407,23 @@ struct MIDIRecorder : Module
 			aft = clamp(aft, 0, 127);
 			MidiCollectors[track].setKeyPressure(aft, c);
 		}
-
-		if (rateLimiterTriggered)
-		{
-			int pw = (int)std::round((inputs[PW_INPUT].getVoltage() + 5.f) / 10.f * 0x4000);
-			pw = clamp(pw, 0, 0x3fff);
-			MidiCollectors[track].setPitchWheel(pw);
-
-			int mw = (int)std::round(inputs[MW_INPUT].getVoltage() / 10.f * 127);
-			mw = clamp(mw, 0, 127);
-			MidiCollectors[track].setModWheel(mw);
-		}
 	}
 
 	void processMidi(const ProcessArgs &args)
 	{
-		total_time_s += args.sampleTime;
-		// PPQ = ticks/beat;  BPM = beat/minute;
-		tick = std::round(total_time_s * bpm / SEC_PER_MINUTE * MIDI_FILE_PPQ);
+		double new_bpm = getBPM();
+		INFO("BPM: %f", new_bpm);
+		bool tempoChanged = new_bpm != clock.bpm;
+		clock.bpm = new_bpm;
+
+		clock.incrementTick(args.sampleTime, tempoChanged);
+
 		for (int i = 0; i < NUM_TRACKS; i++)
 		{
-			processMidiTrack(args, i);
+			if (trackIsActive(i))
+			{
+				processMidiTrack(args, i, tempoChanged);
+			}
 		}
 	}
 
@@ -381,13 +455,17 @@ struct MIDIRecorder : Module
 		midiFile.setTPQ(MIDI_FILE_PPQ);
 		midiFile.makeAbsoluteTicks();
 
+		clock.bpm = getBPM();
 		for (int t = 0; t < num_tracks; t++)
 		{
-			midiFile.addTempo(t, 0, bpm);
+			if (trackIsActive(t))
+			{
+				midiFile.addTempo(t, 0, clock.bpm);
+			}
 		}
 
-		total_time_s = 0.0f;
-		INFO("Start Recording... BPM: %f num_tracks: %d", bpm, num_tracks);
+		clock.reset(clock.bpm);
+		INFO("Start Recording... BPM: %f num_tracks: %d", clock.bpm, num_tracks);
 		running = true;
 	}
 
@@ -423,11 +501,11 @@ struct MIDIRecorder : Module
 			}
 		}
 
-		INFO("Stop Recording.  total_time_s=%f ticks=%d events=%d.  Writing to %s", total_time_s, tick, num_events, newPath.c_str());
+		INFO("Stop Recording.  total_time_s=%f ticks=%d events=%d.  Writing to %s", clock.total_time_s, clock.tick, num_events, newPath.c_str());
 		midiFile.write(newPath);
 	}
 
-	void process(const ProcessArgs &args) override
+	double getBPM()
 	{
 		// From Impromptu's Clocked : bpm = 120*2^V
 		double new_bpm;
@@ -439,12 +517,11 @@ struct MIDIRecorder : Module
 		{
 			new_bpm = 120.0f; // default
 		}
-		if (new_bpm != bpm)
-		{
-			INFO("BPM: %f", new_bpm);
-		}
-		bpm = new_bpm;
+		return new_bpm;
+	}
 
+	void process(const ProcessArgs &args) override
+	{
 		auto was_running = running;
 		int run_requested;
 		// Run button:
@@ -472,6 +549,12 @@ struct MIDIRecorder : Module
 			{
 				stopRecording(args);
 			}
+		}
+		if (!running)
+		{
+			// while running, the recorder processes BPM changes; when not recordning, we need to do it
+			// here so that we have up to date display changes
+			clock.bpm = getBPM();
 		}
 		lights[REC_LIGHT].setBrightness(running);
 	}
@@ -582,12 +665,10 @@ struct MIDIRecorderWidget : ModuleWidget
 			}
 		}
 
-		SvgPanel *svgPanel = (SvgPanel *)getPanel();
-		auto bpmDisplay = new BPMDisplayWidget(module ? &module->bpm : NULL);
+		auto bpmDisplay = new BPMDisplayWidget(module ? &module->clock.bpm : NULL);
 		bpmDisplay->box.size = Vec(30, 10);
 		bpmDisplay->box.pos = mm2px(Vec(FIRST_X, FIRST_Y + 5 * SPACING + SPACING / 2).minus(bpmDisplay->box.size.div(2)));
 		addChild(bpmDisplay);
-		//		svgPanel->fb->addChild(new DisplayBackground(bpmDisplay->box.pos, bpmDispla->box.size));
 	}
 
 	void appendContextMenu(Menu *menu) override
