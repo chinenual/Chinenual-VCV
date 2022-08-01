@@ -381,38 +381,58 @@ struct MIDIRecorder : Module
 
 		if (rateLimiterTriggered)
 		{
-
-			int pw = (int)std::round((inputs[PW_INPUT].getVoltage() + 5.f) / 10.f * 0x4000);
-			pw = clamp(pw, 0, 0x3fff);
-			MidiCollectors[track].setPitchWheel(pw);
-
-			int mw = (int)std::round(inputs[MW_INPUT].getVoltage() / 10.f * 127);
-			mw = clamp(mw, 0, 127);
-			MidiCollectors[track].setModWheel(mw);
+			// The RACK CV-MIDI code doesn't guard each input with isConnected(), but I've noticed
+			// noise on test recordings (e.g. a stray "polyphonic aftertouch" even if nothing
+			// connected to those inputs).  So play it safe :
+			if (inputs[PW_INPUT].isConnected())
+			{
+				int pw = (int)std::round((inputs[PW_INPUT].getVoltage() + 5.f) / 10.f * 0x4000);
+				pw = clamp(pw, 0, 0x3fff);
+				MidiCollectors[track].setPitchWheel(pw);
+			}
+			if (inputs[MW_INPUT].isConnected())
+			{
+				int mw = (int)std::round(inputs[MW_INPUT].getVoltage() / 10.f * 127);
+				mw = clamp(mw, 0, 127);
+				MidiCollectors[track].setModWheel(mw);
+			}
 		}
 
 		for (int c = 0; c < inputs[PITCH_INPUT].getChannels(); c++)
 		{
-			int vel = (int)std::round(inputs[VEL_INPUT].getNormalPolyVoltage(10.f * 100 / 127, c) / 10.f * 127);
-			vel = clamp(vel, 0, 127);
-			MidiCollectors[track].setVelocity(vel, c);
+			if (inputs[VEL_INPUT].isConnected())
+			{
+				int vel = (int)std::round(inputs[VEL_INPUT].getNormalPolyVoltage(10.f * 100 / 127, c) / 10.f * 127);
+				vel = clamp(vel, 0, 127);
+				MidiCollectors[track].setVelocity(vel, c);
+			}
 
-			int note = (int)std::round(inputs[PITCH_INPUT].getVoltage(c) * 12.f + 60.f);
-			note = clamp(note, 0, 127);
+			int note = 60;
+			if (inputs[PITCH_INPUT].isConnected())
+			{
+				note = (int)std::round(inputs[PITCH_INPUT].getVoltage(c) * 12.f + 60.f);
+				note = clamp(note, 0, 127);
+			}
 
-			bool gate = inputs[GATE_INPUT].getPolyVoltage(c) >= 1.f;
-			MidiCollectors[track].setNoteGate(note, gate, c);
+			if (inputs[GATE_INPUT].isConnected())
+			{
+				bool gate = inputs[GATE_INPUT].getPolyVoltage(c) >= 1.f;
+				MidiCollectors[track].setNoteGate(note, gate, c);
+			}
 
-			int aft = (int)std::round(inputs[AFT_INPUT].getPolyVoltage(c) / 10.f * 127);
-			aft = clamp(aft, 0, 127);
-			MidiCollectors[track].setKeyPressure(aft, c);
+			if (inputs[AFT_INPUT].isConnected())
+			{
+				int aft = (int)std::round(inputs[AFT_INPUT].getPolyVoltage(c) / 10.f * 127);
+				aft = clamp(aft, 0, 127);
+				MidiCollectors[track].setKeyPressure(aft, c);
+			}
 		}
 	}
 
-	void processMidi(const ProcessArgs &args)
+	void
+	processMidi(const ProcessArgs &args)
 	{
 		double new_bpm = getBPM();
-		INFO("BPM: %f", new_bpm);
 		bool tempoChanged = new_bpm != clock.bpm;
 		clock.bpm = new_bpm;
 
