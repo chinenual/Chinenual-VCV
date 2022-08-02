@@ -2,8 +2,6 @@
 
 Virtual Eurorack modules for [VCV Rack](https://vcvrack.com), available in the [plugin library](https://library.vcvrack.com/).
 
-**(NOTE: not yet submitted to the library - pending beta testing).**
-
 Feedback and bug reports (and [donations](https://paypal.me/chinenual)) are always appreciated!
 
 The [Changelog](./CHANGELOG.md) describes changes.
