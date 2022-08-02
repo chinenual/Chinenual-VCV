@@ -1,5 +1,9 @@
 # Change log for Chinenual-VCV
 
+## 2.0.0
+
+* Official release for the VCV Library.
+
 ## 2.0.0b5
 
 * Fixes timing error that caused recorded notes to drift off tempo.  
