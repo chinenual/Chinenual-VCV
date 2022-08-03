@@ -4,7 +4,17 @@
 /plugin.dylib
 /plugin.dll
 .DS_Store
-.vscode/*.log
+
+# ---> VSCode
+.vscode/*
+!.vscode/*.json
+
+# Local History for Visual Studio Code
+.history/
+
+# Built Visual Studio Code Extensions
+*.vsix
+
 
 # ---> Xcode
 # Xcode
