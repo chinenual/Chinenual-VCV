@@ -24,12 +24,20 @@ static CVRange CVRanges[] = {
     CVRange(0.f, 10.f),
     CVRange(-5.f, 5.f),
     CVRange(0.f, 5.f),
+    CVRange(-3.f, 3.f),
+    CVRange(0.f, 3.f),
+    CVRange(-1.f, 1.f),
+    CVRange(0.f, 1.f),
 };
 
 enum CVRangeIndex
 {
     CV_RANGE_n10_10,
     CV_RANGE_0_10,
-    CV_RANGE_n5_,
+    CV_RANGE_n5_5,
     CV_RANGE_0_5,
+    CV_RANGE_n3_3,
+    CV_RANGE_0_3,
+    CV_RANGE_n1_1,
+    CV_RANGE_0_1,
 };

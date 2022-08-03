@@ -175,6 +175,47 @@ struct MIDIRecorderCC : Module
 	}
 };
 
+struct ccNumField : TextField
+{
+
+	MIDIRecorderCC *module;
+	unsigned int index = 0;
+
+	ccNumField(unsigned int index)
+	{
+		this->index = index;
+		this->box.pos.x = 90;  // position of the left side of the text field
+		this->box.size.x = 50; // width of the text field
+		this->multiline = false;
+	}
+
+	void onChange(const event::Change &e) override
+	{
+		// Force Integer in range 0..127 from the text.  Type anything else and it get cooerced to something
+		// in the range.
+
+		int val = 0;
+		// if empty text, leave it be - since the user may be intending to type a key. when that happens,
+		// we'll reparse the string and get a new number
+		//
+		// otherwise, keep the string up to date with what we've parsed (this will prevent non-number
+		// characters from ever even getting displayed:
+		if (text != "")
+		{
+			val = (int)std::stol(text);
+			val = rack::clamp((int)val, 0, 127);
+			text = std::to_string(val);
+
+			// HACK: without this, the cursor may be outside the text range and trigger an assertion error.
+			// Can't just call setText() since that will re-invoke the onChange event.  So set
+			// selection and cursor here manually:
+			selection = cursor = text.size();
+		}
+
+		module->cc_config[index].cc = val;
+	};
+};
+
 #define FIRST_X 10.0
 #define FIRST_Y 19.0
 #define SPACING 11.0
@@ -212,166 +253,57 @@ struct MIDIRecorderCCWidget : ModuleWidget
 		for (int i = 0; i < MIDIRecorderCC::NUM_COLS; i++)
 		{
 
-			menu->addChild(createSubmenuItem(string::f("CC#%d", i + 1), "",
-											 [=](Menu *menu)
-											 {
-												 menu->addChild(createIndexSubmenuItem(
-													 "CV Voltage Range",
-													 {
-														 "-10V..10V",
-														 "0V..10V",
-														 "-10V..5V",
-														 "0V..5V",
-													 },
-													 [=]()
-													 { return module->cc_config[i].range; },
-													 [=](int val)
-													 { module->cc_config[i].range = (CVRangeIndex)val; }));
+			menu->addChild(
+				createSubmenuItem(
+					string::f("CC#%d", i + 1), "",
+					[=](Menu *menu)
+					{
+						menu->addChild(createIndexSubmenuItem(
+							"Input Range",
+							{
+								"-10 to 10",
+								"  0 to 10",
+								" -5 to 5",
+								"  0 to 5",
+								" -3 to 3",
+								"  0 to 3",
+								" -1 to 1",
+								"  0 to 1",
+							},
+							[=]()
+							{ return module->cc_config[i].range; },
+							[=](int val)
+							{ module->cc_config[i].range = (CVRangeIndex)val; }));
 
-												 menu->addChild(createBoolMenuItem(
-													 "14bit",
-													 "",
-													 [=]()
-													 { return module->cc_config[i].is14bit; },
-													 [=](bool val)
-													 { module->cc_config[i].is14bit = val; }));
-												 menu->addChild(createIndexSubmenuItem(
-													 "CC",
-													 {
-														 "0",
-														 "1",
-														 "2",
-														 "3",
-														 "4",
-														 "5",
-														 "6",
-														 "7",
-														 "8",
-														 "9",
-														 "10",
-														 "11",
-														 "12",
-														 "13",
-														 "14",
-														 "15",
-														 "16",
-														 "17",
-														 "18",
-														 "19",
-														 "20",
-														 "21",
-														 "22",
-														 "23",
-														 "24",
-														 "25",
-														 "26",
-														 "27",
-														 "28",
-														 "29",
-														 "30",
-														 "31",
-														 "32",
-														 "33",
-														 "34",
-														 "35",
-														 "36",
-														 "37",
-														 "38",
-														 "39",
-														 "40",
-														 "41",
-														 "42",
-														 "43",
-														 "44",
-														 "45",
-														 "46",
-														 "47",
-														 "48",
-														 "49",
-														 "50",
-														 "51",
-														 "52",
-														 "53",
-														 "54",
-														 "55",
-														 "56",
-														 "57",
-														 "58",
-														 "59",
-														 "60",
-														 "61",
-														 "62",
-														 "63",
-														 "64",
-														 "65",
-														 "66",
-														 "67",
-														 "68",
-														 "69",
-														 "70",
-														 "71",
-														 "72",
-														 "73",
-														 "74",
-														 "75",
-														 "76",
-														 "77",
-														 "78",
-														 "79",
-														 "80",
-														 "81",
-														 "82",
-														 "83",
-														 "84",
-														 "85",
-														 "86",
-														 "87",
-														 "88",
-														 "89",
-														 "90",
-														 "91",
-														 "92",
-														 "93",
-														 "94",
-														 "95",
-														 "96",
-														 "97",
-														 "98",
-														 "99",
-														 "100",
-														 "101",
-														 "102",
-														 "103",
-														 "104",
-														 "105",
-														 "106",
-														 "107",
-														 "108",
-														 "109",
-														 "110",
-														 "111",
-														 "112",
-														 "113",
-														 "114",
-														 "115",
-														 "116",
-														 "117",
-														 "118",
-														 "119",
-														 "120",
-														 "121",
-														 "122",
-														 "123",
-														 "124",
-														 "125",
-														 "126",
-														 "127",
-													 },
-													 [=]()
-													 { return module->cc_config[i].cc; },
-													 [=](int val)
-													 { module->cc_config[i].cc = val; }));
-											 }));
+						menu->addChild(createBoolMenuItem(
+							"14bit",
+							"",
+							[=]()
+							{ return module->cc_config[i].is14bit; },
+							[=](bool val)
+							{ module->cc_config[i].is14bit = val; }));
+
+						{
+							// adapted from Voxglitch's DigitalSequencerXP:
+							// Add label input
+							auto holder = new rack::Widget;
+							holder->box.size.x = 170; //  width of the menu
+							holder->box.size.y = 20;
+
+							auto lab = new rack::Label;
+							lab->text = "MIDI CC: ";
+							lab->box.size.y = 50;  // label box size determins the bounding box around #1, #2, #3 etc.
+							lab->box.size.x = 100; // label box size determins the bounding box around #1, #2, #3 etc.
+							holder->addChild(lab);
+
+							auto textfield = new ccNumField(i);
+							textfield->module = module;
+							textfield->text = std::to_string(module->cc_config[i].cc);
+							holder->addChild(textfield);
+
+							menu->addChild(holder);
+						}
+					}));
 		}
 	}
 };
