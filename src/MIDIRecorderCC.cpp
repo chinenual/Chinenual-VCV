@@ -2,42 +2,6 @@
 #include "MIDIRecorder.hpp"
 #include "CVRange.hpp"
 
-static const NVGcolor ccTextColor = nvgRGB(0xff, 0x00, 0x00);
-
-struct CCDisplayWidget : TransparentWidget
-{
-	std::shared_ptr<Font> font;
-	std::string fontPath;
-	char displayStr[16];
-
-	CCDisplayWidget()
-	{
-		fontPath = std::string(asset::plugin(pluginInstance, "res/fonts/Segment14.ttf"));
-	}
-
-	void drawLayer(const DrawArgs &args, int layer) override
-	{
-		if (layer == 1)
-		{
-			if (!(font = APP->window->loadFont(fontPath)))
-			{
-				return;
-			}
-			nvgFontSize(args.vg, 12);
-			nvgFontFaceId(args.vg, font->handle);
-
-			Vec textPos = Vec(6, 24);
-
-			nvgFillColor(args.vg, ccTextColor);
-
-			int cc = 1;
-			snprintf(displayStr, 16, "  %3u", cc);
-
-			nvgText(args.vg, textPos.x, textPos.y, displayStr, NULL);
-		}
-	}
-};
-
 struct CCConfig
 {
 	int cc;
@@ -177,7 +141,6 @@ struct MIDIRecorderCC : Module
 
 struct ccNumField : TextField
 {
-
 	MIDIRecorderCC *module;
 	unsigned int index = 0;
 
@@ -216,6 +179,47 @@ struct ccNumField : TextField
 	};
 };
 
+struct CCDisplayWidget : TransparentWidget
+{
+	std::shared_ptr<Font> font;
+	std::string fontPath;
+	char displayStr[16];
+	CCConfig *cc_config_ptr;
+
+	CCDisplayWidget(CCConfig *cc_config)
+	{
+		cc_config_ptr = cc_config;
+		fontPath = std::string(asset::plugin(pluginInstance, "res/fonts/Segment14.ttf"));
+	}
+
+	void drawLayer(const DrawArgs &args, int layer) override
+	{
+		if (layer == 1)
+		{
+			if (!(font = APP->window->loadFont(fontPath)))
+			{
+				return;
+			}
+			nvgFontSize(args.vg, 9.2);
+			nvgFontFaceId(args.vg, font->handle);
+
+			Vec textPos = Vec(6, 24);
+
+			nvgFillColor(args.vg, ledTextColor);
+
+			if (!cc_config_ptr)
+			{
+				snprintf(displayStr, 16, "---");
+			}
+			else
+			{
+				snprintf(displayStr, 16, "%3u%s", cc_config_ptr->cc, cc_config_ptr->is14bit ? "+" : "");
+			}
+			nvgText(args.vg, textPos.x, textPos.y, displayStr, NULL);
+		}
+	}
+};
+
 #define FIRST_X 10.0
 #define FIRST_Y 19.0
 #define SPACING 11.0
@@ -239,8 +243,16 @@ struct MIDIRecorderCCWidget : ModuleWidget
 			for (i = 0; i < MIDIRecorderCC::NUM_COLS; i++)
 			{
 				auto e = MIDIRecorderCC::T1_FIRST_COLUMN + t * MIDIRecorderCC::NUM_COLS + i;
-				addInput(createInputCentered<PJ301MPort>(mm2px(Vec(FIRST_X + SPACING + i * SPACING, y)), module, e));
+				addInput(createInputCentered<PJ301MPort>(mm2px(Vec(FIRST_X + i * SPACING, y)), module, e));
 			}
+		}
+		for (i = 0; i < MIDIRecorderCC::NUM_COLS; i++)
+		{
+			auto ccDisplay = new CCDisplayWidget(module ? &module->cc_config[i] : NULL);
+			ccDisplay->box.size = Vec(30, 10);
+			const int CCDISPLAY_Y = FIRST_Y - 1.3 * SPACING;
+			ccDisplay->box.pos = mm2px(Vec(FIRST_X + i * SPACING - SPACING / 1.8, CCDISPLAY_Y));
+			addChild(ccDisplay);
 		}
 	}
 

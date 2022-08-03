@@ -1,9 +1,9 @@
 #include <osdialog.h>
 #include "plugin.hpp"
 
+#include "MIDIRecorder.hpp"
 #include "MidiFile.h"
 
-#define NUM_TRACKS 10
 #define NUM_PER_TRACK_INPUTS 6
 #define MIDI_FILE_PPQ 960
 #define SEC_PER_MINUTE 60
@@ -29,8 +29,6 @@ struct MidiCollector : dsp::MidiGenerator<PORT_MAX_CHANNELS>
 		MidiGenerator::reset();
 	}
 };
-
-static const NVGcolor bpmTextColor = nvgRGB(0xff, 0x00, 0x00);
 
 struct BPMDisplayWidget : TransparentWidget
 {
@@ -58,7 +56,7 @@ struct BPMDisplayWidget : TransparentWidget
 
 			Vec textPos = Vec(6, 24);
 
-			nvgFillColor(args.vg, bpmTextColor);
+			nvgFillColor(args.vg, ledTextColor);
 
 			unsigned int bpm = bpm_ptr ? std::round(*bpm_ptr) : 120;
 			snprintf(displayStr, 16, "  %3u", bpm);
