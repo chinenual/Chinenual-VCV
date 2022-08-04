@@ -633,7 +633,9 @@ struct MIDIRecorderWidget : ModuleWidget {
   }
 };
 
-Model *modelMIDIRecorder =
-    createModel<MIDIRecorder, MIDIRecorderWidget>("MIDIRecorder");
 }  // namespace MIDIRecorder
 }  // namespace Chinenual
+
+Model *modelMIDIRecorder =
+    createModel<Chinenual::MIDIRecorder::MIDIRecorder,
+                Chinenual::MIDIRecorder::MIDIRecorderWidget>("MIDIRecorder");

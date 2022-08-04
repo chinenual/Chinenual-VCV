@@ -103,23 +103,55 @@ struct MIDIRecorderCC : MIDIRecorderBase {
   }
 
   void onReset() override {}
-#if 0
-	json_t *dataToJson() override
-	{
-		// json_t *rootJ = json_object();
-		//		json_object_set_new(rootJ, "path", json_string(path.c_str()));
-		//		json_object_set_new(rootJ, "increment_path", json_boolean(increment_path));
-		//		json_object_set_new(rootJ, "align_to_first_note", json_boolean(align_to_first_note));
-		// return rootJ;
-	}
 
-	void dataFromJson(json_t *rootJ) override
-	{
-		//		json_t *pathJ = json_object_get(rootJ, "path");
-		//		if (pathJ)
-		//			setPath(json_string_value(pathJ));
-	}
-#endif
+  json_t *dataToJson() override {
+    json_t *rootJ = json_object();
+    json_t *cc_config_arrayJ = json_array();
+    for (int i = 0; i < NUM_COLS; i++) {
+      json_t *cc_configJ = json_object();
+      json_object_set_new(cc_configJ, "is14bit",
+                          json_boolean(cc_config[i].is14bit));
+      json_object_set_new(cc_configJ, "cc", json_integer(cc_config[i].cc));
+      json_object_set_new(cc_configJ, "range",
+                          json_integer(cc_config[i].range));
+      json_array_append_new(cc_config_arrayJ, cc_configJ);
+    }
+    json_object_set_new(rootJ, "cc_config", cc_config_arrayJ);
+
+    return rootJ;
+  }
+
+  void dataFromJson(json_t *rootJ) override {
+    INFO("JSON 10");
+    json_t *cc_config_arrayJ = json_object_get(rootJ, "cc_config");
+    INFO("JSON 9");
+    if (cc_config_arrayJ) {
+      INFO("JSON 8");
+      size_t i;
+      json_t *eleJ;
+      json_array_foreach(cc_config_arrayJ, i, eleJ) {
+        INFO("JSON 7");
+        json_t *ccJ = json_object_get(eleJ, "cc");
+        if (ccJ) {
+          INFO("JSON 6");
+          cc_config[i].cc = json_integer_value(ccJ);
+        }
+        INFO("JSON 5");
+        json_t *is14bitJ = json_object_get(eleJ, "is14bit");
+        if (is14bitJ) {
+          INFO("JSON 4");
+          cc_config[i].is14bit = json_boolean_value(is14bitJ);
+        }
+        INFO("JSON 3");
+        json_t *rangeJ = json_object_get(eleJ, "range");
+        if (rangeJ) {
+          INFO("JSON 2");
+          cc_config[i].range = (CVRangeIndex)json_integer_value(rangeJ);
+        }
+      }
+      INFO("JSON 1");
+    }
+  }
 
   void process(const ProcessArgs &args) override {
     MIDIRecorderBase::process(args);
@@ -292,8 +324,10 @@ struct MIDIRecorderCCWidget : ModuleWidget {
   }
 };
 
-Model *modelMIDIRecorderCC =
-    createModel<MIDIRecorderCC, MIDIRecorderCCWidget>("MIDIRecorderCC");
-
 }  // namespace MIDIRecorder
 }  // namespace Chinenual
+
+Model *modelMIDIRecorderCC =
+    createModel<Chinenual::MIDIRecorder::MIDIRecorderCC,
+                Chinenual::MIDIRecorder::MIDIRecorderCCWidget>(
+        "MIDIRecorderCC");
