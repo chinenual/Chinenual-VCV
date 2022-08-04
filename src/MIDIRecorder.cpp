@@ -59,8 +59,12 @@ struct BPMDisplayWidget : TransparentWidget
 			nvgFillColor(args.vg, ledTextColor);
 
 			unsigned int bpm = bpm_ptr ? std::round(*bpm_ptr) : 120;
-			snprintf(displayStr, 16, "  %3u", bpm);
+			snprintf(displayStr, 16, "%3u", bpm);
 
+			// FIXME: this isn't honoring the %3u leading blank padding.  Ends up displaying:
+			//    1       instead of the intended     1
+			//    12								 12
+			//    120								120
 			nvgText(args.vg, textPos.x, textPos.y, displayStr, NULL);
 		}
 	}
@@ -685,7 +689,7 @@ struct MIDIRecorderWidget : ModuleWidget
 
 		auto bpmDisplay = new BPMDisplayWidget(module ? &module->clock.bpm : NULL);
 		bpmDisplay->box.size = Vec(30, 10);
-		bpmDisplay->box.pos = mm2px(Vec(FIRST_X, FIRST_Y + 5 * SPACING + SPACING / 2).minus(bpmDisplay->box.size.div(2)));
+		bpmDisplay->box.pos = mm2px(Vec(FIRST_X - SPACING / 2, FIRST_Y + 5 * SPACING));
 		addChild(bpmDisplay);
 	}
 

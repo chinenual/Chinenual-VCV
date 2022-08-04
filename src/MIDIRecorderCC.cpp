@@ -213,8 +213,7 @@ struct CCDisplayWidget : TransparentWidget
 			}
 			else
 			{
-				snprintf(displayStr, 16, "%s%3u",
-						 cc_config_ptr->is14bit ? "*" : "",
+				snprintf(displayStr, 16, "%3u",
 						 cc_config_ptr->cc);
 			}
 			nvgText(args.vg, textPos.x, textPos.y, displayStr, NULL);
