@@ -109,7 +109,7 @@ struct MIDIClock {
   }
 };
 
-struct MIDIRecorder : Module {
+struct MIDIRecorder : MIDIRecorderBase {
   enum ParamId { RUN_PARAM, PARAMS_LEN };
   enum InputId {
     BPM_INPUT,
@@ -210,8 +210,6 @@ struct MIDIRecorder : Module {
       MidiCollector(midiFile, 8, clock.tick),
       MidiCollector(midiFile, 9, clock.tick),
   };
-
-  dsp::Timer rateLimiterTimer;
 
   MIDIRecorder() {
     onReset();
@@ -317,15 +315,6 @@ struct MIDIRecorder : Module {
     const auto MW_INPUT = T1_MW_INPUT + track * NUM_PER_TRACK_INPUTS;
 
     // MIDI specific processing adapted from VCV Core's CV_MIDI.cpp:
-
-    // MIDI baud rate is 31250 b/s, or 3125 B/s.
-    // CC messages are 3 bytes, so we can send a maximum of 1041 CC messages
-    // per second. Since multiple CCs can be generated, play it safe and limit
-    // the CC rate to 200 Hz.
-    const double rateLimiterPeriod = 1 / 200.f;
-    bool rateLimiterTriggered =
-        (rateLimiterTimer.process(args.sampleTime) >= rateLimiterPeriod);
-    if (rateLimiterTriggered) rateLimiterTimer.time -= rateLimiterPeriod;
 
     MidiCollectors[track].setFrame(args.frame);
 
@@ -488,6 +477,8 @@ struct MIDIRecorder : Module {
   }
 
   void process(const ProcessArgs &args) override {
+    MIDIRecorderBase::process(args);
+
     auto was_running = running;
     int run_requested;
     // Run button:

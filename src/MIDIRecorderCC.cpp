@@ -2,6 +2,9 @@
 #include "MIDIRecorderBase.hpp"
 #include "plugin.hpp"
 
+namespace Chinenual {
+namespace MIDIRecorder {
+
 struct CCConfig {
   int cc;
   bool is14bit;
@@ -11,7 +14,7 @@ struct CCConfig {
       : cc(cc), is14bit(is14bit), range(range) {}
 };
 
-struct MIDIRecorderCC : Module {
+struct MIDIRecorderCC : MIDIRecorderBase {
   enum ParamId { PARAMS_LEN };
   enum InputId {
     T1_CC_1_INPUT,
@@ -118,7 +121,9 @@ struct MIDIRecorderCC : Module {
 	}
 #endif
 
-  void process(const ProcessArgs &args) override {}
+  void process(const ProcessArgs &args) override {
+    MIDIRecorderBase::process(args);
+  }
 };
 
 struct ccNumField : TextField {
@@ -289,3 +294,6 @@ struct MIDIRecorderCCWidget : ModuleWidget {
 
 Model *modelMIDIRecorderCC =
     createModel<MIDIRecorderCC, MIDIRecorderCCWidget>("MIDIRecorderCC");
+
+}  // namespace MIDIRecorder
+}  // namespace Chinenual

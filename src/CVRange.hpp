@@ -1,6 +1,9 @@
 #pragma once
 #include "plugin.hpp"
 
+namespace Chinenual {
+namespace MIDIRecorder {
+
 struct CVRange {
   float low;
   float high;
@@ -37,3 +40,6 @@ enum CVRangeIndex {
   CV_RANGE_n1_1,
   CV_RANGE_0_1,
 };
+
+}  // namespace MIDIRecorder
+}  // namespace Chinenual
