@@ -7,7 +7,6 @@
 namespace Chinenual {
 namespace MIDIRecorder {
 
-#define NUM_PER_TRACK_INPUTS 6
 #define MIDI_FILE_PPQ 960
 #define SEC_PER_MINUTE 60
 
@@ -117,7 +116,7 @@ namespace MIDIRecorder {
         }
     };
 
-    struct MIDIRecorder : MIDIRecorderBase {
+    struct MIDIRecorder : MIDIRecorderBase<6> {
         enum ParamId { RUN_PARAM,
             PARAMS_LEN };
         enum InputId {
@@ -222,6 +221,7 @@ namespace MIDIRecorder {
         };
 
         MIDIRecorder()
+            : MIDIRecorderBase(T1_PITCH_INPUT)
         {
             onReset();
 
@@ -232,9 +232,9 @@ namespace MIDIRecorder {
 
             int i, t;
             for (t = 0; t < NUM_TRACKS; t++) {
-                for (i = 0; i < NUM_PER_TRACK_INPUTS; i++) {
-                    auto e = T1_PITCH_INPUT + t * NUM_PER_TRACK_INPUTS + i;
-                    const char* paramName[NUM_PER_TRACK_INPUTS] = {
+                for (i = 0; i < COLS_PER_TRACK; i++) {
+                    auto e = T1_PITCH_INPUT + t * COLS_PER_TRACK + i;
+                    const char* paramName[] = {
                         "Note pitch (V/oct)", "Note gate", "Note velocity",
                         "Aftertouch", "Pitchbend", "Modwheel"
                     };
@@ -312,28 +312,24 @@ namespace MIDIRecorder {
                 align_to_first_note = json_boolean_value(align_to_first_noteJ);
         }
 
-        bool trackIsActive(const int track)
+        bool trackIsActive(const int track) override
         {
-            const auto FIRST_INPUT = T1_FIRST_COLUMN + track * NUM_PER_TRACK_INPUTS;
-            const auto LAST_INPUT = T1_LAST_COLUMN + track * NUM_PER_TRACK_INPUTS;
-            for (int i = FIRST_INPUT; i <= LAST_INPUT; i++) {
-                if (inputs[i].isConnected()) {
-                    return true;
-                }
+            if (MIDIRecorderBase::trackIsActive(track)) {
+                return true;
             }
-            // TODO: check expanders
+            // TODO: check expanders:
             return false;
         }
 
         void processMidiTrack(const ProcessArgs& args, const int track,
             const bool tempoChanged)
         {
-            const auto PITCH_INPUT = T1_PITCH_INPUT + track * NUM_PER_TRACK_INPUTS;
-            const auto GATE_INPUT = T1_GATE_INPUT + track * NUM_PER_TRACK_INPUTS;
-            const auto VEL_INPUT = T1_VEL_INPUT + track * NUM_PER_TRACK_INPUTS;
-            const auto AFT_INPUT = T1_AFT_INPUT + track * NUM_PER_TRACK_INPUTS;
-            const auto PW_INPUT = T1_PW_INPUT + track * NUM_PER_TRACK_INPUTS;
-            const auto MW_INPUT = T1_MW_INPUT + track * NUM_PER_TRACK_INPUTS;
+            const auto PITCH_INPUT = T1_PITCH_INPUT + track * COLS_PER_TRACK;
+            const auto GATE_INPUT = T1_GATE_INPUT + track * COLS_PER_TRACK;
+            const auto VEL_INPUT = T1_VEL_INPUT + track * COLS_PER_TRACK;
+            const auto AFT_INPUT = T1_AFT_INPUT + track * COLS_PER_TRACK;
+            const auto PW_INPUT = T1_PW_INPUT + track * COLS_PER_TRACK;
+            const auto MW_INPUT = T1_MW_INPUT + track * COLS_PER_TRACK;
 
             // MIDI specific processing adapted from VCV Core's CV_MIDI.cpp:
 
@@ -431,8 +427,8 @@ namespace MIDIRecorder {
             /*
               for (int t = NUM_TRACKS-1; t>=0; t--) {
               // are any of the inputs on this row connected?
-              for (int i = 0; i < NUM_PER_TRACK_INPUTS; i++) {
-              auto id = T1_PITCH_INPUT + i + t*NUM_PER_TRACK_INPUTS;
+              for (int i = 0; i < COLS_PER_TRACK; i++) {
+              auto id = T1_PITCH_INPUT + i + t*COLS_PER_TRACK;
               if (inputs[id].isConnected()) {
               num_tracks = t+1;
               break;
@@ -631,8 +627,8 @@ namespace MIDIRecorder {
             int t, i;
             for (t = 0; t < NUM_TRACKS; t++) {
                 auto y = FIRST_Y + t * SPACING;
-                for (i = 0; i < NUM_PER_TRACK_INPUTS; i++) {
-                    auto e = MIDIRecorder::T1_PITCH_INPUT + t * NUM_PER_TRACK_INPUTS + i;
+                for (i = 0; i < MIDIRecorder::COLS_PER_TRACK; i++) {
+                    auto e = MIDIRecorder::T1_PITCH_INPUT + t * MIDIRecorder::COLS_PER_TRACK + i;
                     addInput(createInputCentered<PJ301MPort>(
                         mm2px(Vec(FIRST_X + SPACING + i * SPACING, y)), module, e));
                 }

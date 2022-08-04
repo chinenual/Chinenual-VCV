@@ -18,7 +18,10 @@ namespace MIDIRecorder {
         }
     };
 
-    struct MIDIRecorderCC : MIDIRecorderBase {
+    struct MIDIRecorderCC : MIDIRecorderBase<5> {
+        ExpanderToMasterMessage expander_to_master_message_a;
+        ExpanderToMasterMessage expander_to_master_message_b;
+
         enum ParamId { PARAMS_LEN };
         enum InputId {
             T1_CC_1_INPUT,
@@ -75,7 +78,6 @@ namespace MIDIRecorder {
         };
 
         // range of one row of input:
-        static const int NUM_COLS = 5;
         static const InputId T1_FIRST_COLUMN = T1_CC_1_INPUT;
         static const InputId T1_LAST_COLUMN = T1_CC_5_INPUT;
 
@@ -84,7 +86,7 @@ namespace MIDIRecorder {
 
         // persisted state:
 
-        CCConfig cc_config[NUM_COLS] = {
+        CCConfig cc_config[COLS_PER_TRACK] = {
             CCConfig(10, false, CV_RANGE_n10_10),
             CCConfig(11, false, CV_RANGE_n10_10),
             CCConfig(12, false, CV_RANGE_n10_10),
@@ -93,15 +95,19 @@ namespace MIDIRecorder {
         };
 
         MIDIRecorderCC()
+            : MIDIRecorderBase(T1_CC_1_INPUT)
         {
+            leftExpander.consumerMessage = &expander_to_master_message_a;
+            leftExpander.producerMessage = &expander_to_master_message_b;
+
             onReset();
 
             config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
 
             int i, t;
             for (t = 0; t < NUM_TRACKS; t++) {
-                for (i = 0; i < NUM_COLS; i++) {
-                    auto e = T1_FIRST_COLUMN + t * NUM_COLS + i;
+                for (i = 0; i < COLS_PER_TRACK; i++) {
+                    auto e = T1_FIRST_COLUMN + t * COLS_PER_TRACK + i;
                     configInput(e, string::f("Track %d CC#%d", t + 1, i + 1));
                 }
             }
@@ -113,7 +119,7 @@ namespace MIDIRecorder {
         {
             json_t* rootJ = json_object();
             json_t* cc_config_arrayJ = json_array();
-            for (int i = 0; i < NUM_COLS; i++) {
+            for (int i = 0; i < COLS_PER_TRACK; i++) {
                 json_t* cc_configJ = json_object();
                 json_object_set_new(cc_configJ, "is14bit",
                     json_boolean(cc_config[i].is14bit));
@@ -151,9 +157,45 @@ namespace MIDIRecorder {
             }
         }
 
+        void processMidiTrack(const int track, const ProcessArgs& args)
+        {
+            ExpanderToMasterMessage* expanderMsg = (ExpanderToMasterMessage*)leftExpander.producerMessage;
+
+            const auto COL0_INPUT = T10_CC_1_INPUT + track * COLS_PER_TRACK;
+            for (int i = 0; i < COLS_PER_TRACK; i++) {
+                int inputId = COL0_INPUT + i;
+                if (inputs[inputId].isConnected()) {
+                    float v = inputs[inputId].getVoltage();
+                    if (cc_config[i].is14bit) {
+                        int val = CVRanges[cc_config[i].range].to14bit(v);
+                        int msb, lsb;
+                        CVRanges[cc_config[i].range].split14bit(val, msb, lsb);
+                        smf::MidiMessage ccMsg_1, ccMsg_2;
+                        ccMsg_1.makeController(0, cc_config[i].cc, msb);
+                        ccMsg_2.makeController(0, cc_config[i].cc + 32, lsb);
+                        expanderMsg->msgs[track].push_back(ccMsg_1);
+                        expanderMsg->msgs[track].push_back(ccMsg_2);
+                    } else {
+                        int val = CVRanges[cc_config[i].range].to7bit(v);
+                        smf::MidiMessage ccMsg;
+                        ccMsg.makeController(0, cc_config[i].cc, val);
+                        expanderMsg->msgs[track].push_back(ccMsg);
+                    }
+                }
+            }
+        }
+
         void process(const ProcessArgs& args) override
         {
             MIDIRecorderBase::process(args);
+
+#if 0 // disable until expander exchange protocol sorted 
+            if (rateLimiterTriggered) {
+                for (int t = 0; t < NUM_TRACKS; t++) {
+                    processMidiTrack(t, args);
+                }
+            }
+#endif
         }
     };
 
@@ -254,13 +296,13 @@ namespace MIDIRecorder {
             int t, i;
             for (t = 0; t < NUM_TRACKS; t++) {
                 auto y = FIRST_Y + t * SPACING;
-                for (i = 0; i < MIDIRecorderCC::NUM_COLS; i++) {
-                    auto e = MIDIRecorderCC::T1_FIRST_COLUMN + t * MIDIRecorderCC::NUM_COLS + i;
+                for (i = 0; i < MIDIRecorderCC::COLS_PER_TRACK; i++) {
+                    auto e = MIDIRecorderCC::T1_FIRST_COLUMN + t * MIDIRecorderCC::COLS_PER_TRACK + i;
                     addInput(createInputCentered<PJ301MPort>(
                         mm2px(Vec(FIRST_X + i * SPACING, y)), module, e));
                 }
             }
-            for (i = 0; i < MIDIRecorderCC::NUM_COLS; i++) {
+            for (i = 0; i < MIDIRecorderCC::COLS_PER_TRACK; i++) {
                 auto ccDisplay = new CCDisplayWidget(module ? &module->cc_config[i] : NULL);
                 ccDisplay->box.size = Vec(30, 10);
                 const int CCDISPLAY_Y = FIRST_Y - 1.3 * SPACING;
@@ -275,7 +317,7 @@ namespace MIDIRecorder {
 
             menu->addChild(new MenuSeparator);
 
-            for (int i = 0; i < MIDIRecorderCC::NUM_COLS; i++) {
+            for (int i = 0; i < MIDIRecorderCC::COLS_PER_TRACK; i++) {
                 menu->addChild(
                     createSubmenuItem(string::f("CC#%d", i + 1), "", [=](Menu* menu) {
                         menu->addChild(createIndexSubmenuItem(

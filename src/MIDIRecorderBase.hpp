@@ -28,7 +28,13 @@ namespace MIDIRecorder {
 
     struct MasterToExpanderMessage { };
 
+    // the grid of track inputs must be in one continuous sequence, starting with
+    // FIRST_INPUT_ID, incrementing across columns, and then down tracks.
+    template <int cols_per_track>
     struct MIDIRecorderBase : Module {
+        int FIRST_INPUT_ID;
+        static const int COLS_PER_TRACK = cols_per_track;
+
         dsp::Timer rateLimiterTimer;
         bool rateLimiterTriggered = false;
 
@@ -46,7 +52,23 @@ namespace MIDIRecorder {
                 rateLimiterTimer.time -= rateLimiterPeriod;
         }
 
+        virtual bool trackIsActive(const int track)
+        {
+            const auto LAST_INPUT_ID = FIRST_INPUT_ID + NUM_TRACKS * track * COLS_PER_TRACK;
+            for (int i = FIRST_INPUT_ID; i <= LAST_INPUT_ID; i++) {
+                if (inputs[i].isConnected()) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         void process(const ProcessArgs& args) override { processRateLimiter(args); }
+
+        MIDIRecorderBase(const int first_input_id)
+        {
+            FIRST_INPUT_ID = first_input_id;
+        }
     };
 
 } // namespace MIDIRecorder
