@@ -122,34 +122,24 @@ struct MIDIRecorderCC : MIDIRecorderBase {
   }
 
   void dataFromJson(json_t *rootJ) override {
-    INFO("JSON 10");
     json_t *cc_config_arrayJ = json_object_get(rootJ, "cc_config");
-    INFO("JSON 9");
     if (cc_config_arrayJ) {
-      INFO("JSON 8");
       size_t i;
       json_t *eleJ;
       json_array_foreach(cc_config_arrayJ, i, eleJ) {
-        INFO("JSON 7");
         json_t *ccJ = json_object_get(eleJ, "cc");
         if (ccJ) {
-          INFO("JSON 6");
           cc_config[i].cc = json_integer_value(ccJ);
         }
-        INFO("JSON 5");
         json_t *is14bitJ = json_object_get(eleJ, "is14bit");
         if (is14bitJ) {
-          INFO("JSON 4");
           cc_config[i].is14bit = json_boolean_value(is14bitJ);
         }
-        INFO("JSON 3");
         json_t *rangeJ = json_object_get(eleJ, "range");
         if (rangeJ) {
-          INFO("JSON 2");
           cc_config[i].range = (CVRangeIndex)json_integer_value(rangeJ);
         }
       }
-      INFO("JSON 1");
     }
   }
 
