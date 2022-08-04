@@ -40,7 +40,7 @@ struct BPMDisplayWidget : TransparentWidget
 	BPMDisplayWidget(double *bpm)
 	{
 		bpm_ptr = bpm;
-		fontPath = std::string(asset::plugin(pluginInstance, "res/fonts/Segment14.ttf"));
+		fontPath = std::string(asset::plugin(pluginInstance, "res/fonts/DSEG14Modern-BoldItalic.ttf"));
 	}
 
 	void drawLayer(const DrawArgs &args, int layer) override

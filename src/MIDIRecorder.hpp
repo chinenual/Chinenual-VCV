@@ -9,4 +9,6 @@ static const NVGcolor whiteTextColor = nvgRGB(0xff, 0xff, 0xff);
 // red:
 // static const NVGcolor ledTextColor = nvgRGB(0xff, 0x00, 0x00);
 // lighter red:
-static const NVGcolor ledTextColor = nvgRGB(0xff, 0x33, 0x33);
+// static const NVGcolor ledTextColor = nvgRGB(0xff, 0x33, 0x33);
+// light yellow (lighter variant of the logo color):
+static const NVGcolor ledTextColor = nvgRGB(0xff, 0xdf, 0x80);

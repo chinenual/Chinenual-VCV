@@ -189,7 +189,7 @@ struct CCDisplayWidget : TransparentWidget
 	CCDisplayWidget(CCConfig *cc_config)
 	{
 		cc_config_ptr = cc_config;
-		fontPath = std::string(asset::plugin(pluginInstance, "res/fonts/Segment14.ttf"));
+		fontPath = std::string(asset::plugin(pluginInstance, "res/fonts/DSEG14Modern-BoldItalic.ttf"));
 	}
 
 	void drawLayer(const DrawArgs &args, int layer) override
@@ -213,7 +213,9 @@ struct CCDisplayWidget : TransparentWidget
 			}
 			else
 			{
-				snprintf(displayStr, 16, "%3u%s", cc_config_ptr->cc, cc_config_ptr->is14bit ? "+" : "");
+				snprintf(displayStr, 16, "%s%3u",
+						 cc_config_ptr->is14bit ? "*" : "",
+						 cc_config_ptr->cc);
 			}
 			nvgText(args.vg, textPos.x, textPos.y, displayStr, NULL);
 		}
