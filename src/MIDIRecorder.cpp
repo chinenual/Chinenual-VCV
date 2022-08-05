@@ -118,6 +118,9 @@ namespace MIDIRecorder {
     };
 
     struct MIDIRecorder : MIDIRecorderBase<6> {
+        MasterToExpanderMessage master_to_expander_message_a;
+        MasterToExpanderMessage master_to_expander_message_b;
+
         enum ParamId { RUN_PARAM,
             PARAMS_LEN };
         enum InputId {
@@ -229,6 +232,9 @@ namespace MIDIRecorder {
         MIDIRecorder()
             : MIDIRecorderBase(T1_PITCH_INPUT)
         {
+            rightExpander.consumerMessage = &master_to_expander_message_a;
+            rightExpander.producerMessage = &master_to_expander_message_a;
+
             onReset();
 
             config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
@@ -589,6 +595,12 @@ namespace MIDIRecorder {
                 // recordning, we need to do it here so that we have up to date display
                 // changes
                 clock.bpm = getBPM();
+            }
+            {
+                // tell any expanders that we're expecting them to send us data
+                auto producerMessage = (MasterToExpanderMessage*)rightExpander.producerMessage;
+                producerMessage->isRecording = running;
+                rightExpander.requestMessageFlip();
             }
             lights[REC_LIGHT].setBrightness(running);
         }

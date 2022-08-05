@@ -19,6 +19,10 @@ namespace MIDIRecorder {
 
 #define NUM_TRACKS 10
 
+    struct MasterToExpanderMessage {
+        bool isRecording;
+    };
+
     struct ExpanderToMasterMessage {
         // current status of the inputs for each track (are any inputs connected?)
         bool active[NUM_TRACKS];

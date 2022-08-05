@@ -198,9 +198,11 @@ namespace MIDIRecorder {
             // are we connected to a master module (possibly with other expanders in between?)
             bool connected = false;
             Module* m = this;
+            Module* master = 0;
             while (m) {
                 if (m->model == modelMIDIRecorder) {
                     connected = true;
+                    master = m;
                     break;
                 }
                 if (m->model != modelMIDIRecorderCC) {
@@ -209,18 +211,21 @@ namespace MIDIRecorder {
                 m = m->leftExpander.module;
             }
             if (connected) {
+                auto consumerMessage = (MasterToExpanderMessage*)master->rightExpander.consumerMessage;
                 auto producerMessage = (ExpanderToMasterMessage*)leftExpander.producerMessage;
-                for (int t = 0; t < NUM_TRACKS; t++) {
-                    producerMessage->msgs[t].clear();
-                    producerMessage->active[t] = trackIsActive(t);
-                    if (rateLimiterTriggered && trackIsActive(t)) {
-                        processMidiTrack(t, args);
+                if (consumerMessage->isRecording) {
+                    for (int t = 0; t < NUM_TRACKS; t++) {
+                        producerMessage->msgs[t].clear();
+                        producerMessage->active[t] = trackIsActive(t);
+                        if (rateLimiterTriggered && trackIsActive(t)) {
+                            processMidiTrack(t, args);
+                        }
+                        if (producerMessage->msgs[t].size() > 0) {
+                            INFO("TRACK %d %lu msgs", t, producerMessage->msgs[t].size());
+                        }
                     }
-                    if (producerMessage->msgs[t].size() > 0) {
-                        INFO("TRACK %d %lu msgs", t, producerMessage->msgs[t].size());
-                    }
+                    leftExpander.requestMessageFlip();
                 }
-                leftExpander.requestMessageFlip();
             }
         }
     };
