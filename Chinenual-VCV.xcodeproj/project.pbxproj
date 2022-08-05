@@ -12,6 +12,8 @@
 		325FA08B289A9FDE001BF1D2 /* plugin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = plugin.cpp; path = src/plugin.cpp; sourceTree = "<group>"; };
 		325FA08C289A9FDE001BF1D2 /* plugin.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = plugin.hpp; path = src/plugin.hpp; sourceTree = "<group>"; };
 		325FA08D289A9FDE001BF1D2 /* MIDIRecorder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MIDIRecorder.cpp; path = src/MIDIRecorder.cpp; sourceTree = "<group>"; };
+		325FA08E289D7771001BF1D2 /* CVRange.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = CVRange.hpp; path = src/CVRange.hpp; sourceTree = "<group>"; };
+		325FA08F289D7771001BF1D2 /* MIDIRecorderBase.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = MIDIRecorderBase.hpp; path = src/MIDIRecorderBase.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -23,6 +25,8 @@
 				325FA089289A9FDE001BF1D2 /* MIDIRecorderCC.cpp */,
 				325FA08B289A9FDE001BF1D2 /* plugin.cpp */,
 				325FA08C289A9FDE001BF1D2 /* plugin.hpp */,
+				325FA08E289D7771001BF1D2 /* CVRange.hpp */,
+				325FA08F289D7771001BF1D2 /* MIDIRecorderBase.hpp */,
 			);
 			sourceTree = "<group>";
 		};

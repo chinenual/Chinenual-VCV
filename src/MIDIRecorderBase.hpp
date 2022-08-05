@@ -20,13 +20,12 @@ namespace MIDIRecorder {
 #define NUM_TRACKS 10
 
     struct ExpanderToMasterMessage {
-        // current status of the inputs for each track (is anything connected?)
+        // current status of the inputs for each track (are any inputs connected?)
         bool active[NUM_TRACKS];
-        // a vector of new midi messages per track
+
+        // a vector of new midi messages since last flip per track
         std::vector<smf::MidiMessage> msgs[NUM_TRACKS];
     };
-
-    struct MasterToExpanderMessage { };
 
     // the grid of track inputs must be in one continuous sequence, starting with
     // FIRST_INPUT_ID, incrementing across columns, and then down tracks.
@@ -52,10 +51,15 @@ namespace MIDIRecorder {
                 rateLimiterTimer.time -= rateLimiterPeriod;
         }
 
+        bool active_track_dirty;
+        bool active_track_cache[NUM_TRACKS];
+
         virtual bool trackIsActive(const int track)
         {
-            const auto LAST_INPUT_ID = FIRST_INPUT_ID + NUM_TRACKS * track * COLS_PER_TRACK;
-            for (int i = FIRST_INPUT_ID; i <= LAST_INPUT_ID; i++) {
+            return true;
+            const auto first = FIRST_INPUT_ID + track * COLS_PER_TRACK;
+            const auto last = first + COLS_PER_TRACK;
+            for (int i = first; i <= last; i++) {
                 if (inputs[i].isConnected()) {
                     return true;
                 }
@@ -64,6 +68,21 @@ namespace MIDIRecorder {
         }
 
         void process(const ProcessArgs& args) override { processRateLimiter(args); }
+
+        void onPortChange(const Module::PortChangeEvent& e) override
+        {
+            // flush the active track cache
+            active_track_dirty = true;
+        }
+
+        void onExpanderChange(const Module::ExpanderChangeEvent& e) override
+        {
+            bool connected = false;
+            if ((e.side && rightExpander.module) || ((!e.side) && leftExpander.module)) {
+                connected = true;
+            }
+            INFO("[%s] %s Expander %sconnected", model->slug.c_str(), e.side ? "Right" : "Left", connected ? "" : "dis");
+        }
 
         MIDIRecorderBase(const int first_input_id)
         {

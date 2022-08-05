@@ -326,10 +326,24 @@ namespace MIDIRecorder {
 
         bool trackIsActive(const int track) override
         {
+            return true;
+
             if (MIDIRecorderBase::trackIsActive(track)) {
                 return true;
             }
-            // TODO: check expanders:
+            // check expanders:
+            Module* m = rightExpander.module;
+            while (m) {
+                if (m->model == modelMIDIRecorderCC) {
+                    auto consumerMessage = (ExpanderToMasterMessage*)m->leftExpander.consumerMessage;
+                    if (consumerMessage->active[track]) {
+                        return true;
+                    }
+                } else {
+                    break;
+                }
+                m = m->rightExpander.module;
+            }
             return false;
         }
 
@@ -355,6 +369,9 @@ namespace MIDIRecorder {
                         first_note_seen = true;
                         // reset the clock so that first event is at tick=0:
                         clock.reset(clock.bpm);
+#ifdef SDTDEBUG
+                        INFO("SAW FIRST NOTE");
+#endif
                         break;
                     }
                 }
@@ -364,6 +381,26 @@ namespace MIDIRecorder {
 
             if (tempoChanged) {
                 midiFile.addTempo(track, clock.tick, clock.bpm);
+            }
+
+            {
+                // check expanders - they have indepentent rate limiters, so check every frame
+                Module* m = rightExpander.module;
+                while (m) {
+                    if (m->model == modelMIDIRecorderCC) {
+                        auto consumerMessage = (ExpanderToMasterMessage*)m->leftExpander.consumerMessage;
+                        for (auto&& msg : consumerMessage->msgs[track]) {
+#if 0
+                            INFO("data from expander: %d %2x", track, msg.getCommandByte());
+#endif
+                            // MidiCollectors[track].setCc(msg.getControllerValue(), msg.getControllerNumber());
+                            midiFile.addEvent(track, clock.tick, msg);
+                        }
+                    } else {
+                        break;
+                    }
+                    m = m->rightExpander.module;
+                }
             }
 
             if (rateLimiterTriggered) {
@@ -415,7 +452,6 @@ namespace MIDIRecorder {
                     MidiCollectors[track].setKeyPressure(aft, c);
                 }
             }
-            // TODO: get data from expander(s)
         }
 
         void processMidi(const ProcessArgs& args)
@@ -426,9 +462,12 @@ namespace MIDIRecorder {
 
             clock.incrementTick(args.sampleTime, tempoChanged);
 
-            for (int i = 0; i < NUM_TRACKS; i++) {
-                if (trackIsActive(i)) {
-                    processMidiTrack(args, i, tempoChanged);
+#if 0
+            INFO("ACTIVE: %d %d %d %d %d %d %d %d %d %d", trackIsActive(0), trackIsActive(1), trackIsActive(2), trackIsActive(3), trackIsActive(4), trackIsActive(5), trackIsActive(6), trackIsActive(7), trackIsActive(8), trackIsActive(9));
+#endif
+            for (int t = 0; t < NUM_TRACKS; t++) {
+                if (trackIsActive(t)) {
+                    processMidiTrack(args, t, tempoChanged);
                 }
             }
         }
@@ -501,6 +540,11 @@ namespace MIDIRecorder {
             INFO("Stop Recording.  total_time_s=%f ticks=%d events=%d.  Writing to %s",
                 clock.total_time_s, clock.tick, num_events, newPath.c_str());
             midiFile.write(newPath);
+
+#ifdef SDTDEBUG
+            auto dbgPath = newPath + ".txt";
+            midiFile.writeBinascWithComments(dbgPath);
+#endif
         }
 
         double getBPM()
