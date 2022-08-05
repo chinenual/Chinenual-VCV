@@ -51,20 +51,32 @@ namespace MIDIRecorder {
                 rateLimiterTimer.time -= rateLimiterPeriod;
         }
 
-        bool active_track_dirty;
+        bool active_track_cache_dirty;
         bool active_track_cache[NUM_TRACKS];
 
         virtual bool trackIsActive(const int track)
         {
-            return true;
-            const auto first = FIRST_INPUT_ID + track * COLS_PER_TRACK;
-            const auto last = first + COLS_PER_TRACK;
-            for (int i = first; i <= last; i++) {
-                if (inputs[i].isConnected()) {
-                    return true;
+            if (active_track_cache_dirty) {
+                for (int t = 0; t < NUM_TRACKS; t++) {
+                    const auto first = FIRST_INPUT_ID + t * COLS_PER_TRACK;
+                    const auto last = first + COLS_PER_TRACK;
+                    active_track_cache[t] = false;
+                    for (int i = first; i <= last; i++) {
+                        if (inputs[i].isConnected()) {
+                            active_track_cache[t] = true;
+                            break;
+                        }
+                    }
                 }
+                active_track_cache_dirty = false;
             }
-            return false;
+            return active_track_cache[track];
+        }
+
+        void onReset() override
+        {
+            Module::onReset();
+            active_track_cache_dirty = true;
         }
 
         void process(const ProcessArgs& args) override { processRateLimiter(args); }
@@ -72,7 +84,7 @@ namespace MIDIRecorder {
         void onPortChange(const Module::PortChangeEvent& e) override
         {
             // flush the active track cache
-            active_track_dirty = true;
+            active_track_cache_dirty = true;
         }
 
         void onExpanderChange(const Module::ExpanderChangeEvent& e) override

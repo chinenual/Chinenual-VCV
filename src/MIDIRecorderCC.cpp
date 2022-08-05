@@ -85,7 +85,6 @@ namespace MIDIRecorder {
         enum LightId { LIGHTS_LEN };
 
         // persisted state:
-
         CCConfig cc_config[COLS_PER_TRACK] = {
             CCConfig(10, false, CV_RANGE_0_10),
             CCConfig(11, false, CV_RANGE_0_10),
@@ -113,7 +112,15 @@ namespace MIDIRecorder {
             }
         }
 
-        void onReset() override { }
+        void onReset() override
+        {
+            MIDIRecorderBase::onReset();
+            for (int i = 0; i < COLS_PER_TRACK; i++) {
+                cc_config[i].cc = 10 + i;
+                cc_config[i].is14bit = false;
+                cc_config[i].range = CV_RANGE_0_10;
+            }
+        }
 
         json_t* dataToJson() override
         {

@@ -280,6 +280,8 @@ namespace MIDIRecorder {
 
         void onReset() override
         {
+            MIDIRecorderBase::onReset();
+
             clock.reset(120.0f);
             running = false;
             path = "";
@@ -326,8 +328,6 @@ namespace MIDIRecorder {
 
         bool trackIsActive(const int track) override
         {
-            return true;
-
             if (MIDIRecorderBase::trackIsActive(track)) {
                 return true;
             }
