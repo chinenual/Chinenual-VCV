@@ -87,11 +87,11 @@ namespace MIDIRecorder {
         // persisted state:
 
         CCConfig cc_config[COLS_PER_TRACK] = {
-            CCConfig(10, false, CV_RANGE_n10_10),
-            CCConfig(11, false, CV_RANGE_n10_10),
-            CCConfig(12, false, CV_RANGE_n10_10),
-            CCConfig(13, false, CV_RANGE_n10_10),
-            CCConfig(14, false, CV_RANGE_n10_10),
+            CCConfig(10, false, CV_RANGE_0_10),
+            CCConfig(11, false, CV_RANGE_0_10),
+            CCConfig(12, false, CV_RANGE_0_10),
+            CCConfig(13, false, CV_RANGE_0_10),
+            CCConfig(14, false, CV_RANGE_0_10),
         };
 
         MIDIRecorderCC()
@@ -321,17 +321,7 @@ namespace MIDIRecorder {
                 menu->addChild(
                     createSubmenuItem(string::f("CC#%d", i + 1), "", [=](Menu* menu) {
                         menu->addChild(createIndexSubmenuItem(
-                            "Input Range",
-                            {
-                                "-10 to 10",
-                                "  0 to 10",
-                                " -5 to 5",
-                                "  0 to 5",
-                                " -3 to 3",
-                                "  0 to 3",
-                                " -1 to 1",
-                                "  0 to 1",
-                            },
+                            "Input Range", CVRangeNames,
                             [=]() { return module->cc_config[i].range; },
                             [=](int val) {
                                 module->cc_config[i].range = (CVRangeIndex)val;

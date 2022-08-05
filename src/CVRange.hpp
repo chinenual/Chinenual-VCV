@@ -21,7 +21,7 @@ namespace MIDIRecorder {
 
         int to14bit(float voltage)
         {
-            return clamp((int)std::round(((voltage - low) / high) * 16384), 0, 16384);
+            return clamp((int)std::round(((voltage - low) / high) * 16383), 0, 16383);
         }
 
         void split14bit(const int val, int& msb, int& lsb)
@@ -40,6 +40,17 @@ namespace MIDIRecorder {
         CVRange(0.f, 3.f),
         CVRange(-1.f, 1.f),
         CVRange(0.f, 1.f),
+    };
+
+    static std::vector<std::string> CVRangeNames = {
+        "-10 to 10",
+        "  0 to 10",
+        " -5 to 5",
+        "  0 to 5",
+        " -3 to 3",
+        "  0 to 3",
+        " -1 to 1",
+        "  0 to 1",
     };
 
     enum CVRangeIndex {

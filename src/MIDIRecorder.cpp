@@ -1,5 +1,6 @@
 #include <osdialog.h>
 
+#include "CVRange.hpp"
 #include "MIDIRecorderBase.hpp"
 #include "MidiFile.h"
 #include "plugin.hpp"
@@ -205,6 +206,11 @@ namespace MIDIRecorder {
         std::string path;
         bool increment_path;
         bool align_to_first_note;
+        CVRangeIndex cv_config_vel;
+        CVRangeIndex cv_config_aft;
+        CVRangeIndex cv_config_pw;
+        CVRangeIndex cv_config_mw;
+        bool mw_is14bit;
 
         smf::MidiFile midiFile;
         MidiCollector MidiCollectors[NUM_TRACKS] = {
@@ -284,6 +290,12 @@ namespace MIDIRecorder {
             rec_clicked = false;
             first_note_seen = false;
 
+            cv_config_vel = CV_RANGE_0_10;
+            cv_config_aft = CV_RANGE_0_10;
+            cv_config_pw = CV_RANGE_n5_5;
+            cv_config_mw = CV_RANGE_0_10;
+            mw_is14bit = false;
+
             clearRecording();
         }
 
@@ -360,23 +372,31 @@ namespace MIDIRecorder {
                 // aftertouch" even if nothing connected to those inputs).  So play it
                 // safe :
                 if (inputs[PW_INPUT].isConnected()) {
-                    int pw = (int)std::round((inputs[PW_INPUT].getVoltage() + 5.f) / 10.f * 0x4000);
-                    pw = clamp(pw, 0, 0x3fff);
+                    // PW is always 14bit:
+                    int pw = CVRanges[cv_config_pw].to14bit(inputs[PW_INPUT].getVoltage());
                     MidiCollectors[track].setPitchWheel(pw);
                 }
                 if (inputs[MW_INPUT].isConnected()) {
-                    int mw = (int)std::round(inputs[MW_INPUT].getVoltage() / 10.f * 127);
-                    mw = clamp(mw, 0, 127);
-                    MidiCollectors[track].setModWheel(mw);
+                    if (mw_is14bit) {
+                        int lsb, msb;
+                        int val = CVRanges[cv_config_mw].to14bit(inputs[MW_INPUT].getVoltage());
+                        CVRanges[cv_config_mw].split14bit(val, msb, lsb);
+                        MidiCollectors[track].setCc(1, msb);
+                        MidiCollectors[track].setCc(33, lsb);
+                    } else {
+                        int mw = CVRanges[cv_config_mw].to7bit(inputs[MW_INPUT].getVoltage());
+                        MidiCollectors[track].setModWheel(mw);
+                    }
                 }
             }
 
             for (int c = 0; c < inputs[PITCH_INPUT].getChannels(); c++) {
                 if (inputs[VEL_INPUT].isConnected()) {
-                    int vel = (int)std::round(
-                        inputs[VEL_INPUT].getNormalPolyVoltage(10.f * 100 / 127, c) / 10.f * 127);
-                    vel = clamp(vel, 0, 127);
+                    int vel = CVRanges[cv_config_vel].to7bit(inputs[VEL_INPUT].getPolyVoltage(c));
                     MidiCollectors[track].setVelocity(vel, c);
+                } else {
+                    // default is 100
+                    MidiCollectors[track].setVelocity(100, c);
                 }
 
                 int note = 60;
@@ -391,8 +411,7 @@ namespace MIDIRecorder {
                 }
 
                 if (inputs[AFT_INPUT].isConnected()) {
-                    int aft = (int)std::round(inputs[AFT_INPUT].getPolyVoltage(c) / 10.f * 127);
-                    aft = clamp(aft, 0, 127);
+                    int aft = CVRanges[cv_config_aft].to7bit(inputs[AFT_INPUT].getPolyVoltage(c));
                     MidiCollectors[track].setKeyPressure(aft, c);
                 }
             }
@@ -655,6 +674,34 @@ namespace MIDIRecorder {
                 &module->increment_path));
             menu->addChild(createBoolPtrMenuItem("Start at first note gate", "",
                 &module->align_to_first_note));
+
+            menu->addChild(createIndexSubmenuItem(
+                "VEL Input Range", CVRangeNames,
+                [=]() { return module->cv_config_vel; },
+                [=](int val) {
+                    module->cv_config_vel = (CVRangeIndex)val;
+                }));
+            menu->addChild(createIndexSubmenuItem(
+                "AFT Input Range", CVRangeNames,
+                [=]() { return module->cv_config_aft; },
+                [=](int val) {
+                    module->cv_config_aft = (CVRangeIndex)val;
+                }));
+            menu->addChild(createIndexSubmenuItem(
+                "PW Input Range", CVRangeNames,
+                [=]() { return module->cv_config_pw; },
+                [=](int val) {
+                    module->cv_config_pw = (CVRangeIndex)val;
+                }));
+            menu->addChild(createIndexSubmenuItem(
+                "MW Input Range", CVRangeNames,
+                [=]() { return module->cv_config_mw; },
+                [=](int val) {
+                    module->cv_config_mw = (CVRangeIndex)val;
+                }));
+            menu->addChild(createBoolMenuItem(
+                "MW is 14bit", "", [=]() { return module->mw_is14bit; },
+                [=](bool val) { module->mw_is14bit = val; }));
         }
     };
 
