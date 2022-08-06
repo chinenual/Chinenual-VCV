@@ -54,8 +54,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="2.195562"
-     inkscape:cx="161.23434"
-     inkscape:cy="370.97563"
+     inkscape:cx="153.03599"
+     inkscape:cy="257.10957"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      inkscape:document-rotation="0"
@@ -64,7 +64,7 @@
      inkscape:window-width="1309"
      inkscape:window-height="847"
      inkscape:window-x="47"
-     inkscape:window-y="302"
+     inkscape:window-y="301"
      inkscape:window-maximized="0"
      inkscape:pagecheckerboard="0"
      width="20.32mm"
@@ -227,15 +227,16 @@
          d="m 12.005974,45.43161 h -1.484146 v -2.051897 h 1.484146 v 0.396874 h -0.957735 v 0.354156 h 0.888834 v 0.396875 h -0.888834 v 0.507117 h 0.957735 z"
          id="path9538" />
     </g>
-    <rect
+    <path
        style="fill:#222226;fill-opacity:1;stroke-width:0.22;paint-order:markers stroke fill"
        id="rect9868"
        width="14.219974"
        height="7.5920196"
-       x="1.6871156"
-       y="74.715118"
+       x="2.2896569"
+       y="74.956139"
        inkscape:path-effect="#path-effect10104"
-       d="m 3.6871156,74.715118 10.2199734,0 a 2,2 45 0 1 2,2 v 3.59202 a 2,2 135 0 1 -2,2 H 3.6871156 a 2,2 45 0 1 -2,-2 v -3.59202 a 2,2 135 0 1 2,-2 z" />
+       d="M 4.2896569,74.956139 H 14.50963 a 2,2 45 0 1 2,2 v 3.592019 a 2,2 135 0 1 -2,2 l -10.2199731,0 a 2,2 45 0 1 -2,-2 v -3.592019 a 2,2 135 0 1 2,-2 z"
+       sodipodi:type="rect" />
     <g
        aria-label="9"
        id="text10347"
