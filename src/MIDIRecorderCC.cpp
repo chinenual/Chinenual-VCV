@@ -309,7 +309,10 @@ namespace MIDIRecorder {
 
 #define FIRST_X 10.0
 #define FIRST_Y 20.0
-#define SPACING 10.0
+#define SPACING_X 10.0
+#define SPACING_Y 10.5
+#define LED_OFFSET_X 1.0
+#define LED_OFFSET_Y -5.0
 
     struct MIDIRecorderCCWidget : ModuleWidget {
         MIDIRecorderCCWidget(MIDIRecorderCC* module)
@@ -328,18 +331,18 @@ namespace MIDIRecorder {
 
             int t, i;
             for (t = 0; t < NUM_TRACKS; t++) {
-                auto y = FIRST_Y + t * SPACING;
+                auto y = FIRST_Y + t * SPACING_Y;
                 for (i = 0; i < MIDIRecorderCC::COLS_PER_TRACK; i++) {
                     auto e = MIDIRecorderCC::T1_FIRST_COLUMN + t * MIDIRecorderCC::COLS_PER_TRACK + i;
                     addInput(createInputCentered<PJ301MPort>(
-                        mm2px(Vec(FIRST_X + i * SPACING, y)), module, e));
+                        mm2px(Vec(FIRST_X + i * SPACING_X, y)), module, e));
                 }
             }
             for (i = 0; i < MIDIRecorderCC::COLS_PER_TRACK; i++) {
                 auto ccDisplay = new CCDisplayWidget(module ? &module->cc_config[i] : NULL);
                 ccDisplay->box.size = Vec(30, 10);
-                const int CCDISPLAY_Y = FIRST_Y - 1.3 * SPACING;
-                ccDisplay->box.pos = mm2px(Vec(FIRST_X + i * SPACING - SPACING / 1.8, CCDISPLAY_Y));
+                const int CCDISPLAY_Y = FIRST_Y - SPACING_Y + LED_OFFSET_Y;
+                ccDisplay->box.pos = mm2px(Vec(FIRST_X + i * SPACING_X + LED_OFFSET_X, CCDISPLAY_Y));
                 addChild(ccDisplay);
             }
         }
