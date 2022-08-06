@@ -45,12 +45,12 @@ namespace MIDIRecorder {
     static std::vector<std::string> CVRangeNames = {
         "-10 to 10",
         "  0 to 10",
-        " -5 to 5",
-        "  0 to 5",
-        " -3 to 3",
-        "  0 to 3",
-        " -1 to 1",
-        "  0 to 1",
+        " -5 to  5",
+        "  0 to  5",
+        " -3 to  3",
+        "  0 to  3",
+        " -1 to  1",
+        "  0 to  1",
     };
 
     enum CVRangeIndex {
