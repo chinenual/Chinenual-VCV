@@ -667,7 +667,7 @@ namespace MIDIRecorder {
 #define SPACING_Y 10.5
 #define LED_OFFSET_X 4.0
 #define LED_OFFSET_Y -9.5
-#define BUTTON_OFFSET_X 0.0
+#define BUTTON_OFFSET_X -1.0
 #define BUTTON_OFFSET_Y -5.0
 
     struct MIDIRecorderWidget : ModuleWidget {

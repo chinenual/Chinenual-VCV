@@ -86,11 +86,11 @@ namespace MIDIRecorder {
 
         // persisted state:
         CCConfig cc_config[COLS_PER_TRACK] = {
-            CCConfig(10, false, CV_RANGE_0_10),
-            CCConfig(11, false, CV_RANGE_0_10),
-            CCConfig(12, false, CV_RANGE_0_10),
-            CCConfig(13, false, CV_RANGE_0_10),
-            CCConfig(14, false, CV_RANGE_0_10),
+            CCConfig(2, false, CV_RANGE_0_10),
+            CCConfig(3, false, CV_RANGE_0_10),
+            CCConfig(4, false, CV_RANGE_0_10),
+            CCConfig(5, false, CV_RANGE_0_10),
+            CCConfig(6, false, CV_RANGE_0_10),
         };
 
         MIDIRecorderCC()
@@ -116,7 +116,7 @@ namespace MIDIRecorder {
         {
             MIDIRecorderBase::onReset();
             for (int i = 0; i < COLS_PER_TRACK; i++) {
-                cc_config[i].cc = 10 + i;
+                cc_config[i].cc = 2 + i;
                 cc_config[i].is14bit = false;
                 cc_config[i].range = CV_RANGE_0_10;
             }
