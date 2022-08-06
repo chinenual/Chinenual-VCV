@@ -288,7 +288,7 @@ namespace MIDIRecorder {
                 if (!(font = APP->window->loadFont(fontPath))) {
                     return;
                 }
-                nvgFontSize(args.vg, 9.2);
+                nvgFontSize(args.vg, 11.0);
                 nvgFontFaceId(args.vg, font->handle);
 
                 Vec textPos = Vec(6, 24);
@@ -311,8 +311,8 @@ namespace MIDIRecorder {
 #define FIRST_Y 20.0
 #define SPACING_X 10.0
 #define SPACING_Y 10.5
-#define LED_OFFSET_X 1.0
-#define LED_OFFSET_Y -5.0
+#define LED_OFFSET_X 1.6
+#define LED_OFFSET_Y -4.5
 
     struct MIDIRecorderCCWidget : ModuleWidget {
         MIDIRecorderCCWidget(MIDIRecorderCC* module)
