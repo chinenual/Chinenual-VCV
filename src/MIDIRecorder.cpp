@@ -53,7 +53,7 @@ namespace MIDIRecorder {
                 if (!(font = APP->window->loadFont(fontPath))) {
                     return;
                 }
-                nvgFontSize(args.vg, 12);
+                nvgFontSize(args.vg, 17);
                 nvgFontFaceId(args.vg, font->handle);
 
                 Vec textPos = Vec(6, 24);
@@ -657,13 +657,18 @@ namespace MIDIRecorder {
         RecLight()
         {
             bgColor = nvgRGB(0x66, 0x66, 0x66);
-            box.size = mm2px(Vec(9.0, 9.00));
+            box.size = mm2px(Vec(11.0, 11.00));
         }
     };
 
 #define FIRST_X 10.0
 #define FIRST_Y 20.0
-#define SPACING 10.0
+#define SPACING_X 10.0
+#define SPACING_Y 10.5
+#define LED_OFFSET_X 4.0
+#define LED_OFFSET_Y -9.5
+#define BUTTON_OFFSET_X 0.0
+#define BUTTON_OFFSET_Y -5.0
 
     struct MIDIRecorderWidget : ModuleWidget {
         MIDIRecorderWidget(MIDIRecorder* module)
@@ -681,34 +686,34 @@ namespace MIDIRecorder {
                 RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
             RecButton* recButton = createWidgetCentered<RecButton>(
-                mm2px(Vec(FIRST_X, FIRST_Y + 4 * SPACING)));
+                mm2px(Vec(FIRST_X + BUTTON_OFFSET_X, FIRST_Y + 2 * SPACING_Y + BUTTON_OFFSET_Y)));
             recButton->module = module;
             addChild(recButton);
 
             addChild(createLightCentered<RecLight>(
-                mm2px(Vec(FIRST_X, FIRST_Y + 4 * SPACING)), module,
+                mm2px(Vec(FIRST_X + BUTTON_OFFSET_X, FIRST_Y + 2 * SPACING_Y + BUTTON_OFFSET_Y)), module,
                 MIDIRecorder::REC_LIGHT));
 
             addInput(createInputCentered<PJ301MPort>(
-                mm2px(Vec(FIRST_X, FIRST_Y + 7 * SPACING)), module,
+                mm2px(Vec(FIRST_X, FIRST_Y + 7 * SPACING_Y)), module,
                 MIDIRecorder::BPM_INPUT));
             addInput(createInputCentered<PJ301MPort>(
-                mm2px(Vec(FIRST_X, FIRST_Y + 9 * SPACING)), module,
+                mm2px(Vec(FIRST_X, FIRST_Y + 3 * SPACING_Y)), module,
                 MIDIRecorder::RUN_INPUT));
 
             int t, i;
             for (t = 0; t < NUM_TRACKS; t++) {
-                auto y = FIRST_Y + t * SPACING;
+                auto y = FIRST_Y + t * SPACING_Y;
                 for (i = 0; i < MIDIRecorder::COLS_PER_TRACK; i++) {
                     auto e = MIDIRecorder::T1_PITCH_INPUT + t * MIDIRecorder::COLS_PER_TRACK + i;
                     addInput(createInputCentered<PJ301MPort>(
-                        mm2px(Vec(FIRST_X + SPACING + i * SPACING, y)), module, e));
+                        mm2px(Vec(FIRST_X + SPACING_X + i * SPACING_X, y)), module, e));
                 }
             }
 
             auto bpmDisplay = new BPMDisplayWidget(module ? &module->clock.bpm : NULL);
             bpmDisplay->box.size = Vec(30, 10);
-            bpmDisplay->box.pos = mm2px(Vec(FIRST_X, FIRST_Y + 5 * SPACING));
+            bpmDisplay->box.pos = mm2px(Vec(FIRST_X + LED_OFFSET_X, FIRST_Y + 6 * SPACING_Y + LED_OFFSET_Y));
             addChild(bpmDisplay);
         }
 
