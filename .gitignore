@@ -1,4 +1,4 @@
-./libRack.dylib
+libRack.dylib
 /build
 /dist
 /plugin.so

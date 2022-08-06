@@ -63,10 +63,7 @@ namespace MIDIRecorder {
                 unsigned int bpm = bpm_ptr ? std::round(*bpm_ptr) : 120;
                 snprintf(displayStr, 16, "%3u", bpm);
 
-                // FIXME: this isn't honoring the %3u leading blank padding.  Ends up
-                // displaying:
-                //    1       instead of the intended     1
-                //    12 12 120 120
+                nvgTextAlign(args.vg, NVG_ALIGN_RIGHT | NVG_ALIGN_BOTTOM);
                 nvgText(args.vg, textPos.x, textPos.y, displayStr, NULL);
             }
         }
@@ -665,8 +662,8 @@ namespace MIDIRecorder {
     };
 
 #define FIRST_X 10.0
-#define FIRST_Y 19.0
-#define SPACING 11.0
+#define FIRST_Y 20.0
+#define SPACING 10.0
 
     struct MIDIRecorderWidget : ModuleWidget {
         MIDIRecorderWidget(MIDIRecorder* module)
@@ -711,7 +708,7 @@ namespace MIDIRecorder {
 
             auto bpmDisplay = new BPMDisplayWidget(module ? &module->clock.bpm : NULL);
             bpmDisplay->box.size = Vec(30, 10);
-            bpmDisplay->box.pos = mm2px(Vec(FIRST_X - SPACING / 2, FIRST_Y + 5 * SPACING));
+            bpmDisplay->box.pos = mm2px(Vec(FIRST_X, FIRST_Y + 5 * SPACING));
             addChild(bpmDisplay);
         }
 

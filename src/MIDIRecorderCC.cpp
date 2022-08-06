@@ -300,14 +300,16 @@ namespace MIDIRecorder {
                 } else {
                     snprintf(displayStr, 16, "%3u", cc_config_ptr->cc);
                 }
+                nvgTextAlign(args.vg, NVG_ALIGN_RIGHT | NVG_ALIGN_BOTTOM);
+
                 nvgText(args.vg, textPos.x, textPos.y, displayStr, NULL);
             }
         }
     };
 
 #define FIRST_X 10.0
-#define FIRST_Y 19.0
-#define SPACING 11.0
+#define FIRST_Y 20.0
+#define SPACING 10.0
 
     struct MIDIRecorderCCWidget : ModuleWidget {
         MIDIRecorderCCWidget(MIDIRecorderCC* module)
