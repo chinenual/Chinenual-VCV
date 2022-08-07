@@ -124,7 +124,7 @@ If 14-bit CC is selected, two CC messages are created.  One at the
 configured control number (with the MSB part of the value) and one at
 control number+32 (with the LSB part).
 
-** WARNING:** 
+**WARNING:** 
 The module does not attempt to prevent you from configuring
 conflicting CC's (e.g. if column 1's settings are CC=2, 14-bit, and
 column 2's is CC=34, both columns will be producing CC messages for
