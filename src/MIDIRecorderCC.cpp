@@ -179,9 +179,12 @@ namespace MIDIRecorder {
                         CVRanges[cc_config[i].range].split14bit(val, msb, lsb);
                         smf::MidiMessage ccMsg_1, ccMsg_2;
                         ccMsg_1.makeController(0, cc_config[i].cc, msb);
-                        ccMsg_2.makeController(0, cc_config[i].cc + 32, lsb);
                         expanderMsg->msgs[track].push_back(ccMsg_1);
-                        expanderMsg->msgs[track].push_back(ccMsg_2);
+                        if (cc_config[i].cc + 32 <= 127) {
+                            // silently ignore attempt to write invalid CCnumber
+                            ccMsg_2.makeController(0, cc_config[i].cc + 32, lsb);
+                            expanderMsg->msgs[track].push_back(ccMsg_2);
+                        }
                     } else {
                         int val = CVRanges[cc_config[i].range].to7bit(v);
                         smf::MidiMessage ccMsg;
