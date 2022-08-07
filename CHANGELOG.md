@@ -11,7 +11,9 @@
 
 * The Recorder has new config options 
   * 14-bit CC can be sent for MW (CC1 & CC33). Default is 7-bit (CC1 only)
-  * VEL, AFT, PW and MW voltage input ranges can be changed to match the source modulator outputs.   Defaults remain as in the 2.0.0 release (which matches the VCV Core MIDI-CC module behavior).
+  * VEL, AFT, PW and MW voltage input ranges can be changed to match
+    the source modulator outputs.   Defaults remain as in the 2.0.0
+    release (which matches the VCV Core CV-MIDI module behavior).
   * Revamped the UI - brighter BPM LED color, more readable labels. Track row labels.
 
 ## 2.0.0
