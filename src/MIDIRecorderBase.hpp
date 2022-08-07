@@ -43,7 +43,7 @@ namespace MIDIRecorder {
 
         void processRateLimiter(const ProcessArgs& args)
         {
-            // Adapted from Rack's Recorder module:
+            // Adapted from Rack's CV-MIDI module:
             //
             // MIDI baud rate is 31250 b/s, or 3125 B/s.
             // CC messages are 3 bytes, so we can send a maximum of 1041 CC messages
