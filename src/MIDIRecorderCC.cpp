@@ -223,9 +223,11 @@ namespace MIDIRecorder {
                         if (rateLimiterTriggered && trackIsActive(t)) {
                             processMidiTrack(t, args);
                         }
+#if 0
                         if (producerMessage->msgs[t].size() > 0) {
                             INFO("TRACK %d %lu msgs", t, producerMessage->msgs[t].size());
                         }
+#endif
                     }
                     leftExpander.requestMessageFlip();
                 }
