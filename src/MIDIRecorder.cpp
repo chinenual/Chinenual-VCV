@@ -548,6 +548,8 @@ namespace MIDIRecorder {
             auto dbgPath = newPath + ".txt";
             midiFile.writeBinascWithComments(dbgPath);
 #endif
+            // free memory:
+            clearRecording();
         }
 
         double getBPM()
