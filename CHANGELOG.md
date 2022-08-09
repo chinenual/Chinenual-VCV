@@ -1,5 +1,10 @@
 # Change log for Chinenual-VCV
 
+## 2.1.0b2
+
+* Fixes memory deallocation bug that caused memory to not be deleted
+  as soon as it could be. 
+
 ## 2.1.0b1
 
 * New expander module for the MIDI Recorder.  Adds support for 5 additional

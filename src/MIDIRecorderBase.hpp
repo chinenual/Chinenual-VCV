@@ -29,6 +29,21 @@ namespace MIDIRecorder {
 
         // a vector of new midi messages since last flip per track
         std::vector<smf::MidiMessage> msgs[NUM_TRACKS];
+
+        ExpanderToMasterMessage()
+        {
+            // preallocate the vectors so we're not triggering an alloc in the audio thread.
+            // Technically, we only need room for 1 message per track since the CC's are rate limited to no
+            // more than one message per frame (and in practice many fewer than that due to the
+            // rateLimiter timer)  - and the master consumes the messages every frame even though the
+            // expanders don't produce them every frame.
+            //
+            // But preallocate extras "just in case" the master doesn't consume the vectors as expected.
+            // It's only few bytes of overhead.
+            for (int t = 0; t < NUM_TRACKS; t++) {
+                msgs[t].reserve(3);
+            }
+        }
     };
 
     // the grid of track inputs must be in one continuous sequence, starting with

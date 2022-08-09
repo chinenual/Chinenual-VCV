@@ -1,6 +1,7 @@
 #include <osdialog.h>
 
 #include "CVRange.hpp"
+#include "MIDIBuffer.hpp"
 #include "MIDIRecorderBase.hpp"
 #include "MidiFile.h"
 #include "plugin.hpp"
@@ -12,12 +13,12 @@ namespace MIDIRecorder {
 #define SEC_PER_MINUTE 60
 
     struct MidiCollector : dsp::MidiGenerator<PORT_MAX_CHANNELS> {
-        smf::MidiFile& midiFile;
+        MIDIBuffer& midiBuffer;
         int track;
         int& tick;
 
-        MidiCollector(smf::MidiFile& midiFile, int track, int& tick)
-            : midiFile(midiFile)
+        MidiCollector(MIDIBuffer& midiBuffer, int track, int& tick)
+            : midiBuffer(midiBuffer)
             , track(track)
             , tick(tick)
         {
@@ -28,7 +29,8 @@ namespace MIDIRecorder {
             /// do something
             // convert to the smf library's classes:
             smf::MidiMessage smfMsg(message.bytes);
-            midiFile.addEvent(track, tick, smfMsg);
+            smf::MidiEvent smfEvent(tick, track, smfMsg);
+            midiBuffer.append_event(track, smfEvent);
         }
 
         void reset() { MidiGenerator::reset(); }
@@ -213,21 +215,23 @@ namespace MIDIRecorder {
         bool mw_is14bit;
 
         smf::MidiFile midiFile;
+        MIDIBuffer midiBuffer;
         MidiCollector MidiCollectors[NUM_TRACKS] = {
-            MidiCollector(midiFile, 0, clock.tick),
-            MidiCollector(midiFile, 1, clock.tick),
-            MidiCollector(midiFile, 2, clock.tick),
-            MidiCollector(midiFile, 3, clock.tick),
-            MidiCollector(midiFile, 4, clock.tick),
-            MidiCollector(midiFile, 5, clock.tick),
-            MidiCollector(midiFile, 6, clock.tick),
-            MidiCollector(midiFile, 7, clock.tick),
-            MidiCollector(midiFile, 8, clock.tick),
-            MidiCollector(midiFile, 9, clock.tick),
+            MidiCollector(midiBuffer, 0, clock.tick),
+            MidiCollector(midiBuffer, 1, clock.tick),
+            MidiCollector(midiBuffer, 2, clock.tick),
+            MidiCollector(midiBuffer, 3, clock.tick),
+            MidiCollector(midiBuffer, 4, clock.tick),
+            MidiCollector(midiBuffer, 5, clock.tick),
+            MidiCollector(midiBuffer, 6, clock.tick),
+            MidiCollector(midiBuffer, 7, clock.tick),
+            MidiCollector(midiBuffer, 8, clock.tick),
+            MidiCollector(midiBuffer, 9, clock.tick),
         };
 
         MIDIRecorder()
             : MIDIRecorderBase(T1_PITCH_INPUT)
+            , midiBuffer(midiFile)
         {
             rightExpander.consumerMessage = &master_to_expander_message_a;
             rightExpander.producerMessage = &master_to_expander_message_a;
@@ -396,8 +400,9 @@ namespace MIDIRecorder {
 #if 0
                             INFO("data from expander: %d %2x", track, msg.getCommandByte());
 #endif
-                            // MidiCollectors[track].setCc(msg.getControllerValue(), msg.getControllerNumber());
-                            midiFile.addEvent(track, clock.tick, msg);
+                            /// midiCollectors[track].setCc(msg.getControllerValue(), msg.getControllerNumber());
+                            smf::MidiEvent event(clock.tick, track, msg);
+                            midiBuffer.append_event(track, event);
                         }
                     } else {
                         break;
@@ -477,6 +482,8 @@ namespace MIDIRecorder {
 
         void startRecording(const ProcessArgs& args)
         {
+            midiBuffer.stop();
+
             if (path == "") {
                 INFO("ERROR: No Path in startRecording");
                 return;
@@ -508,6 +515,7 @@ namespace MIDIRecorder {
                     midiFile.addTempo(t, 0, clock.bpm);
                 }
             }
+            midiBuffer.start();
 
             clock.reset(clock.bpm);
             INFO("Start Recording... BPM: %f num_tracks: %d", clock.bpm, num_tracks);
@@ -516,6 +524,8 @@ namespace MIDIRecorder {
 
         void stopRecording(const ProcessArgs& args)
         {
+            midiBuffer.stop();
+
             running = false;
             int num_events = 0;
             for (int t = 0; t < midiFile.getNumTracks(); t++) {
