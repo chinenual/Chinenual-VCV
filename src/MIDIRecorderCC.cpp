@@ -19,8 +19,8 @@ namespace MIDIRecorder {
     };
 
     struct MIDIRecorderCC : MIDIRecorderBase<5> {
-        ExpanderToMasterMessage expander_to_master_message_a;
-        ExpanderToMasterMessage expander_to_master_message_b;
+        ExpanderToMasterMessage expanderToMasterMessage_a;
+        ExpanderToMasterMessage expanderToMasterMessage_b;
 
         enum ParamId { PARAMS_LEN };
         enum InputId {
@@ -85,7 +85,7 @@ namespace MIDIRecorder {
         enum LightId { LIGHTS_LEN };
 
         // persisted state:
-        CCConfig cc_config[COLS_PER_TRACK] = {
+        CCConfig ccConfig[COLS_PER_TRACK] = {
             CCConfig(2, false, CV_RANGE_0_10),
             CCConfig(3, false, CV_RANGE_0_10),
             CCConfig(4, false, CV_RANGE_0_10),
@@ -96,8 +96,8 @@ namespace MIDIRecorder {
         MIDIRecorderCC()
             : MIDIRecorderBase(T1_CC_1_INPUT)
         {
-            leftExpander.consumerMessage = &expander_to_master_message_a;
-            leftExpander.producerMessage = &expander_to_master_message_b;
+            leftExpander.consumerMessage = &expanderToMasterMessage_a;
+            leftExpander.producerMessage = &expanderToMasterMessage_b;
 
             onReset();
 
@@ -116,49 +116,49 @@ namespace MIDIRecorder {
         {
             MIDIRecorderBase::onReset();
             for (int i = 0; i < COLS_PER_TRACK; i++) {
-                cc_config[i].cc = 2 + i;
-                cc_config[i].is14bit = false;
-                cc_config[i].range = CV_RANGE_0_10;
+                ccConfig[i].cc = 2 + i;
+                ccConfig[i].is14bit = false;
+                ccConfig[i].range = CV_RANGE_0_10;
             }
         }
 
         json_t* dataToJson() override
         {
             json_t* rootJ = json_object();
-            json_t* cc_config_arrayJ = json_array();
+            json_t* ccConfig_arrayJ = json_array();
             for (int i = 0; i < COLS_PER_TRACK; i++) {
-                json_t* cc_configJ = json_object();
-                json_object_set_new(cc_configJ, "is14bit",
-                    json_boolean(cc_config[i].is14bit));
-                json_object_set_new(cc_configJ, "cc", json_integer(cc_config[i].cc));
-                json_object_set_new(cc_configJ, "range",
-                    json_integer(cc_config[i].range));
-                json_array_append_new(cc_config_arrayJ, cc_configJ);
+                json_t* ccConfigJ = json_object();
+                json_object_set_new(ccConfigJ, "is14bit",
+                    json_boolean(ccConfig[i].is14bit));
+                json_object_set_new(ccConfigJ, "cc", json_integer(ccConfig[i].cc));
+                json_object_set_new(ccConfigJ, "range",
+                    json_integer(ccConfig[i].range));
+                json_array_append_new(ccConfig_arrayJ, ccConfigJ);
             }
-            json_object_set_new(rootJ, "cc_config", cc_config_arrayJ);
+            json_object_set_new(rootJ, "ccConfig", ccConfig_arrayJ);
 
             return rootJ;
         }
 
         void dataFromJson(json_t* rootJ) override
         {
-            json_t* cc_config_arrayJ = json_object_get(rootJ, "cc_config");
-            if (cc_config_arrayJ) {
+            json_t* ccConfig_arrayJ = json_object_get(rootJ, "ccConfig");
+            if (ccConfig_arrayJ) {
                 size_t i;
                 json_t* eleJ;
-                json_array_foreach(cc_config_arrayJ, i, eleJ)
+                json_array_foreach(ccConfig_arrayJ, i, eleJ)
                 {
                     json_t* ccJ = json_object_get(eleJ, "cc");
                     if (ccJ) {
-                        cc_config[i].cc = json_integer_value(ccJ);
+                        ccConfig[i].cc = json_integer_value(ccJ);
                     }
                     json_t* is14bitJ = json_object_get(eleJ, "is14bit");
                     if (is14bitJ) {
-                        cc_config[i].is14bit = json_boolean_value(is14bitJ);
+                        ccConfig[i].is14bit = json_boolean_value(is14bitJ);
                     }
                     json_t* rangeJ = json_object_get(eleJ, "range");
                     if (rangeJ) {
-                        cc_config[i].range = (CVRangeIndex)json_integer_value(rangeJ);
+                        ccConfig[i].range = (CVRangeIndex)json_integer_value(rangeJ);
                     }
                 }
             }
@@ -173,22 +173,22 @@ namespace MIDIRecorder {
                 int inputId = COL0_INPUT + i;
                 if (inputs[inputId].isConnected()) {
                     float v = inputs[inputId].getVoltage();
-                    if (cc_config[i].is14bit) {
-                        int val = CVRanges[cc_config[i].range].to14bit(v);
+                    if (ccConfig[i].is14bit) {
+                        int val = CVRanges[ccConfig[i].range].to14bit(v);
                         int msb, lsb;
-                        CVRanges[cc_config[i].range].split14bit(val, msb, lsb);
+                        CVRanges[ccConfig[i].range].split14bit(val, msb, lsb);
                         smf::MidiMessage ccMsg_1, ccMsg_2;
-                        ccMsg_1.makeController(0, cc_config[i].cc, msb);
+                        ccMsg_1.makeController(0, ccConfig[i].cc, msb);
                         expanderMsg->msgs[track].push_back(ccMsg_1);
-                        if (cc_config[i].cc + 32 <= 127) {
+                        if (ccConfig[i].cc + 32 <= 127) {
                             // silently ignore attempt to write invalid CCnumber
-                            ccMsg_2.makeController(0, cc_config[i].cc + 32, lsb);
+                            ccMsg_2.makeController(0, ccConfig[i].cc + 32, lsb);
                             expanderMsg->msgs[track].push_back(ccMsg_2);
                         }
                     } else {
-                        int val = CVRanges[cc_config[i].range].to7bit(v);
+                        int val = CVRanges[ccConfig[i].range].to7bit(v);
                         smf::MidiMessage ccMsg;
-                        ccMsg.makeController(0, cc_config[i].cc, val);
+                        ccMsg.makeController(0, ccConfig[i].cc, val);
                         expanderMsg->msgs[track].push_back(ccMsg);
                     }
                 }
@@ -270,7 +270,7 @@ namespace MIDIRecorder {
                 selection = cursor = text.size();
             }
 
-            module->cc_config[index].cc = val;
+            module->ccConfig[index].cc = val;
         };
     };
 
@@ -278,11 +278,11 @@ namespace MIDIRecorder {
         std::shared_ptr<Font> font;
         std::string fontPath;
         char displayStr[16];
-        CCConfig* cc_config_ptr;
+        CCConfig* ccConfigPtr;
 
-        CCDisplayWidget(CCConfig* cc_config)
+        CCDisplayWidget(CCConfig* ccConfig)
         {
-            cc_config_ptr = cc_config;
+            ccConfigPtr = ccConfig;
             fontPath = std::string(
                 asset::plugin(pluginInstance, "res/fonts/DSEG14Modern-BoldItalic.ttf"));
         }
@@ -300,10 +300,10 @@ namespace MIDIRecorder {
 
                 nvgFillColor(args.vg, ledTextColor);
 
-                if (!cc_config_ptr) {
+                if (!ccConfigPtr) {
                     snprintf(displayStr, 16, "---");
                 } else {
-                    snprintf(displayStr, 16, "%3u", cc_config_ptr->cc);
+                    snprintf(displayStr, 16, "%3u", ccConfigPtr->cc);
                 }
                 nvgTextAlign(args.vg, NVG_ALIGN_RIGHT | NVG_ALIGN_BOTTOM);
 
@@ -344,7 +344,7 @@ namespace MIDIRecorder {
                 }
             }
             for (i = 0; i < MIDIRecorderCC::COLS_PER_TRACK; i++) {
-                auto ccDisplay = new CCDisplayWidget(module ? &module->cc_config[i] : NULL);
+                auto ccDisplay = new CCDisplayWidget(module ? &module->ccConfig[i] : NULL);
                 ccDisplay->box.size = Vec(30, 10);
                 const int CCDISPLAY_Y = FIRST_Y - SPACING_Y + LED_OFFSET_Y;
                 ccDisplay->box.pos = mm2px(Vec(FIRST_X + i * SPACING_X + LED_OFFSET_X, CCDISPLAY_Y));
@@ -363,14 +363,14 @@ namespace MIDIRecorder {
                     createSubmenuItem(string::f("CC#%d", i + 1), "", [=](Menu* menu) {
                         menu->addChild(createIndexSubmenuItem(
                             "Input Range", CVRangeNames,
-                            [=]() { return module->cc_config[i].range; },
+                            [=]() { return module->ccConfig[i].range; },
                             [=](int val) {
-                                module->cc_config[i].range = (CVRangeIndex)val;
+                                module->ccConfig[i].range = (CVRangeIndex)val;
                             }));
 
                         menu->addChild(createBoolMenuItem(
-                            "14bit", "", [=]() { return module->cc_config[i].is14bit; },
-                            [=](bool val) { module->cc_config[i].is14bit = val; }));
+                            "14bit", "", [=]() { return module->ccConfig[i].is14bit; },
+                            [=](bool val) { module->ccConfig[i].is14bit = val; }));
 
                         {
                             // adapted from Voxglitch's DigitalSequencerXP:
@@ -389,7 +389,7 @@ namespace MIDIRecorder {
 
                             auto textfield = new ccNumField(i);
                             textfield->module = module;
-                            textfield->text = std::to_string(module->cc_config[i].cc);
+                            textfield->text = std::to_string(module->ccConfig[i].cc);
                             holder->addChild(textfield);
 
                             menu->addChild(holder);

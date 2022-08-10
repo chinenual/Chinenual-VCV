@@ -40,11 +40,11 @@ namespace MIDIRecorder {
         std::shared_ptr<Font> font;
         std::string fontPath;
         char displayStr[16];
-        double* bpm_ptr;
+        double* bpmPtr;
 
         BPMDisplayWidget(double* bpm)
         {
-            bpm_ptr = bpm;
+            bpmPtr = bpm;
             fontPath = std::string(
                 asset::plugin(pluginInstance, "res/fonts/DSEG14Modern-BoldItalic.ttf"));
         }
@@ -62,7 +62,7 @@ namespace MIDIRecorder {
 
                 nvgFillColor(args.vg, ledTextColor);
 
-                unsigned int bpm = bpm_ptr ? std::round(*bpm_ptr) : 120;
+                unsigned int bpm = bpmPtr ? std::round(*bpmPtr) : 120;
                 snprintf(displayStr, 16, "%3u", bpm);
 
                 nvgTextAlign(args.vg, NVG_ALIGN_RIGHT | NVG_ALIGN_BOTTOM);
@@ -75,27 +75,27 @@ namespace MIDIRecorder {
 
     struct MIDIClock {
         int tick;
-        double last_tick; // unrounded
-        double time_at_last_tempo_change;
-        double tick_at_last_tempo_change;
-        double total_time_s;
+        double lastTick; // unrounded
+        double timeAtLastTempoChange;
+        double tickAtLastTempoChange;
+        double totalTimeSecs;
         double bpm;
 
-        void reset(double new_bpm)
+        void reset(double newBpm)
         {
-            bpm = new_bpm;
-            total_time_s = 0.0f;
-            last_tick = 0.0f;
+            bpm = newBpm;
+            totalTimeSecs = 0.0f;
+            lastTick = 0.0f;
             tick = 0;
-            time_at_last_tempo_change = 0.0f;
-            tick_at_last_tempo_change = 0.0f;
+            timeAtLastTempoChange = 0.0f;
+            tickAtLastTempoChange = 0.0f;
         }
 
         void incrementTick(float sampleTime, bool tempoChanged)
         {
             // this is called just before the first event of the tick is called.  So
             // the resulting "tick" is used for this sample's timestamp.  We want the
-            // very first event to be at tick=0, so increment the "total_time_s" after
+            // very first event to be at tick=0, so increment the "totalTimeSecs" after
             // computing the tick.
 
             // keep track of the time and tick the last time the temp changed.  If we
@@ -104,15 +104,15 @@ namespace MIDIRecorder {
             // change and then adding the elapsed time since the tempo change as a
             // chunk rather than as a series of small increments.
             if (tempoChanged) {
-                time_at_last_tempo_change = total_time_s;
-                tick_at_last_tempo_change = last_tick;
+                timeAtLastTempoChange = totalTimeSecs;
+                tickAtLastTempoChange = lastTick;
             }
             // PPQ = ticks/beat;  BPM = beat/minute;
-            double incremental_tick = (total_time_s - time_at_last_tempo_change) * bpm / SEC_PER_MINUTE * MIDI_FILE_PPQ;
-            last_tick = incremental_tick + tick_at_last_tempo_change;
-            tick = std::round(last_tick);
+            double incrementalTick = (totalTimeSecs - timeAtLastTempoChange) * bpm / SEC_PER_MINUTE * MIDI_FILE_PPQ;
+            lastTick = incrementalTick + tickAtLastTempoChange;
+            tick = std::round(lastTick);
 
-            total_time_s += sampleTime;
+            totalTimeSecs += sampleTime;
         }
     };
 
@@ -198,25 +198,25 @@ namespace MIDIRecorder {
 
         MIDIClock clock;
         bool running;
-        bool rec_clicked;
-        bool first_note_seen;
-        std::string path_directory;
-        std::string path_basename;
-        std::string path_ext;
+        bool recClicked;
+        bool firstNoteSeen;
+        std::string pathDirectory;
+        std::string pathBasename;
+        std::string pathExt;
 
         // persisted state:
         std::string path;
-        bool increment_path;
-        bool align_to_first_note;
-        CVRangeIndex cv_config_vel;
-        CVRangeIndex cv_config_aft;
-        CVRangeIndex cv_config_pw;
-        CVRangeIndex cv_config_mw;
-        bool mw_is14bit;
+        bool incrementPath;
+        bool alignToFirstNote;
+        CVRangeIndex cvConfigVel;
+        CVRangeIndex cvConfigAft;
+        CVRangeIndex cvConfigPw;
+        CVRangeIndex cvConfigMw;
+        bool mwIs14bit;
 
         smf::MidiFile midiFile;
         MIDIBuffer midiBuffer;
-        MidiCollector MidiCollectors[NUM_TRACKS] = {
+        MidiCollector midiCollectors[NUM_TRACKS] = {
             MidiCollector(midiBuffer, 0, clock.tick),
             MidiCollector(midiBuffer, 1, clock.tick),
             MidiCollector(midiBuffer, 2, clock.tick),
@@ -263,26 +263,26 @@ namespace MIDIRecorder {
 
             if (new_path == "") {
                 this->path = "";
-                path_directory = "";
-                path_basename = "";
+                pathDirectory = "";
+                pathBasename = "";
                 return;
             }
 
-            path_directory = system::getDirectory(new_path);
-            path_basename = system::getStem(new_path);
-            path_ext = system::getExtension(new_path);
+            pathDirectory = system::getDirectory(new_path);
+            pathBasename = system::getStem(new_path);
+            pathExt = system::getExtension(new_path);
 
-            if (path_basename == "") {
+            if (pathBasename == "") {
                 path = "";
                 return;
             }
-            path = path_directory + "/" + path_basename + ".mid";
+            path = pathDirectory + "/" + pathBasename + ".mid";
         }
 
         void clearRecording()
         {
             midiFile.clear();
-            first_note_seen = false;
+            firstNoteSeen = false;
         }
 
         void onReset() override
@@ -292,18 +292,18 @@ namespace MIDIRecorder {
             clock.reset(120.0f);
             running = false;
             path = "";
-            path_directory = "";
-            path_basename = "";
-            increment_path = true;
-            align_to_first_note = true;
-            rec_clicked = false;
-            first_note_seen = false;
+            pathDirectory = "";
+            pathBasename = "";
+            incrementPath = true;
+            alignToFirstNote = true;
+            recClicked = false;
+            firstNoteSeen = false;
 
-            cv_config_vel = CV_RANGE_0_10;
-            cv_config_aft = CV_RANGE_0_10;
-            cv_config_pw = CV_RANGE_n5_5;
-            cv_config_mw = CV_RANGE_0_10;
-            mw_is14bit = false;
+            cvConfigVel = CV_RANGE_0_10;
+            cvConfigAft = CV_RANGE_0_10;
+            cvConfigPw = CV_RANGE_n5_5;
+            cvConfigMw = CV_RANGE_0_10;
+            mwIs14bit = false;
 
             clearRecording();
         }
@@ -312,9 +312,9 @@ namespace MIDIRecorder {
         {
             json_t* rootJ = json_object();
             json_object_set_new(rootJ, "path", json_string(path.c_str()));
-            json_object_set_new(rootJ, "increment_path", json_boolean(increment_path));
-            json_object_set_new(rootJ, "align_to_first_note",
-                json_boolean(align_to_first_note));
+            json_object_set_new(rootJ, "incrementPath", json_boolean(incrementPath));
+            json_object_set_new(rootJ, "alignToFirstNote",
+                json_boolean(alignToFirstNote));
             return rootJ;
         }
 
@@ -324,13 +324,13 @@ namespace MIDIRecorder {
             if (pathJ)
                 setPath(json_string_value(pathJ));
 
-            json_t* increment_pathJ = json_object_get(rootJ, "increment_path");
-            if (increment_pathJ)
-                increment_path = json_boolean_value(increment_pathJ);
+            json_t* incrementPathJ = json_object_get(rootJ, "incrementPath");
+            if (incrementPathJ)
+                incrementPath = json_boolean_value(incrementPathJ);
 
-            json_t* align_to_first_noteJ = json_object_get(rootJ, "align_to_first_note");
-            if (align_to_first_noteJ)
-                align_to_first_note = json_boolean_value(align_to_first_noteJ);
+            json_t* alignToFirstNoteJ = json_object_get(rootJ, "alignToFirstNote");
+            if (alignToFirstNoteJ)
+                alignToFirstNote = json_boolean_value(alignToFirstNoteJ);
         }
 
         bool trackIsActive(const int track) override
@@ -366,14 +366,14 @@ namespace MIDIRecorder {
 
             // MIDI specific processing adapted from VCV Core's CV_MIDI.cpp:
 
-            MidiCollectors[track].setFrame(args.frame);
+            midiCollectors[track].setFrame(args.frame);
 
-            if (align_to_first_note && !first_note_seen) {
+            if (alignToFirstNote && !firstNoteSeen) {
                 // any note gates in this frame?
                 for (int c = 0; c < inputs[PITCH_INPUT].getChannels(); c++) {
                     bool gate = inputs[GATE_INPUT].getPolyVoltage(c) >= 1.f;
                     if (gate) {
-                        first_note_seen = true;
+                        firstNoteSeen = true;
                         // reset the clock so that first event is at tick=0:
                         clock.reset(clock.bpm);
 #ifdef SDTDEBUG
@@ -418,30 +418,30 @@ namespace MIDIRecorder {
                 // safe :
                 if (inputs[PW_INPUT].isConnected()) {
                     // PW is always 14bit:
-                    int pw = CVRanges[cv_config_pw].to14bit(inputs[PW_INPUT].getVoltage());
-                    MidiCollectors[track].setPitchWheel(pw);
+                    int pw = CVRanges[cvConfigPw].to14bit(inputs[PW_INPUT].getVoltage());
+                    midiCollectors[track].setPitchWheel(pw);
                 }
                 if (inputs[MW_INPUT].isConnected()) {
-                    if (mw_is14bit) {
+                    if (mwIs14bit) {
                         int lsb, msb;
-                        int val = CVRanges[cv_config_mw].to14bit(inputs[MW_INPUT].getVoltage());
-                        CVRanges[cv_config_mw].split14bit(val, msb, lsb);
-                        MidiCollectors[track].setCc(1, msb);
-                        MidiCollectors[track].setCc(33, lsb);
+                        int val = CVRanges[cvConfigMw].to14bit(inputs[MW_INPUT].getVoltage());
+                        CVRanges[cvConfigMw].split14bit(val, msb, lsb);
+                        midiCollectors[track].setCc(1, msb);
+                        midiCollectors[track].setCc(33, lsb);
                     } else {
-                        int mw = CVRanges[cv_config_mw].to7bit(inputs[MW_INPUT].getVoltage());
-                        MidiCollectors[track].setModWheel(mw);
+                        int mw = CVRanges[cvConfigMw].to7bit(inputs[MW_INPUT].getVoltage());
+                        midiCollectors[track].setModWheel(mw);
                     }
                 }
             }
 
             for (int c = 0; c < inputs[PITCH_INPUT].getChannels(); c++) {
                 if (inputs[VEL_INPUT].isConnected()) {
-                    int vel = CVRanges[cv_config_vel].to7bit(inputs[VEL_INPUT].getPolyVoltage(c));
-                    MidiCollectors[track].setVelocity(vel, c);
+                    int vel = CVRanges[cvConfigVel].to7bit(inputs[VEL_INPUT].getPolyVoltage(c));
+                    midiCollectors[track].setVelocity(vel, c);
                 } else {
                     // default is 100
-                    MidiCollectors[track].setVelocity(100, c);
+                    midiCollectors[track].setVelocity(100, c);
                 }
 
                 int note = 60;
@@ -452,21 +452,21 @@ namespace MIDIRecorder {
 
                 if (inputs[GATE_INPUT].isConnected()) {
                     bool gate = inputs[GATE_INPUT].getPolyVoltage(c) >= 1.f;
-                    MidiCollectors[track].setNoteGate(note, gate, c);
+                    midiCollectors[track].setNoteGate(note, gate, c);
                 }
 
                 if (inputs[AFT_INPUT].isConnected()) {
-                    int aft = CVRanges[cv_config_aft].to7bit(inputs[AFT_INPUT].getPolyVoltage(c));
-                    MidiCollectors[track].setKeyPressure(aft, c);
+                    int aft = CVRanges[cvConfigAft].to7bit(inputs[AFT_INPUT].getPolyVoltage(c));
+                    midiCollectors[track].setKeyPressure(aft, c);
                 }
             }
         }
 
         void processMidi(const ProcessArgs& args)
         {
-            double new_bpm = getBPM();
-            bool tempoChanged = new_bpm != clock.bpm;
-            clock.bpm = new_bpm;
+            double newBpm = getBPM();
+            bool tempoChanged = newBpm != clock.bpm;
+            clock.bpm = newBpm;
 
             clock.incrementTick(args.sampleTime, tempoChanged);
 
@@ -492,18 +492,7 @@ namespace MIDIRecorder {
             clearRecording();
             // max track where inputs are connected?
             int num_tracks = NUM_TRACKS;
-            /*
-              for (int t = NUM_TRACKS-1; t>=0; t--) {
-              // are any of the inputs on this row connected?
-              for (int i = 0; i < COLS_PER_TRACK; i++) {
-              auto id = T1_PITCH_INPUT + i + t*COLS_PER_TRACK;
-              if (inputs[id].isConnected()) {
-              num_tracks = t+1;
-              break;
-              }
-              }
-              }
-            */
+
             midiFile.addTracks(num_tracks);
 
             midiFile.setTPQ(MIDI_FILE_PPQ);
@@ -527,20 +516,20 @@ namespace MIDIRecorder {
             midiBuffer.stop();
 
             running = false;
-            int num_events = 0;
+            int numEvents = 0;
             for (int t = 0; t < midiFile.getNumTracks(); t++) {
                 if (midiFile[t].size() <= 2) {
                     // unused track - just the tempo info
                     midiFile[t].clear();
                 } else {
-                    num_events += midiFile[t].size();
+                    numEvents += midiFile[t].size();
                 }
             }
             std::string newPath = path;
-            if (increment_path) {
+            if (incrementPath) {
                 std::string extension = "mid";
                 for (int i = 0; i <= 999; i++) {
-                    newPath = path_directory + "/" + path_basename;
+                    newPath = pathDirectory + "/" + pathBasename;
                     if (i > 0)
                         newPath += string::f("-%03d", i);
                     newPath += "." + extension;
@@ -550,8 +539,8 @@ namespace MIDIRecorder {
                 }
             }
 
-            INFO("Stop Recording.  total_time_s=%f ticks=%d events=%d.  Writing to %s",
-                clock.total_time_s, clock.tick, num_events, newPath.c_str());
+            INFO("Stop Recording.  totalTimeSecs=%f ticks=%d events=%d.  Writing to %s",
+                clock.totalTimeSecs, clock.tick, numEvents, newPath.c_str());
             midiFile.write(newPath);
 
 #ifdef SDTDEBUG
@@ -565,37 +554,37 @@ namespace MIDIRecorder {
         double getBPM()
         {
             // From Impromptu's Clocked : bpm = 120*2^V
-            double new_bpm;
+            double newBpm;
             if (inputs[BPM_INPUT].isConnected()) {
-                new_bpm = 120.0f * std::pow(2.0f, inputs[BPM_INPUT].getVoltage());
+                newBpm = 120.0f * std::pow(2.0f, inputs[BPM_INPUT].getVoltage());
             } else {
-                new_bpm = 120.0f; // default
+                newBpm = 120.0f; // default
             }
-            return new_bpm;
+            return newBpm;
         }
 
         void process(const ProcessArgs& args) override
         {
             MIDIRecorderBase::process(args);
 
-            auto was_running = running;
-            int run_requested;
+            auto wasRunning = running;
+            int runRequested;
             // Run button:
             if (inputs[RUN_INPUT].isConnected()) {
-                run_requested = inputs[RUN_INPUT].getVoltage() > 0.0f;
+                runRequested = inputs[RUN_INPUT].getVoltage() > 0.0f;
             } else {
-                //			run_requested = params[RUN_PARAM].getValue() >
+                //			runRequested = params[RUN_PARAM].getValue() >
                 // 0.0f;
-                run_requested = rec_clicked;
+                runRequested = recClicked;
             }
 
-            if (run_requested) {
-                if (!was_running) {
+            if (runRequested) {
+                if (!wasRunning) {
                     startRecording(args);
                 }
                 processMidi(args);
             } else {
-                if (was_running) {
+                if (wasRunning) {
                     stopRecording(args);
                 }
             }
@@ -657,7 +646,7 @@ namespace MIDIRecorder {
                     selectPath(module);
                 }
                 if (module && module->path != "") {
-                    module->rec_clicked = !module->rec_clicked;
+                    module->recClicked = !module->recClicked;
                 }
             }
 
@@ -741,37 +730,37 @@ namespace MIDIRecorder {
                 [=]() { selectPath(module); }));
 
             menu->addChild(createBoolPtrMenuItem("Append -001, -002, etc.", "",
-                &module->increment_path));
+                &module->incrementPath));
             menu->addChild(createBoolPtrMenuItem("Start at first note gate", "",
-                &module->align_to_first_note));
+                &module->alignToFirstNote));
 
             menu->addChild(createIndexSubmenuItem(
                 "VEL Input Range", CVRangeNames,
-                [=]() { return module->cv_config_vel; },
+                [=]() { return module->cvConfigVel; },
                 [=](int val) {
-                    module->cv_config_vel = (CVRangeIndex)val;
+                    module->cvConfigVel = (CVRangeIndex)val;
                 }));
             menu->addChild(createIndexSubmenuItem(
                 "AFT Input Range", CVRangeNames,
-                [=]() { return module->cv_config_aft; },
+                [=]() { return module->cvConfigAft; },
                 [=](int val) {
-                    module->cv_config_aft = (CVRangeIndex)val;
+                    module->cvConfigAft = (CVRangeIndex)val;
                 }));
             menu->addChild(createIndexSubmenuItem(
                 "PW Input Range", CVRangeNames,
-                [=]() { return module->cv_config_pw; },
+                [=]() { return module->cvConfigPw; },
                 [=](int val) {
-                    module->cv_config_pw = (CVRangeIndex)val;
+                    module->cvConfigPw = (CVRangeIndex)val;
                 }));
             menu->addChild(createIndexSubmenuItem(
                 "MW Input Range", CVRangeNames,
-                [=]() { return module->cv_config_mw; },
+                [=]() { return module->cvConfigMw; },
                 [=](int val) {
-                    module->cv_config_mw = (CVRangeIndex)val;
+                    module->cvConfigMw = (CVRangeIndex)val;
                 }));
             menu->addChild(createBoolMenuItem(
-                "MW is 14bit", "", [=]() { return module->mw_is14bit; },
-                [=](bool val) { module->mw_is14bit = val; }));
+                "MW is 14bit", "", [=]() { return module->mwIs14bit; },
+                [=](bool val) { module->mwIs14bit = val; }));
         }
     };
 
