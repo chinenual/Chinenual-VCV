@@ -61,7 +61,7 @@ changed to better match your modulation sources.
 * **AFT** - polyphonic. Aftertouch/Key Pressure (default: 0V .. 10V)
 * **PW** - monophonic. Pitchbend (default: -5V .. 5V)
 * **MW** - monophonic. Mod Wheel (default: 0V .. 10V).  Can optionally
-  be set to capture 14bit values (see [About 14bit](#about-14bit) below).
+  be set to capture 14bit values. See [About 14bit](#about-14bit) below.
 
 Target file selection works in a similar way to the VCV Recorder
 module.  You can select a file from the context menu, or if none has
@@ -92,7 +92,7 @@ Right-click Context menu:
   Defaults to 0..10V.
 * **MW is 14bit** - Capture MW as 14bit rather than the default
   7bit. Emits two CC values (CC1 and CC33) when enabled.  See
-  [About 14bit](#about-14bit) below). 
+  [About 14bit](#about-14bit) below. 
 
 ### MIDI RecorderCC
 
@@ -112,7 +112,7 @@ Each column of CC values is configured via  the Right-click Context menu:
   inputs. Defaults to 0..10V.
 * **14bit** - Capture as 14bit rather than the default
   7bit. Emits two CC values (CCx and CCx+32) when enabled.  See
-  [About 14bit](#about-14bit) below). 
+  [About 14bit](#about-14bit) below. 
 * **MIDI CC** - The CC number.   
 
 
