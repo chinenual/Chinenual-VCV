@@ -8,6 +8,12 @@ The [Changelog](./CHANGELOG.md) describes changes.
 
 ## Modules
 
+* [MIDI Recorder](#midi-recorder) - a polyphonic multi-track recorder
+  to convert CV to standard MIDI files.
+  
+* [MIDI Recorder CC](#midi-recordercc) - an expander for the recorder
+  to capture CV as CC values. Supports both 7- and 14-bit CC.
+
 ### MIDI Recorder
 
 ![module-screenshot](./doc/MIDIRecorder.png)
@@ -44,15 +50,18 @@ file and then import it into my DAW.
 
 The remaining inputs accept the same signals as the VCV core
 CV-MIDI module, each row feeding a separate polyphonic track in the
-target MIDI file:
+target MIDI file.  CV input voltage ranges default to the same ranges
+used by the VCV 
+CV-MIDI module, however the VEL, AFT, PW and MW input ranges can be
+changed to better match your modulation sources.  
 
 * **V/OCT** - polyphonic. Note pitch (1V/oct)
 * **GATE** - polyphonic. Note gates (0 .. 10V)
-* **VEL**  - polyphonic. Note velocity (0 .. 10V).  Defaults to 100 if unconnected.
-* **AFT** - polyphonic. Aftertouch/Key Pressure (0V .. 10V)
-* **PW** - monophonic. Pitchbend (-5V .. 5V)
-* **MW** - monophonic. Mod Wheel (0V .. 10V)
-
+* **VEL**  - polyphonic. Note velocity (default: 0 .. 10V).  Defaults to 100 if unconnected.
+* **AFT** - polyphonic. Aftertouch/Key Pressure (default: 0V .. 10V)
+* **PW** - monophonic. Pitchbend (default: -5V .. 5V)
+* **MW** - monophonic. Mod Wheel (default: 0V .. 10V).  Can optionally
+  be set to capture 14bit values (see [About 14bit](#about-14bit) below).
 
 Target file selection works in a similar way to the VCV Recorder
 module.  You can select a file from the context menu, or if none has
@@ -73,6 +82,59 @@ Right-click Context menu:
   until that first note plays.    Turn this off to record the events
   immediately (in which case you may need to shift the events in your
   DAW to get them to line up nicely on a bar division.
+* **VEL Input Range** - sets the input CV range for the VEL inputs.
+  Defaults to 0..10V.
+* **AFT Input Range** - sets the input CV range for the AFT inputs.
+  Defaults to 0..10V.
+* **PW Input Range** - sets the input CV range for the PW inputs.
+  Defaults to -5..5V.
+* **MW Input Range** - sets the input CV range for the MW inputs.
+  Defaults to 0..10V.
+* **MW is 14bit** - Capture MW as 14bit rather than the default
+  7bit. Emits two CC values (CC1 and CC33) when enabled.  See
+  [About 14bit](#about-14bit) below). 
+
+### MIDI RecorderCC
+
+![module-screenshot](./doc/MIDIRecorderCC.png)
+
+An expander for the MIDI Recorder that adds support for capturing
+arbitrary CC values.   The expander must be adjacent to the recorder,
+and to its right.  Any number of expanders can be used. When using
+more than one, just place them next to each other, all to the right of
+the master recorder module:
+
+![module-screenshot](./doc/MIDIRecorder-ExpanderChain.png)
+
+Each column of CC values is configured via  the Right-click Context menu:
+
+* **Input Range** - sets the input CV range for that column of
+  inputs. Defaults to 0..10V.
+* **14bit** - Capture as 14bit rather than the default
+  7bit. Emits two CC values (CCx and CCx+32) when enabled.  See
+  [About 14bit](#about-14bit) below). 
+* **MIDI CC** - The CC number.   
+
+
+### About 14bit
+
+If 14-bit CC is selected, two CC messages are created.  One at the
+configured control number (with the MSB part of the value) and one at
+control number+32 (with the LSB part).
+
+**WARNING:** 
+The module does not attempt to prevent you from configuring
+conflicting CC's (e.g. if column 1's settings are CC=2, 14-bit, and
+column 2's is CC=34, both columns will be producing CC messages for
+CC=34.  It does not prevent you from creating 14-bit CC pairs outside
+the "normal" range defined by the MIDI spec (only CC0 through CC31
+have well defined paired CC's from 32 through 63, but the module will
+allow you to specify, for example, CC70 as 14 bit, which will emit
+CC70(MSB) and CC102(LSB)).   If the LSB part of the value would extend
+beyond the maximum legal 127 CC number, it is silently omitted.
+
+Also note that the MW column on the master recorder produces CC1 (and
+optionally CC33 if configured for 14bit).
 
 ## Acknowledgements
 

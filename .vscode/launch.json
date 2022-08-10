@@ -1,0 +1,30 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb-vscode",
+            "request": "launch",
+            "name": "LLDB-vscode Launch",
+            "program": "/Applications/VCV Rack 2 Free.app/Contents/MacOS/Rack",
+            "args": [],
+            "env": [],
+            "cwd": "${workspaceRoot}",
+            "preLaunchTask": "Build VCV Rack plugin"
+        },
+        {
+            "name": "(lldb) Launch",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/Applications/VCV Rack 2 Free.app/Contents/MacOS/Rack",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "externalConsole": true,
+            "miDebuggerPath": "/usr/bin/lldb",
+            "preLaunchTask": "Build VCV Rack plugin"
+        }
+    ]
+}
