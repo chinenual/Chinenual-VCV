@@ -387,7 +387,10 @@ namespace MIDIRecorder {
             }
 
             if (tempoChanged) {
-                midiFile.addTempo(track, clock.tick, clock.bpm);
+                smf::MidiMessage tempoMsg;
+                tempoMsg.makeTempo(clock.bpm);
+                smf::MidiEvent tempoEvent(clock.tick, track, tempoMsg);
+                midiBuffer.appendEvent(track, tempoEvent);
             }
 
             {
