@@ -2,6 +2,7 @@
 
 ## 2.1.0b2
 
+* Fixes memory allocation bug: no longer allocate from the audio thread.
 * Fixes memory deallocation bug that caused memory to not be deleted
   as soon as it could be. 
 
