@@ -4,6 +4,7 @@
 #include "MidiFile.h"
 #include "MidiMessage.h"
 #include "plugin.hpp"
+#include <condition_variable>
 #include <thread>
 
 namespace Chinenual {
