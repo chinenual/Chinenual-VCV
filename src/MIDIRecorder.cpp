@@ -30,7 +30,7 @@ namespace MIDIRecorder {
             // convert to the smf library's classes:
             smf::MidiMessage smfMsg(message.bytes);
             smf::MidiEvent smfEvent(tick, track, smfMsg);
-            midiBuffer.append_event(track, smfEvent);
+            midiBuffer.appendEvent(track, smfEvent);
         }
 
         void reset() { MidiGenerator::reset(); }
@@ -402,7 +402,7 @@ namespace MIDIRecorder {
 #endif
                             /// midiCollectors[track].setCc(msg.getControllerValue(), msg.getControllerNumber());
                             smf::MidiEvent event(clock.tick, track, msg);
-                            midiBuffer.append_event(track, event);
+                            midiBuffer.appendEvent(track, event);
                         }
                     } else {
                         break;

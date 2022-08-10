@@ -22,15 +22,15 @@ namespace MIDIRecorder {
 
         // buffer indexes increment monotonically - we use modulo arithmetic to select one of the three
         // buffers.  This lets us easily determine if the worker is "behind" via simple subtraction
-        int64_t buffer_index = 0;
-        int64_t worker_buffer_index = 0;
+        int64_t bufferIndex = 0;
+        int64_t workerBufferIndex = 0;
 
         bool running = false;
-        std::thread worker_thread;
-        std::mutex worker_mutex;
-        std::condition_variable worker_cv;
-        std::mutex main_mutex;
-        std::condition_variable main_cv;
+        std::thread workerThread;
+        std::mutex workerMutex;
+        std::condition_variable workerCv;
+        std::mutex mainMutex;
+        std::condition_variable mainCv;
 
         std::vector<smf::MidiEvent> buffers[NUM_BUFFERS][NUM_TRACKS];
         smf::MidiFile& midiFile;
@@ -49,14 +49,14 @@ namespace MIDIRecorder {
         }
 
         // Called from the audio thread to record an event
-        void append_event(const int track, smf::MidiEvent& event)
+        void appendEvent(const int track, smf::MidiEvent& event)
         {
             // wait for the worker to catch up if it has fallen behind:
-            if (buffer_index - worker_buffer_index >= NUM_BUFFERS) {
-                std::unique_lock<std::mutex> lock(main_mutex);
-                main_cv.wait(lock);
+            if (bufferIndex - workerBufferIndex >= NUM_BUFFERS) {
+                std::unique_lock<std::mutex> lock(mainMutex);
+                mainCv.wait(lock);
             }
-            auto buffer = buffers[buffer_index % NUM_BUFFERS];
+            auto buffer = buffers[bufferIndex % NUM_BUFFERS];
 
             buffer[track].push_back(event);
 
@@ -64,19 +64,19 @@ namespace MIDIRecorder {
                 // we advance to the next set of buffers when any track overflows its buffer
 
                 // next buffer:
-                buffer_index++;
+                bufferIndex++;
                 // wake up the worker:
-                worker_cv.notify_one();
+                workerCv.notify_one();
             }
         }
 
-        void process_events(std::vector<smf::MidiEvent> buffer[NUM_TRACKS])
+        void processEvents(std::vector<smf::MidiEvent> buffer[NUM_TRACKS])
         {
             for (int t = 0; t < NUM_TRACKS; t++) {
                 // copy events out of the buffer into the midiFile eventLists:
 #ifdef SDTDEBUG
                 if (buffer[t].size() > 0) {
-                    INFO("WORKER CONSUMING %lu events on track %d (buf %lld)", buffer[t].size(), t, worker_buffer_index);
+                    INFO("WORKER CONSUMING %lu events on track %d (buf %lld)", buffer[t].size(), t, workerBufferIndex);
                 }
 #endif
                 for (size_t i = 0; i < buffer[t].size(); i++) {
@@ -87,53 +87,53 @@ namespace MIDIRecorder {
                 }
                 buffer[t].clear();
             }
-            main_cv.notify_one();
+            mainCv.notify_one();
         }
 
         void run()
         {
-            std::unique_lock<std::mutex> lock(worker_mutex);
+            std::unique_lock<std::mutex> lock(workerMutex);
             while (running) {
                 // wait until the master thread tells us there's something to process:
-                worker_cv.wait(lock);
-                for (; worker_buffer_index < buffer_index; worker_buffer_index++) {
-                    auto buffer = buffers[worker_buffer_index % NUM_BUFFERS];
-                    process_events(buffer);
+                workerCv.wait(lock);
+                for (; workerBufferIndex < bufferIndex; workerBufferIndex++) {
+                    auto buffer = buffers[workerBufferIndex % NUM_BUFFERS];
+                    processEvents(buffer);
                 }
             }
             // we're not running any more, but there may be some pent up events we need to handle:
             for (int i = 0; i < NUM_BUFFERS; i++) {
                 auto buffer = buffers[i];
-                process_events(buffer);
+                processEvents(buffer);
             }
             /// now we fall off the end of the thread
         }
 
         void start()
         {
-            worker_buffer_index = 0;
-            buffer_index = 0;
+            workerBufferIndex = 0;
+            bufferIndex = 0;
 
-            if (worker_thread.joinable()) {
+            if (workerThread.joinable()) {
                 return;
             }
 
             running = true;
-            worker_thread = std::thread([this] {
+            workerThread = std::thread([this] {
                 run();
             });
         }
 
         void stop()
         {
-            if (!worker_thread.joinable()) {
+            if (!workerThread.joinable()) {
                 return;
             }
 
             running = false;
-            worker_cv.notify_all();
-            if (worker_thread.joinable()) {
-                worker_thread.join();
+            workerCv.notify_all();
+            if (workerThread.joinable()) {
+                workerThread.join();
             }
         }
     };
