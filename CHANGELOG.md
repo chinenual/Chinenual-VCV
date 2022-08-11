@@ -1,5 +1,10 @@
 # Change log for Chinenual-VCV
 
+## 2.1.0
+
+* Adds the new MIDI Recorder CC expander module.  
+* Fixes a memory allocation performance bug.
+
 ## 2.1.0b2
 
 * Fixes memory allocation bug: no longer allocate from the audio thread.
