@@ -1,5 +1,9 @@
 # Change log for Chinenual-VCV
 
+## 2.1.1
+
+Fix URLs in the plugin.json manifest.
+
 ## 2.1.0
 
 * Adds the new MIDI Recorder CC expander module.  

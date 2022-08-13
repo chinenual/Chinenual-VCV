@@ -7,11 +7,11 @@
   "author": "Steve Tynor",
   "authorEmail": "support@chinenual.com",
   "authorUrl": "https://chinenual.com",
-  "pluginUrl": "https://github.com/chinenual/chinenual-vcv",
-  "manualUrl": "https://github.com/chinenual/chinenual-vcv/README.md",
-  "sourceUrl": "https://github.com/chinenual/chinenual-vcv",
+  "pluginUrl": "https://github.com/chinenual/Chinenual-VCV",
+  "manualUrl": "https://github.com/chinenual/Chinenual-VCV/blob/main/README.md",
+  "sourceUrl": "https://github.com/chinenual/Chinenual-VCV",
   "donateUrl": "https://paypal.me/chinenual",
-  "changelogUrl": "https://github.com/chinenual/chinenual-vcv/CHANGELOG.md",
+  "changelogUrl": "https://github.com/chinenual/Chinenual-VCV/blob/main/CHANGELOG.md",
   "modules": [
     {
       "slug": "MIDIRecorder",
