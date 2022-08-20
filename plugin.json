@@ -1,7 +1,11 @@
 {
   "slug": "Chinenual-VCV",
   "name": "Chinenual",
+<<<<<<< Updated upstream
   "version": "2.1.0b2",
+=======
+  "version": "2.2.0-b1",
+>>>>>>> Stashed changes
   "license": "GPL-3.0-or-later",
   "brand": "Chinenual",
   "author": "Steve Tynor",

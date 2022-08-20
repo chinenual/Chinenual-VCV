@@ -192,9 +192,15 @@ namespace MIDIRecorder {
         const InputId T1_FIRST_COLUMN = T1_PITCH_INPUT;
         const InputId T1_LAST_COLUMN = T1_MW_INPUT;
 
-        enum OutputId { OUTPUTS_LEN };
-        enum LightId { REC_LIGHT,
-            LIGHTS_LEN };
+        enum OutputId {
+            RUNNING_OUTPUT,
+            OUTPUTS_LEN
+        };
+        enum LightId {
+            REC_LIGHT,
+            RUNNING_LIGHT,
+            LIGHTS_LEN
+        };
 
         MIDIClock clock;
         bool running;
@@ -241,6 +247,7 @@ namespace MIDIRecorder {
             config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
             configInput(BPM_INPUT, "Tempo/BPM");
             configInput(RUN_INPUT, "Start/Stop Gate");
+            configOutput(RUNNING_OUTPUT, "Is Actively Recording Gate");
             configSwitch(RUN_PARAM, 0.0f, 1.0f, 0.0f, "Start/Stop");
 
             int i, t;
@@ -352,6 +359,11 @@ namespace MIDIRecorder {
                 m = m->rightExpander.module;
             }
             return false;
+        }
+
+        bool isActivelyRecording()
+        {
+            return running && ((!alignToFirstNote) || firstNoteSeen);
         }
 
         void processMidiTrack(const ProcessArgs& args, const int track,
@@ -603,7 +615,10 @@ namespace MIDIRecorder {
                 producerMessage->isRecording = running;
                 rightExpander.requestMessageFlip();
             }
-            lights[REC_LIGHT].setBrightness(running);
+            lights[REC_LIGHT].setBrightness(running ? 1.0f : 0.0f);
+            outputs[RUNNING_OUTPUT].setVoltage(isActivelyRecording() ? 10.0f : 0.0f);
+            lights[RUNNING_LIGHT].setBrightness(isActivelyRecording() ? 1.0f : 0.0f);
+            // INFO("isactivelyrecording: %d %d %d %d", isActivelyRecording(), running, alignToFirstNote, firstNoteSeen);
         }
     };
 
@@ -673,6 +688,9 @@ namespace MIDIRecorder {
 #define LED_OFFSET_Y -9.5
 #define BUTTON_OFFSET_X -1.0
 #define BUTTON_OFFSET_Y -5.0
+// shift the entire first column over a nudge to make room for a large button, but keep
+// all the ports and lights aligned with the big button:
+#define FIRST_COL_X (FIRST_X + BUTTON_OFFSET_X)
 
     struct MIDIRecorderWidget : ModuleWidget {
         MIDIRecorderWidget(MIDIRecorder* module)
@@ -690,20 +708,27 @@ namespace MIDIRecorder {
                 RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
             RecButton* recButton = createWidgetCentered<RecButton>(
-                mm2px(Vec(FIRST_X + BUTTON_OFFSET_X, FIRST_Y + 2 * SPACING_Y + BUTTON_OFFSET_Y)));
+                mm2px(Vec(FIRST_COL_X, FIRST_Y + 2 * SPACING_Y + BUTTON_OFFSET_Y)));
             recButton->module = module;
             addChild(recButton);
 
             addChild(createLightCentered<RecLight>(
-                mm2px(Vec(FIRST_X + BUTTON_OFFSET_X, FIRST_Y + 2 * SPACING_Y + BUTTON_OFFSET_Y)), module,
+                mm2px(Vec(FIRST_COL_X, FIRST_Y + 2 * SPACING_Y + BUTTON_OFFSET_Y)), module,
                 MIDIRecorder::REC_LIGHT));
 
+            addChild(createLightCentered<MediumLight<RedLight>>(
+                mm2px(Vec(FIRST_COL_X, FIRST_Y + 0 * SPACING_Y)), module,
+                MIDIRecorder::RUNNING_LIGHT));
+
             addInput(createInputCentered<PJ301MPort>(
-                mm2px(Vec(FIRST_X, FIRST_Y + 7 * SPACING_Y)), module,
+                mm2px(Vec(FIRST_COL_X, FIRST_Y + 7 * SPACING_Y)), module,
                 MIDIRecorder::BPM_INPUT));
             addInput(createInputCentered<PJ301MPort>(
-                mm2px(Vec(FIRST_X, FIRST_Y + 3 * SPACING_Y)), module,
+                mm2px(Vec(FIRST_COL_X, FIRST_Y + 3 * SPACING_Y)), module,
                 MIDIRecorder::RUN_INPUT));
+            addOutput(createOutputCentered<PJ301MPort>(
+                mm2px(Vec(FIRST_COL_X, FIRST_Y + 4 * SPACING_Y)), module,
+                MIDIRecorder::RUNNING_OUTPUT));
 
             int t, i;
             for (t = 0; t < NUM_TRACKS; t++) {
