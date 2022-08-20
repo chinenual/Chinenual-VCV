@@ -1,5 +1,29 @@
 # Change log for Chinenual-VCV
 
+## 2.2.0-b1
+
+* New Output Port: **ACTIVE** can be used to synchronize
+  the MIDI Recoding with an audio recording.  When **Align At First
+  Note** is enabled, this goes high after the first note is
+  detected, else as soon as the recording is started.
+*  An LED under the **ACTIVE** port lights up when the recorder
+   is capturing events (it lights up when the **ACTIVE**
+   gate is high.
+* Panel layout changes - the first column of ports is shifted left a
+  bit to align with the **Record** button.
+* The **Record** button is now labeled **REC** (was **RUN**). 
+* The **Start/Stop Gate** input is no longer labeled **GATE**. It  shares
+  the **REC** label with the **Record** button.
+  
+## 2.1.1
+
+Fix URLs in the plugin.json manifest.
+
+## 2.1.0
+
+* Adds the new MIDI Recorder CC expander module.  
+* Fixes a memory allocation performance bug.
+
 ## 2.1.0b2
 
 * Fixes memory allocation bug: no longer allocate from the audio thread.

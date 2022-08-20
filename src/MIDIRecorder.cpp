@@ -684,7 +684,7 @@ namespace MIDIRecorder {
 #define FIRST_Y 20.0
 #define SPACING_X 10.0
 #define SPACING_Y 10.5
-#define LED_OFFSET_X 4.0
+#define LED_OFFSET_X 3.0
 #define LED_OFFSET_Y -9.5
 #define BUTTON_OFFSET_X -1.0
 #define BUTTON_OFFSET_Y -5.0
@@ -717,17 +717,14 @@ namespace MIDIRecorder {
                 MIDIRecorder::REC_LIGHT));
 
             addChild(createLightCentered<MediumLight<RedLight>>(
-                mm2px(Vec(FIRST_COL_X, FIRST_Y + 0 * SPACING_Y)), module,
+                mm2px(Vec(FIRST_COL_X, FIRST_Y + 6 * SPACING_Y)), module,
                 MIDIRecorder::RUNNING_LIGHT));
 
-            addInput(createInputCentered<PJ301MPort>(
-                mm2px(Vec(FIRST_COL_X, FIRST_Y + 7 * SPACING_Y)), module,
-                MIDIRecorder::BPM_INPUT));
             addInput(createInputCentered<PJ301MPort>(
                 mm2px(Vec(FIRST_COL_X, FIRST_Y + 3 * SPACING_Y)), module,
                 MIDIRecorder::RUN_INPUT));
             addOutput(createOutputCentered<PJ301MPort>(
-                mm2px(Vec(FIRST_COL_X, FIRST_Y + 4 * SPACING_Y)), module,
+                mm2px(Vec(FIRST_COL_X, FIRST_Y + 5 * SPACING_Y)), module,
                 MIDIRecorder::RUNNING_OUTPUT));
 
             int t, i;
@@ -740,9 +737,12 @@ namespace MIDIRecorder {
                 }
             }
 
+            addInput(createInputCentered<PJ301MPort>(
+                mm2px(Vec(FIRST_COL_X, FIRST_Y + 9 * SPACING_Y)), module,
+                MIDIRecorder::BPM_INPUT));
             auto bpmDisplay = new BPMDisplayWidget(module ? &module->clock.bpm : NULL);
             bpmDisplay->box.size = Vec(30, 10);
-            bpmDisplay->box.pos = mm2px(Vec(FIRST_X + LED_OFFSET_X, FIRST_Y + 6 * SPACING_Y + LED_OFFSET_Y));
+            bpmDisplay->box.pos = mm2px(Vec(FIRST_X + LED_OFFSET_X, FIRST_Y + 8 * SPACING_Y + LED_OFFSET_Y));
             addChild(bpmDisplay);
         }
 
