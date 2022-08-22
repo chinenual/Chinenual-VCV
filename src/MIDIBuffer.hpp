@@ -49,6 +49,11 @@ namespace MIDIRecorder {
             }
         }
 
+        ~MIDIBuffer()
+        {
+            stop();
+        }
+
         // Called from the audio thread to record an event
         void appendEvent(const int track, smf::MidiEvent& event)
         {
