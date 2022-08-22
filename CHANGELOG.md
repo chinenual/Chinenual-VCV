@@ -1,6 +1,6 @@
 # Change log for Chinenual-VCV
 
-## 2.2.0-b1
+## 2.2.0
 
 * New Output Port: **ACTIVE** can be used to synchronize
   the MIDI Recoding with an audio recording.  When **Align At First
