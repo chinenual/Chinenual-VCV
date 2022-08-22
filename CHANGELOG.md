@@ -8,7 +8,7 @@
   detected, else as soon as the recording is started.
 *  An LED under the **ACTIVE** port lights up when the recorder
    is capturing events (it lights up when the **ACTIVE**
-   gate is high.
+   gate is high).
 * Panel layout changes - the first column of ports is shifted left a
   bit to align with the **Record** button.
 * The **Record** button is now labeled **REC** (was **RUN**). 
