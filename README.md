@@ -34,11 +34,11 @@ file and then import it into my DAW.
 
 ####  How it works
 
-* **RUN**  - If the **GATE** input is unconnected, you can press
+* **REC**  - If the **REC** gate input is unconnected, you can press
   this button to start and end the recording.  It changes color to red
   while recording.
   
-* **GATE** - You can control the recording start/stop with a gate
+* **REC** - You can control the recording start/stop with a gate
   signal (e.g. from Count Modula's FADE module).   Recording starts
   when the signal
   is above 0.0v; stops when it drops to or below 0.0v.   The Run
@@ -48,6 +48,17 @@ file and then import it into my DAW.
   conventions as Impromptu's CLOCKED BPM output (BPM = 120 * 2^voltage).  If unconnected, sets the MIDI tempo
   to 120 BPM.  An LED style display shows the BPM.
 
+* **ACTIVE** - This output gate is high when the recorder is actively
+   capturing events.  It can be used to synchronize
+  the MIDI Recoding with an audio recording.  When **Align At First
+  Note** is enabled, this goes high after the first note is
+  detected, else as soon as the recording is started.
+  
+*  An LED under the **ACTIVE** port lights up when the recorder
+   is capturing events (it lights up when the **ACTIVE**
+   gate is high).
+
+   
 The remaining inputs accept the same signals as the VCV core
 CV-MIDI module, each row feeding a separate polyphonic track in the
 target MIDI file.  CV input voltage ranges default to the same ranges
