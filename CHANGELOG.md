@@ -14,7 +14,9 @@
 * The **Record** button is now labeled **REC** (was **RUN**). 
 * The **Start/Stop Gate** input is no longer labeled **GATE**. It  shares
   the **REC** label with the **Record** button.
-  
+* Fixes a bug that could cause Rack to crash if Rack is shut down 
+  while the recorder is actively recording. 
+
 ## 2.1.1
 
 Fix URLs in the plugin.json manifest.
