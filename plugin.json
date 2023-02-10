@@ -35,13 +35,15 @@
 			]
 		},
 		{
-			"slug": "DrumMapper",
-			"name": "DrumMapper",
-			"description": "Convert GATEs to General MIDI drum pitches",
-			"manualUrl": "https://github.com/chinenual/Chinenual-VCV/blob/main/README.md#drummapper",
+			"slug": "DrumMap",
+			"name": "DrumMap",
+			"description": "Merge GATEs to General MIDI drum pitches",
+			"manualUrl": "https://github.com/chinenual/Chinenual-VCV/blob/main/README.md#drummap",
 			"tags": [
 				"midi",
+				"general midi",
 				"recording",
+				"merge",
 				"drum"
 			]
 		}

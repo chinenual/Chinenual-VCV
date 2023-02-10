@@ -7,7 +7,7 @@
 #define NUM_INPUTS (NUM_INPUT_ROWS * NUM_INPUT_COLS)
 
 namespace Chinenual {
-namespace DrumMapper {
+namespace DrumMap {
 
     struct GeneralMIDI {
         int note;
@@ -159,7 +159,7 @@ namespace DrumMapper {
         { 126, "126", "126" },
         { 127, "127", "127" }
     };
-    struct DrumMapper : Module {
+    struct DrumMap : Module {
         enum ParamId {
             PARAMS_LEN
         };
@@ -189,7 +189,7 @@ namespace DrumMapper {
 
         int map[NUM_INPUTS];
 
-        DrumMapper()
+        DrumMap()
         {
             onReset();
 
@@ -275,12 +275,12 @@ namespace DrumMapper {
 #define LABEL_OFFSET_X -3.0
 #define LABEL_OFFSET_Y -16.0
 
-    struct DrumMapperWidget : ModuleWidget {
-        DrumMapperWidget(DrumMapper* module)
+    struct DrumMapWidget : ModuleWidget {
+        DrumMapWidget(DrumMap* module)
         {
             setModule(module);
             setPanel(
-                createPanel(asset::plugin(pluginInstance, "res/DrumMapper.svg")));
+                createPanel(asset::plugin(pluginInstance, "res/DrumMap.svg")));
             addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
             addChild(
                 createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
@@ -292,7 +292,7 @@ namespace DrumMapper {
             for (row = 0; row < NUM_INPUT_ROWS; row++) {
                 auto y = FIRST_Y + row * SPACING_Y;
                 for (col = 0; col < NUM_INPUT_COLS; col++) {
-                    auto e = DrumMapper::GATE_INPUT_1 + row * NUM_INPUT_COLS + col;
+                    auto e = DrumMap::GATE_INPUT_1 + row * NUM_INPUT_COLS + col;
                     addInput(createInputCentered<PJ301MPort>(
                         mm2px(Vec(FIRST_X + SPACING_X + col * SPACING_X, y)), module, e));
 
@@ -308,9 +308,9 @@ namespace DrumMapper {
             {
                 auto y = FIRST_Y + 6 * SPACING_Y;
                 addOutput(createOutputCentered<PJ301MPort>(
-                    mm2px(Vec(FIRST_X + SPACING_X + 0 * SPACING_X, y)), module, DrumMapper::PITCH_OUTPUT));
+                    mm2px(Vec(FIRST_X + SPACING_X + 0 * SPACING_X, y)), module, DrumMap::PITCH_OUTPUT));
                 addOutput(createOutputCentered<PJ301MPort>(
-                    mm2px(Vec(FIRST_X + SPACING_X + 1 * SPACING_X, y)), module, DrumMapper::GATE_OUTPUT));
+                    mm2px(Vec(FIRST_X + SPACING_X + 1 * SPACING_X, y)), module, DrumMap::GATE_OUTPUT));
                 {
                     auto labelDisplay = new LabelDisplayWidget(NULL);
                     labelDisplay->setStaticLabel("V/OCT");
@@ -329,8 +329,8 @@ namespace DrumMapper {
         }
     };
 
-} // namespace DrumMapper
+} // namespace DrumMap
 } // namespace Chinenual
 
-Model* modelDrumMapper = createModel<Chinenual::DrumMapper::DrumMapper,
-    Chinenual::DrumMapper::DrumMapperWidget>("DrumMapper");
+Model* modelDrumMap = createModel<Chinenual::DrumMap::DrumMap,
+    Chinenual::DrumMap::DrumMapWidget>("DrumMap");
