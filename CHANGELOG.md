@@ -1,5 +1,12 @@
 # Change log for Chinenual-VCV
 
+## 2.3.0
+
+*Improved support for capturing percussive gates:
+ * If a track's V/Oct input is not connected, the recorder defaults to 
+  MIDI C4 (so for drums, only a GATE input is necessary). When a polyphonic gate is connected, but no V/Oct, then each channel of the GATE gets a unique MIDI note pitch.
+ * A new module, DrumMapper, maps named gates to General MIDI "drum" notes.
+
 ## 2.2.0
 
 * New Output Port: **ACTIVE** can be used to synchronize

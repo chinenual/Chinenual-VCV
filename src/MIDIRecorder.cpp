@@ -450,7 +450,7 @@ namespace MIDIRecorder {
                 }
             }
 
-            for (int c = 0; c < inputs[PITCH_INPUT].getChannels(); c++) {
+            for (int c = 0; c < inputs[VEL_INPUT].getChannels(); c++) {
                 if (inputs[VEL_INPUT].isConnected()) {
                     int vel = CVRanges[cvConfigVel].to7bit(inputs[VEL_INPUT].getPolyVoltage(c));
                     midiCollectors[track].setVelocity(vel, c);
@@ -458,21 +458,36 @@ namespace MIDIRecorder {
                     // default is 100
                     midiCollectors[track].setVelocity(100, c);
                 }
-
-                int note = 60;
-                if (inputs[PITCH_INPUT].isConnected()) {
-                    note = (int)std::round(inputs[PITCH_INPUT].getVoltage(c) * 12.f + 60.f);
-                    note = clamp(note, 0, 127);
-                }
-
-                if (inputs[GATE_INPUT].isConnected()) {
+            }
+            // if GATE connected, but pitch isn't, supply a default pitch
+            if (inputs[GATE_INPUT].isConnected() && (!inputs[PITCH_INPUT].isConnected())) {
+                int note = 60; // C4
+                for (int c = 0; c < inputs[GATE_INPUT].getChannels(); c++) {
                     bool gate = inputs[GATE_INPUT].getPolyVoltage(c) >= 1.f;
                     midiCollectors[track].setNoteGate(note, gate, c);
+                    note++;
+                    if (inputs[AFT_INPUT].isConnected()) {
+                        int aft = CVRanges[cvConfigAft].to7bit(inputs[AFT_INPUT].getVoltage());
+                        midiCollectors[track].setKeyPressure(aft, c);
+                    }
                 }
+            } else {
+                // else if pitch is connected, use CC-MIDI style logic:
+                for (int c = 0; c < inputs[PITCH_INPUT].getChannels(); c++) {
+                    int note = 60;
+                    if (inputs[PITCH_INPUT].isConnected()) {
+                        note = (int)std::round(inputs[PITCH_INPUT].getVoltage(c) * 12.f + 60.f);
+                        note = clamp(note, 0, 127);
+                    }
 
-                if (inputs[AFT_INPUT].isConnected()) {
-                    int aft = CVRanges[cvConfigAft].to7bit(inputs[AFT_INPUT].getPolyVoltage(c));
-                    midiCollectors[track].setKeyPressure(aft, c);
+                    if (inputs[GATE_INPUT].isConnected()) {
+                        bool gate = inputs[GATE_INPUT].getPolyVoltage(c) >= 1.f;
+                        midiCollectors[track].setNoteGate(note, gate, c);
+                    }
+                    if (inputs[AFT_INPUT].isConnected()) {
+                        int aft = CVRanges[cvConfigAft].to7bit(inputs[AFT_INPUT].getVoltage());
+                        midiCollectors[track].setKeyPressure(aft, c);
+                    }
                 }
             }
         }
