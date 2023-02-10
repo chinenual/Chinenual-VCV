@@ -1,38 +1,49 @@
 {
-    "slug": "Chinenual-VCV",
-    "name": "Chinenual",
-    "version": "2.2.0",
-    "license": "GPL-3.0-or-later",
-    "brand": "Chinenual",
-    "author": "Steve Tynor",
-    "authorEmail": "support@chinenual.com",
-    "authorUrl": "https://chinenual.com",
-    "pluginUrl": "https://github.com/chinenual/Chinenual-VCV",
-    "manualUrl": "https://github.com/chinenual/Chinenual-VCV/blob/main/README.md",
-    "sourceUrl": "https://github.com/chinenual/Chinenual-VCV",
-    "donateUrl": "https://paypal.me/chinenual",
-    "changelogUrl": "https://github.com/chinenual/Chinenual-VCV/blob/main/CHANGELOG.md",
-    "modules": [
-	{
-	    "slug": "MIDIRecorder",
-	    "name": "MIDIRecorder",
-	    "description": "Multi-track MIDI Recorder",
-	    "manualUrl": "https://github.com/chinenual/Chinenual-VCV/blob/main/README.md#midi-recorder",
-	    "tags": [
-		"midi",
-		"recording"
-	    ]
-	},
-	{
-	    "slug": "MIDIRecorderCC",
-	    "name": "MIDIRecorderCC",
-	    "description": "CC expander for the MIDI Recorder",
-	    "manualUrl": "https://github.com/chinenual/Chinenual-VCV/blob/main/README.md#midi-recordercc",
-	    "tags": [
-		"midi",
-		"recording",
-		"expander"
-	    ]
-	}
-    ]
+	"slug": "Chinenual-VCV",
+	"name": "Chinenual",
+	"version": "2.3.0-beta1",
+	"license": "GPL-3.0-or-later",
+	"brand": "Chinenual",
+	"author": "Steve Tynor",
+	"authorEmail": "support@chinenual.com",
+	"authorUrl": "https://chinenual.com",
+	"pluginUrl": "https://github.com/chinenual/Chinenual-VCV",
+	"manualUrl": "https://github.com/chinenual/Chinenual-VCV/blob/main/README.md",
+	"sourceUrl": "https://github.com/chinenual/Chinenual-VCV",
+	"donateUrl": "https://paypal.me/chinenual",
+	"changelogUrl": "https://github.com/chinenual/Chinenual-VCV/blob/main/CHANGELOG.md",
+	"modules": [
+		{
+			"slug": "MIDIRecorder",
+			"name": "MIDIRecorder",
+			"description": "Multi-track MIDI Recorder",
+			"manualUrl": "https://github.com/chinenual/Chinenual-VCV/blob/main/README.md#midi-recorder",
+			"tags": [
+				"midi",
+				"recording"
+			]
+		},
+		{
+			"slug": "MIDIRecorderCC",
+			"name": "MIDIRecorderCC",
+			"description": "CC expander for the MIDI Recorder",
+			"manualUrl": "https://github.com/chinenual/Chinenual-VCV/blob/main/README.md#midi-recordercc",
+			"tags": [
+				"midi",
+				"recording",
+				"expander"
+			]
+		},
+		{
+			"slug": "DrumMapper",
+			"name": "DrumMapper",
+			"description": "Convert GATEs to General MIDI drum pitches",
+			"manualUrl": "https://github.com/chinenual/Chinenual-VCV/blob/main/README.md#drummapper",
+			"tags": [
+				"midi",
+				"recording",
+				"drum"
+			]
+		}
+	]
 }
