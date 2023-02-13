@@ -256,7 +256,7 @@ namespace DrumMap {
         float pitchToVoltage(int note)
         {
             // based on VCV CORE MIDI_CV:
-            return (note - 60.f) / 12.f
+            return (note - 60.f) / 12.f;
         }
 
         float velToVoltage(int vel)
@@ -271,11 +271,12 @@ namespace DrumMap {
 
             for (int i = 0; i < NUM_INPUTS; i++) {
                 auto gate = inputs[GATE_INPUT_1 + i];
-                auto vel = inputs[VEL_INPUT_1 + i];
 
                 if (gate.isConnected()) {
                     outputs[PITCH_OUTPUT].setVoltage(pitchToVoltage(generalMidiNames[map[i]].note), out_c);
                     outputs[GATE_OUTPUT].setVoltage(gate.getVoltage(), out_c);
+
+                    auto vel = inputs[VEL_INPUT_1 + i];
                     if (vel.isConnected()) {
                         outputs[VEL_OUTPUT].setVoltage(vel.getVoltage(), out_c);
                     } else {
@@ -286,9 +287,9 @@ namespace DrumMap {
                     out_c++;
                 }
             }
-            outputs[PITCH_OUTPUT].setChannels(out_c - 1);
-            outputs[GATE_OUTPUT].setChannels(out_c - 1);
-            outputs[VEL_OUTPUT].setChannels(out_c - 1);
+            outputs[PITCH_OUTPUT].setChannels(out_c);
+            outputs[GATE_OUTPUT].setChannels(out_c);
+            outputs[VEL_OUTPUT].setChannels(out_c);
         }
     };
 
@@ -337,10 +338,10 @@ namespace DrumMap {
         }
     };
 
-#define FIRST_X -3.0
+#define FIRST_X -8.0
 #define FIRST_Y 20.0
 #define SPACING_X 15.0
-#define SPACING_Y 16.0
+#define SPACING_Y 20.0
 #define LABEL_OFFSET_X -3.0
 #define LABEL_OFFSET_Y -16.0
 
