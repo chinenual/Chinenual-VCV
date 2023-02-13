@@ -30,7 +30,7 @@ namespace DrumMap {
     };
 
     GeneralMIDI generalMidiNames[] = {
-        { 0, "unused", "unused" },
+        { 0, "0", "0" },
         { 1, "1", "1" },
         { 2, "2", "2" },
         { 3, "3", "3" },
@@ -293,10 +293,10 @@ namespace DrumMap {
         }
     };
 
-    // light yellow - the logo color:
+    // yellow - the logo color:
     static const NVGcolor textColor_yellow = nvgRGB(0xff, 0xd4, 0x56);
 
-    struct LabelDisplayWidget : TransparentWidget {
+    struct LabelDisplayWidget : Widget {
         std::shared_ptr<Font> font;
         std::string fontPath;
         char displayStr[16];
@@ -307,6 +307,46 @@ namespace DrumMap {
             generalMidiIndexPtr = generalMidiIndex;
             fontPath = std::string(
                 asset::plugin(pluginInstance, "res/fonts/opensans/OpenSans-Bold.ttf"));
+        }
+
+        void onButton(const ButtonEvent& e) override
+        {
+            INFO("ON BUTTON %f %f", e.pos.x, e.pos.y);
+            if (generalMidiIndexPtr != 0) {
+                INFO("ON BUTTON - user edit");
+                // a user-editable input
+                if (e.action == GLFW_PRESS) {
+                    INFO("ON BUTTON - show");
+                    onShowMenu();
+                    e.consume(this);
+                }
+                if (e.action == GLFW_RELEASE) {
+                    e.consume(this);
+                }
+            }
+        }
+
+        void onShowMenu()
+        {
+            INFO("ON SHOW ");
+            if (generalMidiIndexPtr != 0) {
+                INFO("ON SHOW - user edit %d", *generalMidiIndexPtr);
+                // a user-editable input
+                std::vector<std::string> generalMidiMenuNames;
+                for (int i = 0; i < 127; i++) {
+                    auto name = generalMidiNames[i].name;
+                    auto note = generalMidiNames[i].note;
+                    generalMidiMenuNames.push_back(string::f("%s (%d)", name, note));
+                }
+
+                auto menu = rack::createMenu();
+                menu->addChild(createIndexSubmenuItem(
+                    "General MIDI", generalMidiMenuNames,
+                    [=]() { return *generalMidiIndexPtr; },
+                    [=](int val) {
+                        *generalMidiIndexPtr = val;
+                    }));
+            }
         }
 
         void setStaticLabel(const char* txt)
@@ -334,6 +374,11 @@ namespace DrumMap {
                 nvgTextAlign(args.vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
 
                 nvgText(args.vg, textPos.x, textPos.y, displayStr, NULL);
+
+#if 0
+                nvgRect(args.vg, box.getLeft(), box.getTop(), box.getWidth(), box.getHeight());
+                nvgFill(args.vg);
+#endif
             }
         }
     };
@@ -376,7 +421,7 @@ namespace DrumMap {
                     {
                         int i = row * NUM_INPUT_COLS + col;
                         auto labelDisplay = new LabelDisplayWidget(module ? &module->map[i] : NULL);
-                        labelDisplay->box.size = Vec(30, 10);
+                        labelDisplay->box.size = Vec(60, 20);
                         labelDisplay->box.pos = mm2px(Vec(LABEL_OFFSET_X + SPACING_X + col * SPACING_X, y + LABEL_OFFSET_Y));
                         addChild(labelDisplay);
                     }
