@@ -253,8 +253,42 @@ namespace DrumMap {
             }
         }
 
+        float pitchToVoltage(int note)
+        {
+            // based on VCV CORE MIDI_CV:
+            return (note - 60.f) / 12.f
+        }
+
+        float velToVoltage(int vel)
+        {
+            // based on VCV CORE MIDI_CV:
+            return rescale(vel, 0, 127, 0.f, 10.f);
+        }
+
         void process(const ProcessArgs& args) override
         {
+            int out_c = 0;
+
+            for (int i = 0; i < NUM_INPUTS; i++) {
+                auto gate = inputs[GATE_INPUT_1 + i];
+                auto vel = inputs[VEL_INPUT_1 + i];
+
+                if (gate.isConnected()) {
+                    outputs[PITCH_OUTPUT].setVoltage(pitchToVoltage(generalMidiNames[map[i]].note), out_c);
+                    outputs[GATE_OUTPUT].setVoltage(gate.getVoltage(), out_c);
+                    if (vel.isConnected()) {
+                        outputs[VEL_OUTPUT].setVoltage(vel.getVoltage(), out_c);
+                    } else {
+                        // default velocity
+                        int default_vel = 100;
+                        outputs[VEL_OUTPUT].setVoltage(velToVoltage(default_vel), out_c);
+                    }
+                    out_c++;
+                }
+            }
+            outputs[PITCH_OUTPUT].setChannels(out_c - 1);
+            outputs[GATE_OUTPUT].setChannels(out_c - 1);
+            outputs[VEL_OUTPUT].setChannels(out_c - 1);
         }
     };
 
