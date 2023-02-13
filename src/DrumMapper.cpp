@@ -176,11 +176,24 @@ namespace DrumMap {
             GATE_INPUT_10,
             GATE_INPUT_11,
             GATE_INPUT_12,
+            VEL_INPUT_1,
+            VEL_INPUT_2,
+            VEL_INPUT_3,
+            VEL_INPUT_4,
+            VEL_INPUT_5,
+            VEL_INPUT_6,
+            VEL_INPUT_7,
+            VEL_INPUT_8,
+            VEL_INPUT_9,
+            VEL_INPUT_10,
+            VEL_INPUT_11,
+            VEL_INPUT_12,
             INPUTS_LEN
         };
         enum OutputId {
             PITCH_OUTPUT,
             GATE_OUTPUT,
+            VEL_OUTPUT,
             OUTPUTS_LEN
         };
         enum LightId {
@@ -194,10 +207,14 @@ namespace DrumMap {
             onReset();
 
             config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
-            for (int i = GATE_INPUT_1; i < INPUTS_LEN; i++) {
-                configInput(i, string::f("Gate %d", i));
+            for (int i = GATE_INPUT_1; i < GATE_INPUT_1 + NUM_INPUTS; i++) {
+                configInput(i, string::f("Gate %d", i - GATE_INPUT_1));
+            }
+            for (int i = VEL_INPUT_1; i < VEL_INPUT_1 + NUM_INPUTS; i++) {
+                configInput(i, string::f("Velocity %d", i - VEL_INPUT_1));
             }
             configOutput(PITCH_OUTPUT, "Pitches (V/oct)");
+            configOutput(VEL_OUTPUT, "Velocities");
             configOutput(GATE_OUTPUT, "Gates");
         }
 
@@ -211,11 +228,29 @@ namespace DrumMap {
         json_t* dataToJson() override
         {
             json_t* rootJ = json_object();
+            json_t* mapJ = json_array();
+            for (int i = 0; i < NUM_INPUTS; i++) {
+                json_array_append_new(mapJ, json_integer(map[i]));
+            }
+            json_object_set(rootJ, "map", mapJ);
             return rootJ;
         }
 
         void dataFromJson(json_t* rootJ) override
         {
+            if (rootJ == 0)
+                return;
+            json_t* mapJ = json_object_get(rootJ, "map");
+            if (mapJ == 0)
+                return;
+            if (json_array_size(mapJ) != NUM_INPUTS)
+                return;
+            size_t i;
+            json_t* val;
+            json_array_foreach(mapJ, i, val)
+            {
+                map[i] = json_integer_value(val);
+            }
         }
 
         void process(const ProcessArgs& args) override
@@ -292,9 +327,12 @@ namespace DrumMap {
             for (row = 0; row < NUM_INPUT_ROWS; row++) {
                 auto y = FIRST_Y + row * SPACING_Y;
                 for (col = 0; col < NUM_INPUT_COLS; col++) {
-                    auto e = DrumMap::GATE_INPUT_1 + row * NUM_INPUT_COLS + col;
+                    auto e_gate = DrumMap::GATE_INPUT_1 + row * NUM_INPUT_COLS + col;
+                    auto e_vel = DrumMap::VEL_INPUT_1 + row * NUM_INPUT_COLS + col;
                     addInput(createInputCentered<PJ301MPort>(
-                        mm2px(Vec(FIRST_X + SPACING_X + col * SPACING_X, y)), module, e));
+                        mm2px(Vec(FIRST_X + SPACING_X + col * SPACING_X, y)), module, e_gate));
+                    addInput(createInputCentered<PJ301MPort>(
+                        mm2px(Vec(FIRST_X + SPACING_X + (col + 0.5) * SPACING_X, y)), module, e_vel));
 
                     {
                         int i = row * NUM_INPUT_COLS + col;
@@ -311,6 +349,8 @@ namespace DrumMap {
                     mm2px(Vec(FIRST_X + SPACING_X + 0 * SPACING_X, y)), module, DrumMap::PITCH_OUTPUT));
                 addOutput(createOutputCentered<PJ301MPort>(
                     mm2px(Vec(FIRST_X + SPACING_X + 1 * SPACING_X, y)), module, DrumMap::GATE_OUTPUT));
+                addOutput(createOutputCentered<PJ301MPort>(
+                    mm2px(Vec(FIRST_X + SPACING_X + 2 * SPACING_X, y)), module, DrumMap::VEL_OUTPUT));
                 {
                     auto labelDisplay = new LabelDisplayWidget(NULL);
                     labelDisplay->setStaticLabel("V/OCT");
