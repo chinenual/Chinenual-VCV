@@ -14,49 +14,8 @@ namespace DrumMap {
         const char* name;
         const char* label; // abbreviated for display
     };
-    int defaultMap[NUM_INPUTS] = {
-        36, // kick
-        43, // l-tom
-        38, // snare
-        47, // m-tom
-        31, // rim
-        50, // h-tom
-        44, // p-hat
-        39, // clap
-        42, // c-hat
-        49, // crash
-        46, // o-hat
-        51, // ride
-    };
 
-    GeneralMIDI generalMidiNames[] = {
-        { 0, "0", "0" },
-        { 1, "1", "1" },
-        { 2, "2", "2" },
-        { 3, "3", "3" },
-        { 4, "4", "4" },
-        { 5, "5", "5" },
-        { 6, "6", "6" },
-        { 7, "7", "7" },
-        { 8, "8", "8" },
-        { 9, "9", "9" },
-        { 10, "10", "10" },
-        { 11, "11", "11" },
-        { 12, "12", "12" },
-        { 13, "13", "13" },
-        { 14, "14", "14" },
-        { 15, "15", "15" },
-        { 16, "16", "16" },
-        { 17, "17", "17" },
-        { 18, "18", "18" },
-        { 19, "19", "19" },
-        { 20, "20", "20" },
-        { 21, "21", "21" },
-        { 22, "22", "22" },
-        { 23, "23", "23" },
-        { 24, "24", "24" },
-        { 25, "25", "25" },
-        { 26, "26", "26" },
+    std::vector<GeneralMIDI> generalMidiDefinitions = {
         { 27, "High Q", "HighQ" },
         { 28, "Slap", "Slap" },
         { 29, "Scratch Push", "ScrPush" },
@@ -118,47 +77,23 @@ namespace DrumMap {
         { 85, "Castanets", "Castanet" },
         { 86, "Mute Surdo", "M-Surdo" },
         { 87, "Open Surdo", "O-Surdo" },
-        { 88, "88", "88" },
-        { 89, "89", "89" },
-        { 90, "90", "90" },
-        { 91, "91", "91" },
-        { 92, "92", "92" },
-        { 93, "93", "93" },
-        { 94, "94", "94" },
-        { 95, "95", "95" },
-        { 96, "96", "96" },
-        { 97, "97", "97" },
-        { 98, "98", "98" },
-        { 99, "99", "99" },
-        { 100, "100", "100" },
-        { 101, "101", "101" },
-        { 102, "102", "102" },
-        { 103, "103", "103" },
-        { 104, "104", "104" },
-        { 105, "105", "105" },
-        { 106, "106", "106" },
-        { 107, "107", "107" },
-        { 108, "108", "108" },
-        { 109, "109", "109" },
-        { 110, "110", "110" },
-        { 111, "111", "111" },
-        { 112, "112", "112" },
-        { 113, "113", "113" },
-        { 114, "114", "114" },
-        { 115, "115", "115" },
-        { 116, "116", "116" },
-        { 117, "117", "117" },
-        { 118, "118", "118" },
-        { 119, "119", "119" },
-        { 120, "120", "120" },
-        { 121, "121", "121" },
-        { 122, "122", "122" },
-        { 123, "123", "123" },
-        { 124, "124", "124" },
-        { 125, "125", "125" },
-        { 126, "126", "126" },
-        { 127, "127", "127" }
     };
+    const int FIRST_GENMIDI_NOTE = generalMidiDefinitions[0].note;
+    int defaultMap[NUM_INPUTS] = {
+        36 - FIRST_GENMIDI_NOTE, // kick
+        43 - FIRST_GENMIDI_NOTE, // l-tom
+        38 - FIRST_GENMIDI_NOTE, // snare
+        47 - FIRST_GENMIDI_NOTE, // m-tom
+        31 - FIRST_GENMIDI_NOTE, // rim
+        50 - FIRST_GENMIDI_NOTE, // h-tom
+        44 - FIRST_GENMIDI_NOTE, // p-hat
+        39 - FIRST_GENMIDI_NOTE, // clap
+        42 - FIRST_GENMIDI_NOTE, // c-hat
+        49 - FIRST_GENMIDI_NOTE, // crash
+        46 - FIRST_GENMIDI_NOTE, // o-hat
+        51 - FIRST_GENMIDI_NOTE, // ride
+    };
+
     struct DrumMap : Module {
         enum ParamId {
             PARAMS_LEN
@@ -273,7 +208,7 @@ namespace DrumMap {
                 auto gate = inputs[GATE_INPUT_1 + i];
 
                 if (gate.isConnected()) {
-                    outputs[PITCH_OUTPUT].setVoltage(pitchToVoltage(generalMidiNames[map[i]].note), out_c);
+                    outputs[PITCH_OUTPUT].setVoltage(pitchToVoltage(generalMidiDefinitions[map[i]].note), out_c);
                     outputs[GATE_OUTPUT].setVoltage(gate.getVoltage(), out_c);
 
                     auto vel = inputs[VEL_INPUT_1 + i];
@@ -333,9 +268,9 @@ namespace DrumMap {
                 INFO("ON SHOW - user edit %d", *generalMidiIndexPtr);
                 // a user-editable input
                 std::vector<std::string> generalMidiMenuNames;
-                for (int i = 0; i < 127; i++) {
-                    auto name = generalMidiNames[i].name;
-                    auto note = generalMidiNames[i].note;
+                for (auto v : generalMidiDefinitions) {
+                    auto name = v.name;
+                    auto note = v.note;
                     generalMidiMenuNames.push_back(string::f("%s (%d)", name, note));
                 }
 
@@ -369,7 +304,7 @@ namespace DrumMap {
                 nvgFillColor(args.vg, textColor_yellow);
 
                 if (generalMidiIndexPtr) {
-                    snprintf(displayStr, 16, "%s", generalMidiNames[*generalMidiIndexPtr].label);
+                    snprintf(displayStr, 16, "%s", generalMidiDefinitions[*generalMidiIndexPtr].label);
                 }
                 nvgTextAlign(args.vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
 
