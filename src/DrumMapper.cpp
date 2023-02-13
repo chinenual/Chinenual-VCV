@@ -338,11 +338,15 @@ namespace DrumMap {
         }
     };
 
-#define FIRST_X -8.0
+#define FIRST_X -14.0
 #define FIRST_Y 20.0
-#define SPACING_X 15.0
-#define SPACING_Y 20.0
-#define LABEL_OFFSET_X -3.0
+#define SPACING_X 20.0
+#define SPACING_Y 16.0
+#define SPACING_X_OUT 14.1
+#define FIRST_X_OUT -8.0
+#define PAIR_SPACING 0.42
+#define LABEL_OFFSET_X -11.0
+#define LABEL_OFFSET_X_OUT -10.0
 #define LABEL_OFFSET_Y -16.0
 
     struct DrumMapWidget : ModuleWidget {
@@ -367,7 +371,7 @@ namespace DrumMap {
                     addInput(createInputCentered<PJ301MPort>(
                         mm2px(Vec(FIRST_X + SPACING_X + col * SPACING_X, y)), module, e_gate));
                     addInput(createInputCentered<PJ301MPort>(
-                        mm2px(Vec(FIRST_X + SPACING_X + (col + 0.5) * SPACING_X, y)), module, e_vel));
+                        mm2px(Vec(FIRST_X + SPACING_X + (col + PAIR_SPACING) * SPACING_X, y)), module, e_vel));
 
                     {
                         int i = row * NUM_INPUT_COLS + col;
@@ -381,23 +385,30 @@ namespace DrumMap {
             {
                 auto y = FIRST_Y + 6 * SPACING_Y;
                 addOutput(createOutputCentered<PJ301MPort>(
-                    mm2px(Vec(FIRST_X + SPACING_X + 0 * SPACING_X, y)), module, DrumMap::PITCH_OUTPUT));
+                    mm2px(Vec(FIRST_X_OUT + SPACING_X_OUT + 0 * SPACING_X_OUT, y)), module, DrumMap::PITCH_OUTPUT));
                 addOutput(createOutputCentered<PJ301MPort>(
-                    mm2px(Vec(FIRST_X + SPACING_X + 1 * SPACING_X, y)), module, DrumMap::GATE_OUTPUT));
+                    mm2px(Vec(FIRST_X_OUT + SPACING_X_OUT + 1 * SPACING_X_OUT, y)), module, DrumMap::GATE_OUTPUT));
                 addOutput(createOutputCentered<PJ301MPort>(
-                    mm2px(Vec(FIRST_X + SPACING_X + 2 * SPACING_X, y)), module, DrumMap::VEL_OUTPUT));
+                    mm2px(Vec(FIRST_X_OUT + SPACING_X_OUT + 2 * SPACING_X_OUT, y)), module, DrumMap::VEL_OUTPUT));
                 {
                     auto labelDisplay = new LabelDisplayWidget(NULL);
-                    labelDisplay->setStaticLabel("V/OCT");
+                    labelDisplay->setStaticLabel("V/oct");
                     labelDisplay->box.size = Vec(30, 10);
-                    labelDisplay->box.pos = mm2px(Vec(LABEL_OFFSET_X + SPACING_X + 0 * SPACING_X, y + LABEL_OFFSET_Y));
+                    labelDisplay->box.pos = mm2px(Vec(LABEL_OFFSET_X_OUT + SPACING_X_OUT + 0 * SPACING_X_OUT, y + LABEL_OFFSET_Y));
                     addChild(labelDisplay);
                 }
                 {
                     auto labelDisplay = new LabelDisplayWidget(NULL);
-                    labelDisplay->setStaticLabel("GATE");
+                    labelDisplay->setStaticLabel("Gate");
                     labelDisplay->box.size = Vec(30, 10);
-                    labelDisplay->box.pos = mm2px(Vec(LABEL_OFFSET_X + SPACING_X + 1 * SPACING_X, y + LABEL_OFFSET_Y));
+                    labelDisplay->box.pos = mm2px(Vec(LABEL_OFFSET_X_OUT + SPACING_X_OUT + 1 * SPACING_X_OUT, y + LABEL_OFFSET_Y));
+                    addChild(labelDisplay);
+                }
+                {
+                    auto labelDisplay = new LabelDisplayWidget(NULL);
+                    labelDisplay->setStaticLabel("Vel");
+                    labelDisplay->box.size = Vec(30, 10);
+                    labelDisplay->box.pos = mm2px(Vec(LABEL_OFFSET_X_OUT + SPACING_X_OUT + 2 * SPACING_X_OUT, y + LABEL_OFFSET_Y));
                     addChild(labelDisplay);
                 }
             }
