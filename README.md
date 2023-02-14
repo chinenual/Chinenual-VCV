@@ -14,6 +14,8 @@ The [Changelog](./CHANGELOG.md) describes changes.
 * [MIDI Recorder CC](#midi-recordercc) - an expander for the recorder
   to capture CV as CC values. Supports both 7- and 14-bit CC.
 
+* [DrumMap](#drummap) - Accepts percussion GATE inputs and converts them to General MIDI pitch v/oct.
+
 ### MIDI Recorder
 
 ![module-screenshot](./doc/MIDIRecorder.png)
@@ -146,6 +148,18 @@ beyond the maximum legal 127 CC number, it is silently omitted.
 
 Also note that the MW column on the master recorder produces CC1 (and
 optionally CC33 if configured for 14bit).
+
+### DrumMap
+
+![module-screenshot](./doc/DrumMap_w_MIDIRecorder.png)
+![module-screenshot](./doc/DrumMap_w_CV-MIDI.png)
+
+DrumMap converts input percussion/drum gate inputs to pitch outputs corresponding to user-selectable General MIDI conventions.  Use it to produce a polyphonic "drum track" with MIDIRecorder, or connect it directly to an external drum machine or DAW with VCV core's CV-MIDI.
+
+Click on the input pair label to change the MIDI note to be associated with that gate. 
+
+Produces three polyphonic outputs **V/Oct**, **Gate** and **VEL** suitable for directly importing into the MIDIRecorder or sent out through CV-MIDI.
+
 
 ## Acknowledgements
 
