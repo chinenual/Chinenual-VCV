@@ -158,7 +158,7 @@ DrumMap converts input percussion/drum gate inputs to pitch outputs correspondin
 
 Click on the input pair label to change the MIDI note to be associated with that gate. 
 
-Produces three polyphonic outputs **V/Oct**, **Gate** and **VEL** suitable for directly importing into the MIDIRecorder or sent out through CV-MIDI.
+Produces three polyphonic outputs **V/Oct**, **Gate** and **Vel** suitable for directly importing into the MIDIRecorder or sent out through CV-MIDI.
 
 
 ## Acknowledgements
