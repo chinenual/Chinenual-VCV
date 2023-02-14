@@ -246,12 +246,9 @@ namespace DrumMap {
 
         void onButton(const ButtonEvent& e) override
         {
-            INFO("ON BUTTON %f %f", e.pos.x, e.pos.y);
             if (generalMidiIndexPtr != 0) {
-                INFO("ON BUTTON - user edit");
                 // a user-editable input
                 if (e.action == GLFW_PRESS) {
-                    INFO("ON BUTTON - show");
                     onShowMenu();
                     e.consume(this);
                 }
@@ -263,9 +260,7 @@ namespace DrumMap {
 
         void onShowMenu()
         {
-            INFO("ON SHOW ");
             if (generalMidiIndexPtr != 0) {
-                INFO("ON SHOW - user edit %d", *generalMidiIndexPtr);
                 // a user-editable input
                 std::vector<std::string> generalMidiMenuNames;
                 for (auto v : generalMidiDefinitions) {
@@ -299,8 +294,15 @@ namespace DrumMap {
                 nvgFontFaceId(args.vg, font->handle);
                 nvgShapeAntiAlias(args.vg, false);
 
-                Vec textPos = Vec(6, 24);
+                Vec textPos = Vec(box.getWidth() / 2.f,
+                    (box.getHeight() / 2.f) + 4.f); // bias down a bit
 
+#if 0
+                nvgFillColor(args.vg, nvgRGB(0xff, 0x00, 0x00));
+                nvgBeginPath(args.vg);
+                nvgRect(args.vg, 0.f, 0.f, box.getWidth(), box.getHeight());
+                nvgFill(args.vg);
+#endif
                 nvgFillColor(args.vg, textColor_yellow);
 
                 if (generalMidiIndexPtr) {
@@ -309,11 +311,6 @@ namespace DrumMap {
                 nvgTextAlign(args.vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
 
                 nvgText(args.vg, textPos.x, textPos.y, displayStr, NULL);
-
-#if 0
-                nvgRect(args.vg, box.getLeft(), box.getTop(), box.getWidth(), box.getHeight());
-                nvgFill(args.vg);
-#endif
             }
         }
     };
@@ -322,12 +319,16 @@ namespace DrumMap {
 #define FIRST_Y 20.0
 #define SPACING_X 20.0
 #define SPACING_Y 16.0
-#define SPACING_X_OUT 14.1
 #define FIRST_X_OUT -8.0
 #define PAIR_SPACING 0.42
-#define LABEL_OFFSET_X -11.0
-#define LABEL_OFFSET_X_OUT -10.0
-#define LABEL_OFFSET_Y -16.0
+#define LABEL_OFFSET_X -19.0
+#define LABEL_OFFSET_Y -12.0
+#define LABEL_HEIGHT 22
+#define LABEL_WIDTH 55
+
+#define SPACING_X_OUT 14.1
+#define LABEL_OFFSET_X_OUT (LABEL_OFFSET_X + 2.0)
+#define LABEL_OFFSET_Y_OUT (LABEL_OFFSET_Y - 0.5) // leave space for the shading under the output jacks
 
     struct DrumMapWidget : ModuleWidget {
         DrumMapWidget(DrumMap* module)
@@ -356,7 +357,7 @@ namespace DrumMap {
                     {
                         int i = row * NUM_INPUT_COLS + col;
                         auto labelDisplay = new LabelDisplayWidget(module ? &module->map[i] : NULL);
-                        labelDisplay->box.size = Vec(60, 20);
+                        labelDisplay->box.size = Vec(LABEL_WIDTH, LABEL_HEIGHT);
                         labelDisplay->box.pos = mm2px(Vec(LABEL_OFFSET_X + SPACING_X + col * SPACING_X, y + LABEL_OFFSET_Y));
                         addChild(labelDisplay);
                     }
@@ -373,22 +374,22 @@ namespace DrumMap {
                 {
                     auto labelDisplay = new LabelDisplayWidget(NULL);
                     labelDisplay->setStaticLabel("V/oct");
-                    labelDisplay->box.size = Vec(30, 10);
-                    labelDisplay->box.pos = mm2px(Vec(LABEL_OFFSET_X_OUT + SPACING_X_OUT + 0 * SPACING_X_OUT, y + LABEL_OFFSET_Y));
+                    labelDisplay->box.size = Vec(LABEL_WIDTH, LABEL_HEIGHT);
+                    labelDisplay->box.pos = mm2px(Vec(LABEL_OFFSET_X_OUT + SPACING_X_OUT + 0 * SPACING_X_OUT, y + LABEL_OFFSET_Y_OUT));
                     addChild(labelDisplay);
                 }
                 {
                     auto labelDisplay = new LabelDisplayWidget(NULL);
                     labelDisplay->setStaticLabel("Gate");
-                    labelDisplay->box.size = Vec(30, 10);
-                    labelDisplay->box.pos = mm2px(Vec(LABEL_OFFSET_X_OUT + SPACING_X_OUT + 1 * SPACING_X_OUT, y + LABEL_OFFSET_Y));
+                    labelDisplay->box.size = Vec(LABEL_WIDTH, LABEL_HEIGHT);
+                    labelDisplay->box.pos = mm2px(Vec(LABEL_OFFSET_X_OUT + SPACING_X_OUT + 1 * SPACING_X_OUT, y + LABEL_OFFSET_Y_OUT));
                     addChild(labelDisplay);
                 }
                 {
                     auto labelDisplay = new LabelDisplayWidget(NULL);
                     labelDisplay->setStaticLabel("Vel");
-                    labelDisplay->box.size = Vec(30, 10);
-                    labelDisplay->box.pos = mm2px(Vec(LABEL_OFFSET_X_OUT + SPACING_X_OUT + 2 * SPACING_X_OUT, y + LABEL_OFFSET_Y));
+                    labelDisplay->box.size = Vec(LABEL_WIDTH, LABEL_HEIGHT);
+                    labelDisplay->box.pos = mm2px(Vec(LABEL_OFFSET_X_OUT + SPACING_X_OUT + 2 * SPACING_X_OUT, y + LABEL_OFFSET_Y_OUT));
                     addChild(labelDisplay);
                 }
             }
