@@ -2,10 +2,10 @@
 
 ## 2.3.0
 
-*Improved support for capturing percussion events:
- * If a track's **V/OCT** input is not connected, the recorder defaults to 
+* Improved support for capturing percussion events:
+  * In the MIDIRecorder, if a track's **V/OCT** input is not connected, the recorder defaults to 
   MIDI C4 (so for drums, only a **GATE** input is necessary). When a polyphonic gate is connected, but no **V/OCT**, then each channel of the **GATE** gets a unique MIDI note pitch.
- * A new module, DrumMap, maps named gates to General MIDI "drum" notes (which can then be plugged into the MIDIRecorder or sent to a live drum machine via the core CV-MIDI module).
+  * A new module, DrumMap, maps named gates to General MIDI "drum" notes (which can then be plugged into the MIDIRecorder or sent to a live drum machine via the core CV-MIDI module).
 
 ## 2.2.0
 
