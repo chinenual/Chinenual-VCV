@@ -76,6 +76,8 @@ changed to better match your modulation sources.
 * **MW** - monophonic. Mod Wheel (default: 0V .. 10V).  Can optionally
   be set to capture 14bit values. See [About 14bit](#about-14bit) below.
 
+If **GATE** is connected, but **V/Oct** is not, the recorder supplies a default note value to each channel of the **GATE** (starting at C4, ascending by semitone for each channel of the input).  This makes it easier to record percussion sequences.  See the [DrumMap](#drummap) module as another way to assign useful pitch values for drum gate inputs.
+
 Target file selection works in a similar way to the VCV Recorder
 module.  You can select a file from the context menu, or if none has
 been selected, you'll get a popup dialog the first time you try to
