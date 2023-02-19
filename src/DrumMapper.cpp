@@ -356,7 +356,7 @@ namespace DrumMap {
 
                     {
                         int i = row * NUM_INPUT_COLS + col;
-                        auto labelDisplay = new LabelDisplayWidget(module ? &module->map[i] : NULL);
+                        auto labelDisplay = new LabelDisplayWidget(module ? &module->map[i] : &defaultMap[i]);
                         labelDisplay->box.size = Vec(LABEL_WIDTH, LABEL_HEIGHT);
                         labelDisplay->box.pos = mm2px(Vec(LABEL_OFFSET_X + SPACING_X + col * SPACING_X, y + LABEL_OFFSET_Y));
                         addChild(labelDisplay);

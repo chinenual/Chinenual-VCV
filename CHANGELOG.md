@@ -1,5 +1,9 @@
 # Change log for Chinenual-VCV
 
+## 2.3.1
+
+* Fix DrumMap preview image.
+
 ## 2.3.0
 
 * Improved support for capturing percussion events:
