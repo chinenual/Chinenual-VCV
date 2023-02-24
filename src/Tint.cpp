@@ -151,8 +151,9 @@ namespace Tint {
 
         void process(const ProcessArgs& args) override
         {
+            // if (args.frame % 1) {
             mode = (Mode)(int)params[MODE_PARAM].getValue();
-            if (gateTrigger.process(inputs[GATE_INPUT].getVoltage())) {
+            if (gateTrigger.process(inputs[GATE_INPUT].getVoltageSum(), 1.f, 2.f)) {
                 // toggle the direction
                 upDown = !upDown;
             }
@@ -188,6 +189,7 @@ namespace Tint {
             }
             outputs[TINT_OUTPUT].setChannels(tint_c);
             outputs[MIX_OUTPUT].setChannels(mix_c);
+            //}
         }
     };
 
@@ -219,6 +221,8 @@ namespace Tint {
                 Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
             addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH,
                 RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+            addParam(createParamCentered<RoundSmallBlackKnob>(
+                mm2px(Vec(FIRST_X_OUT + SPACING_X_OUT + 0 * SPACING_X_OUT, SPACING_Y * 1)), module, Tint::MODE_PARAM));
             addInput(createInputCentered<PJ301MPort>(
                 mm2px(Vec(FIRST_X_OUT + SPACING_X_OUT + 0 * SPACING_X_OUT, SPACING_Y * 2)), module, Tint::CHORD_INPUT));
             addInput(createInputCentered<PJ301MPort>(
@@ -226,13 +230,10 @@ namespace Tint {
             addInput(createInputCentered<PJ301MPort>(
                 mm2px(Vec(FIRST_X_OUT + SPACING_X_OUT + 0 * SPACING_X_OUT, SPACING_Y * 4)), module, Tint::GATE_INPUT));
 
-            addParam(createParamCentered<RoundSmallBlackKnob>(
-                mm2px(Vec(FIRST_X_OUT + SPACING_X_OUT + 0 * SPACING_X_OUT, SPACING_Y * 5)), module, Tint::MODE_PARAM));
-
             addOutput(createOutputCentered<PJ301MPort>(
                 mm2px(Vec(FIRST_X_OUT + SPACING_X_OUT + 0 * SPACING_X_OUT, SPACING_Y * 6)), module, Tint::TINT_OUTPUT));
             addOutput(createOutputCentered<PJ301MPort>(
-                mm2px(Vec(FIRST_X_OUT + SPACING_X_OUT + 1 * SPACING_X_OUT, SPACING_Y * 6)), module, Tint::MIX_OUTPUT));
+                mm2px(Vec(FIRST_X_OUT + SPACING_X_OUT + 0 * SPACING_X_OUT, SPACING_Y * 7)), module, Tint::MIX_OUTPUT));
         }
     };
 
