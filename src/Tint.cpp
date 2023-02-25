@@ -12,6 +12,7 @@ namespace Tint {
     struct Tint : Module {
         enum ParamId {
             MODE_PARAM,
+            OCTAVE_PARAM,
             PARAMS_LEN
         };
         enum InputId {
@@ -39,6 +40,7 @@ namespace Tint {
         };
 
         Mode mode;
+        int octave;
         bool upDown; // current note is playing up or down when bidirectional
         bool inChord[128];
         float chordState[rack::PORT_MAX_CHANNELS];
@@ -55,11 +57,13 @@ namespace Tint {
             configOutput(TINT_OUTPUT, "Harmonized pitch(es)");
             configOutput(MIX_OUTPUT, "Original plus harmonized pitches");
             configSwitch(MODE_PARAM, 0, 5, 0, "Mode", { "Up", "Down", "Up/Down", "Up+1", "Down-1", "Up+1/Down-1" });
+            configSwitch(OCTAVE_PARAM, -3, 3, 0, "Octave Offset", { "-3", "-2", "-1", "0", "+1", "+2", "+3" });
         }
 
         void onReset() override
         {
             mode = MODE_UP;
+            octave = 0;
             upDown = false;
             gateTrigger.reset();
             for (int n = 0; n < 128; n++) {
@@ -131,7 +135,7 @@ namespace Tint {
                         c++;
                     }
                     if (c == count) {
-                        return n;
+                        return n + (octave * 12);
                     }
                 }
             } else {
@@ -142,21 +146,23 @@ namespace Tint {
                         c++;
                     }
                     if (c == count) {
-                        return n;
+                        return n + (octave * 12);
                     }
                 }
             }
-            return note;
+            return note + (octave * 12);
         }
 
         void process(const ProcessArgs& args) override
         {
             // if (args.frame % 1) {
             mode = (Mode)(int)params[MODE_PARAM].getValue();
+            octave = (int)params[OCTAVE_PARAM].getValue();
             if (gateTrigger.process(inputs[GATE_INPUT].getVoltageSum(), 1.f, 2.f)) {
                 // toggle the direction
                 upDown = !upDown;
             }
+
             bool chordChange = false;
             for (int c = 0; c < inputs[CHORD_INPUT].getChannels(); c++) {
                 float v = inputs[CHORD_INPUT].getPolyVoltage(c);
@@ -193,11 +199,11 @@ namespace Tint {
         }
     };
 
-#define FIRST_X -14.0
-#define FIRST_Y 20.0
+#define FIRST_X -5.0
+#define FIRST_Y 5.0
 #define SPACING_X 20.0
-#define SPACING_Y 16.0
-#define FIRST_X_OUT -8.0
+#define SPACING_Y 15.0
+#define FIRST_X_OUT -6.3
 #define PAIR_SPACING 0.42
 #define LABEL_OFFSET_X -19.0
 #define LABEL_OFFSET_Y -12.0
@@ -222,18 +228,21 @@ namespace Tint {
             addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH,
                 RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
             addParam(createParamCentered<RoundSmallBlackKnob>(
-                mm2px(Vec(FIRST_X_OUT + SPACING_X_OUT + 0 * SPACING_X_OUT, SPACING_Y * 1)), module, Tint::MODE_PARAM));
+                mm2px(Vec(FIRST_X_OUT + SPACING_X_OUT + 0 * SPACING_X_OUT, FIRST_Y + SPACING_Y * 1)), module, Tint::MODE_PARAM));
+            addParam(createParamCentered<RoundSmallBlackKnob>(
+                mm2px(Vec(FIRST_X_OUT + SPACING_X_OUT + 0 * SPACING_X_OUT, FIRST_Y + SPACING_Y * 2)), module, Tint::OCTAVE_PARAM));
+
             addInput(createInputCentered<PJ301MPort>(
-                mm2px(Vec(FIRST_X_OUT + SPACING_X_OUT + 0 * SPACING_X_OUT, SPACING_Y * 2)), module, Tint::CHORD_INPUT));
+                mm2px(Vec(FIRST_X_OUT + SPACING_X_OUT + 0 * SPACING_X_OUT, FIRST_Y + SPACING_Y * 3)), module, Tint::CHORD_INPUT));
             addInput(createInputCentered<PJ301MPort>(
-                mm2px(Vec(FIRST_X_OUT + SPACING_X_OUT + 0 * SPACING_X_OUT, SPACING_Y * 3)), module, Tint::PITCH_INPUT));
+                mm2px(Vec(FIRST_X_OUT + SPACING_X_OUT + 0 * SPACING_X_OUT, FIRST_Y + SPACING_Y * 4)), module, Tint::PITCH_INPUT));
             addInput(createInputCentered<PJ301MPort>(
-                mm2px(Vec(FIRST_X_OUT + SPACING_X_OUT + 0 * SPACING_X_OUT, SPACING_Y * 4)), module, Tint::GATE_INPUT));
+                mm2px(Vec(FIRST_X_OUT + SPACING_X_OUT + 0 * SPACING_X_OUT, FIRST_Y + SPACING_Y * 5)), module, Tint::GATE_INPUT));
 
             addOutput(createOutputCentered<PJ301MPort>(
-                mm2px(Vec(FIRST_X_OUT + SPACING_X_OUT + 0 * SPACING_X_OUT, SPACING_Y * 6)), module, Tint::TINT_OUTPUT));
+                mm2px(Vec(FIRST_X_OUT + SPACING_X_OUT + 0 * SPACING_X_OUT, FIRST_Y + SPACING_Y * 6)), module, Tint::TINT_OUTPUT));
             addOutput(createOutputCentered<PJ301MPort>(
-                mm2px(Vec(FIRST_X_OUT + SPACING_X_OUT + 0 * SPACING_X_OUT, SPACING_Y * 7)), module, Tint::MIX_OUTPUT));
+                mm2px(Vec(FIRST_X_OUT + SPACING_X_OUT + 0 * SPACING_X_OUT, FIRST_Y + SPACING_Y * 7)), module, Tint::MIX_OUTPUT));
         }
     };
 
