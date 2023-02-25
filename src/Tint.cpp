@@ -169,7 +169,7 @@ namespace Tint {
             // if (args.frame % 1) {
             mode = (Mode)(int)params[MODE_PARAM].getValue();
             octave = (int)params[OCTAVE_PARAM].getValue();
-            if (gateTrigger.process(inputs[GATE_INPUT].getVoltageSum(), 1.f, 2.f)) {
+            if (gateTrigger.process(inputs[GATE_INPUT].getVoltage(), 1.f, 2.f)) {
                 // toggle the direction
                 upDown = !upDown;
             }

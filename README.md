@@ -204,8 +204,8 @@ Controls:
  
  * **Gate** - when using one of the bidirectional modes, the gate
    input is used to signal the harmonizer to switch direction
-   (polyphonic).  Can be left unpatched if using a unidirectional
-   mode.
+   (monophic).  Can be left unpatched if using a unidirectional
+   mode. 
 
 Outputs:
 
