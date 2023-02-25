@@ -77,6 +77,8 @@ namespace Tint {
         json_t* dataToJson() override
         {
             json_t* rootJ = json_object();
+            json_object_set_new(rootJ, "octave", json_integer(octave));
+            json_object_set_new(rootJ, "mode", json_integer(mode));
             return rootJ;
         }
 
@@ -84,6 +86,15 @@ namespace Tint {
         {
             if (rootJ == 0)
                 return;
+
+            json_t* modeJ = json_object_get(rootJ, "mode");
+            if (modeJ) {
+                mode = (Mode)json_integer_value(modeJ);
+            }
+            json_t* octaveJ = json_object_get(rootJ, "octave");
+            if (octaveJ) {
+                octave = json_integer_value(octaveJ);
+            }
         }
 
         float pitchToVoltage(int note)
