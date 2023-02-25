@@ -47,9 +47,9 @@
 		},
                 {       
                         "slug": "Tint",
-                        "name": "Tintinabulator",
-                        "description": "Harmonizes via Arvo Pärt style Tintinabulation",
-                        "manualUrl": "https://github.com/chinenual/Chinenual-VCV/blob/main/README.md#tint",
+                        "name": "Tintinnabulator",
+                        "description": "Harmonizes via Arvo Pärt style Tintinnabulation",
+                        "manualUrl": "https://github.com/chinenual/Chinenual-VCV/blob/main/README.md#tintinnabulator",
                         "tags": [
                                 "quantizer",
                                 "utility"
