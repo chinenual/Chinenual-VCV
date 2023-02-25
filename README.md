@@ -171,7 +171,9 @@ Produces three polyphonic outputs **V/Oct**, **Gate** and **Vel** suitable for d
 Produce a harmonized pitch from an input chord and melody using Avro
 Pärt-style tintinnabulation where a harmony note is selected from a
 reference chord.  Pärt's music tends to use simple triads for his
-tintinnabulation.  For example, when using the "Up" variant, the
+tintinnabulation but the module allows you to specify any set of notes
+as the reference.  
+For example, when using the "Up" variant, the
 selected note will be the closest note in the chord at a higher pitch
 than the melody.
   
