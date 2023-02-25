@@ -1,5 +1,15 @@
 # Change log for Chinenual-VCV
 
+## 2.4.0
+
+* New module, Tintinnabulator.   Produce a harmonized pitch from an
+  input chord and melody using Avro Pärt-style tintinnabulation.  Supports
+  several variants of the harmonization - select first available pitch
+  or next one, in both upwards or downwards direction.  Also supports
+  bidirectional tintinnabulation, where every other note switches
+  between upward or downwards selection.  An Octave offset can be used
+  to offset the harmony up or down from the reference melody line.
+
 ## 2.3.1
 
 * Fix DrumMap preview image.

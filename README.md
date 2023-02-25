@@ -16,6 +16,8 @@ The [Changelog](./CHANGELOG.md) describes changes.
 
 * [DrumMap](#drummap) - Accepts percussion GATE inputs and converts them to General MIDI pitch v/oct.
 
+* [Tintinnabulator](#tintinnabulator) - Produce a harmonized pitch from an input chord and melody using Avro Pärt-style tintinnabulation.
+  
 ### MIDI Recorder
 
 ![module-screenshot](./doc/MIDIRecorder.png)
@@ -151,10 +153,10 @@ beyond the maximum legal 127 CC number, it is silently omitted.
 Also note that the MW column on the master recorder produces CC1 (and
 optionally CC33 if configured for 14bit).
 
-### DrumMap
+### DrumMap 
 
 ![module-screenshot](./doc/DrumMap_w_MIDIRecorder.png)
-![module-screenshot](./doc/DrumMap_w_CV-MIDI.png)
+![module-screenshot](./doc/DrumMap_w_CV-MIDI.png) 
 
 DrumMap converts input percussion/drum gate inputs to pitch outputs corresponding to user-selectable General MIDI conventions.  Use it to produce a polyphonic "drum track" with MIDIRecorder, or connect it directly to an external drum machine or DAW with VCV core's CV-MIDI.
 
@@ -162,7 +164,57 @@ Click on the input pair label to change the MIDI note to be associated with that
 
 Produces three polyphonic outputs **V/Oct**, **Gate** and **Vel** suitable for directly importing into the MIDIRecorder or sent out through CV-MIDI.
 
+### Tintinnabulator
 
+![module-screenshot](./doc/Tint.png) 
+
+Produce a harmonized pitch from an input chord and melody using Avro
+Pärt-style tintinnabulation where a harmony note is selected from a
+reference chord.  Pärt's music tends to use simple triads for his
+tintinnabulation.  For example, when using the "Up" variant, the
+selected note will be the closest note in the chord at a higher pitch
+than the melody.
+  
+The module supports several variants of the harmonization - select
+first available pitch or next one, in both upwards or downwards
+direction.  Also supports bidirectional tintinnabulation, where every
+other note switches between upward or downwards selection.  An Octave
+offset can be used to offset the harmony up or down from the reference
+melody line. 
+  
+Controls:
+ * **Mode** - controls the algorithm used to select the harmony value.
+   Options are:
+   * "Up" - next chord note higher than the melody
+   * "Down" - next chord note lower than the melody
+   * "Up/Down" - alternating up or down 
+   * "Up+1" - second chord note higher than the melody
+   * "Down-1" - second chord note lower than the melody
+   * "Up+1/Down-1" - alternating up or down 
+
+* **Octave** - offset the resulting harmony note by up to three
+  octaves up or down.
+  
+ Inputs:
+ 
+ * **Chord** - the notes defining the reference chord (polyphonic:
+   V/Oct).   Aaron Static's ChordCV produces a suitable signal.
+   
+ * **Melody** - the pitches to be harmonized.  (polyphonic: V/Oct).
+ 
+ * **Gate** - when using one of the bidirectional modes, the gate
+   input is used to signal the harmonizer to switch direction
+   (polyphonic).  Can be left unpatched if using a unidirectional
+   mode.
+
+Outputs:
+
+* **Tint** - the resulting harmony pitches (polyphonic: V/Oct). 
+
+* **Mix** - The original melody and harmony pitches mixed into a
+  common polyphonic output (polyphonic: V/Oct).
+	
+   
 ## Acknowledgements
 
 The MIDIRecorder leverages builtin functionality of the VCV Rack core
