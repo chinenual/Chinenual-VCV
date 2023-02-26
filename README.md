@@ -22,7 +22,7 @@ The [Changelog](./CHANGELOG.md) describes changes.
 
 * [DrumMap](#drummap) - Accepts percussion GATE inputs and converts them to General MIDI pitch v/oct.
 
-* [Tintinnabulator](#tintinnabulator) - Produce a harmonized pitch from an input chord and melody using Avro Pärt-style tintinnabulation.
+* [Tintinnabulator](#tintinnabulator) - Produce a harmonized pitch from an input chord and melody using Arvo Pärt-style tintinnabulation.
 
 * [NoteMeter](#notemeter) - a polyphonic metering module that displays note names from V/Oct inputs.
   
@@ -176,7 +176,7 @@ Produces three polyphonic outputs **V/Oct**, **Gate** and **Vel** suitable for d
 
 ![module-screenshot](./doc/Tint.png) 
 
-Produce a harmonized pitch from an input chord and melody using Avro
+Produce a harmonized pitch from an input chord and melody using Arvo
 Pärt-style tintinnabulation where a harmony note is selected from a
 reference chord.  Pärt's music tends to use simple triads for his
 tintinnabulation but the module allows you to specify any set of notes
