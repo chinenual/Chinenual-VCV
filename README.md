@@ -10,7 +10,7 @@ The [Changelog](./CHANGELOG.md) describes changes.
 
 ![module-screenshot](./doc/MIDIRecorder.png)
 ![module-screenshot](./doc/MIDIRecorderCC.png)
-![module-screenshot](./doc/DrumMap_w_CV-MIDI.png) 
+![module-screenshot](./doc/DrumMap.png) 
 ![module-screenshot](./doc/Tint.png) 
 ![module-screenshot](./doc/NoteMeter.png) 
 
