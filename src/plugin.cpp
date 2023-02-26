@@ -12,6 +12,7 @@ void init(Plugin* p)
     p->addModel(modelMIDIRecorderCC);
     p->addModel(modelDrumMap);
     p->addModel(modelTint);
+    p->addModel(modelNoteMeter);
 
     // Any other plugin initialization may go here.
     // As an alternative, consider lazy-loading assets and lookup tables when your

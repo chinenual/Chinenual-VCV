@@ -1,7 +1,7 @@
 {
 	"slug": "Chinenual-VCV",
 	"name": "Chinenual",
-	"version": "2.4.0-beta1",
+	"version": "2.4.0-beta2",
 	"license": "GPL-3.0-or-later",
 	"brand": "Chinenual",
 	"author": "Steve Tynor",
@@ -54,7 +54,16 @@
                                 "quantizer",
                                 "utility"
                         ]
-                } 
-
+                },
+                {       
+                        "slug": "NoteMeter",
+                        "name": "NoteMeter",
+                        "description": "Display note names for inbound V/Oct voltages",
+                        "manualUrl": "https://github.com/chinenual/Chinenual-VCV/blob/main/README.md#notemeter",
+                        "tags": [
+                                "visual",
+                                "utility"
+                        ]
+                }      
 	]
 }
