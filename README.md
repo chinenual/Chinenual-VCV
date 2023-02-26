@@ -8,6 +8,12 @@ The [Changelog](./CHANGELOG.md) describes changes.
 
 ## Modules
 
+![module-screenshot](./doc/MIDIRecorder.png)
+![module-screenshot](./doc/MIDIRecorderCC.png)
+![module-screenshot](./doc/DrumMap_w_CV-MIDI.png) 
+![module-screenshot](./doc/Tint.png) 
+![module-screenshot](./doc/NoteMeter.png) 
+
 * [MIDI Recorder](#midi-recorder) - a polyphonic multi-track recorder
   to convert CV to standard MIDI files.
   
