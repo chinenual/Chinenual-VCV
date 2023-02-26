@@ -17,6 +17,8 @@ The [Changelog](./CHANGELOG.md) describes changes.
 * [DrumMap](#drummap) - Accepts percussion GATE inputs and converts them to General MIDI pitch v/oct.
 
 * [Tintinnabulator](#tintinnabulator) - Produce a harmonized pitch from an input chord and melody using Avro Pärt-style tintinnabulation.
+
+* [NoteMeter](#notemeter) - a polyphonic metering module that displays note names from V/Oct inputs.
   
 ### MIDI Recorder
 
@@ -212,7 +214,15 @@ Outputs:
 
 * **Mix** - The original melody and harmony pitches mixed into a
   common polyphonic output (polyphonic: V/Oct).
-	
+
+### NoteMeter
+
+![module-screenshot](./doc/NoteMeter.png) 
+
+NoteMeter is a polyphonic metering module that displays note names
+from V/Oct inputs.	If the input voltage does not align exactly with a
+note voltage it indicates the deviance from the closest note as
+"cents". 
    
 ## Acknowledgements
 
