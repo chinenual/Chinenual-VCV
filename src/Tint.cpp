@@ -108,7 +108,7 @@ namespace Tint {
             return (int)std::round(v * 12.f + 60.f);
         }
 
-        int tintinabulate(int note)
+        int tintinnabulate(int note)
         {
             int delta = 0; // up or down
             int count = 0; // (1 = first available note in the chord, 2 = second)
@@ -197,7 +197,7 @@ namespace Tint {
             int mix_c = 0;
             for (int c = 0; c < inputs[PITCH_INPUT].getChannels(); c++) {
                 int in = voltageToPitch(inputs[PITCH_INPUT].getPolyVoltage(c));
-                int harm = tintinabulate(in);
+                int harm = tintinnabulate(in);
                 outputs[TINT_OUTPUT].setVoltage(pitchToVoltage(harm), tint_c);
                 outputs[MIX_OUTPUT].setVoltage(pitchToVoltage(in), mix_c);
                 outputs[MIX_OUTPUT].setVoltage(pitchToVoltage(harm), mix_c + 1);
