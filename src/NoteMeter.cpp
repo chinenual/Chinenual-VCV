@@ -80,16 +80,28 @@ namespace NoteMeter {
 
         void process(const ProcessArgs& args) override
         {
+            int label_i = 0;
             if ((args.frame % 100) == 0) { // throttle
                 for (int i = 0; i < NUM_INPUTS; i++) {
                     auto in = inputs[PITCH_INPUT_1 + i];
-
                     if (in.isConnected()) {
-                        auto n = voltageToPitch(in.getVoltage());
-                        auto fn = voltageToMicroPitch(in.getVoltage());
-                        pitchToText(text[i], n, fn - ((float)n));
+                        label_i = i;
+                        for (int c = 0; c < in.getChannels(); c++) {
+
+                            auto n = voltageToPitch(in.getVoltage(c));
+                            auto fn = voltageToMicroPitch(in.getVoltage(c));
+                            pitchToText(text[label_i], n, fn - ((float)n));
+                            label_i++;
+                            if (label_i > NUM_INPUTS) {
+                                return;
+                            }
+                        }
                     } else {
-                        text[i] = "";
+                        text[label_i] = "";
+                        label_i++;
+                        if (label_i > NUM_INPUTS) {
+                            return;
+                        }
                     }
                 }
             }
