@@ -9,6 +9,10 @@
   bidirectional tintinnabulation, where every other note switches
   between upward or downwards selection.  An Octave offset can be used
   to offset the harmony up or down from the reference melody line.
+* New module, NoteMeter,  a polyphonic metering module that displays note names
+ from V/Oct inputs.	If the input voltage does not align exactly with a
+ note voltage it indicates the deviance from the closest note as
+ "cents". 
 
 ## 2.3.1
 
