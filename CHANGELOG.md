@@ -4,7 +4,7 @@
 
 * Implements [issue #5](https://github.com/chinenual/Chinenual-VCV/issues/5).
   The Tintinabulator now supports non-equal temperament tunings.
-* Fixes [issue #4](https://github.com/chinenual/Chinenual-VCV/issues4)
+* Fixes [issue #4](https://github.com/chinenual/Chinenual-VCV/issues/4)
   NoteMeter crash reported on Windows.
 
 ## 2.4.0
