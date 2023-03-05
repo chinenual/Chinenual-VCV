@@ -98,7 +98,7 @@ jobs:
           export CROSS_COMPILE=$CROSS_COMPILE_TARGET_${{ matrix.platform }}
           make -j 4 dep
           make -j 4 dist
-          if [${{matrix.platform}} == "x64" ]; then make test;done
+          if [${{matrix.platform}} == "x64" ]; then make test; fi
           echo "Plugin architecture '$(lipo -archs plugin.dylib)'"
       - name: Upload artifact
         uses: actions/upload-artifact@v3
