@@ -69,7 +69,7 @@ namespace NoteMeter {
                             pitchToText(text[label_i], n, fn - ((float)n));
                             label_i++;
                             if (label_i >= NUM_INPUTS) {
-                                INFO("  EARLY RETURN[%d]   i = %d   channels = %d\n", label_i, i, in.getChannels());
+                                // INFO("  EARLY RETURN[%d]   i = %d   channels = %d\n", label_i, i, in.getChannels());
                                 break; // inner loop
                             }
                         }
