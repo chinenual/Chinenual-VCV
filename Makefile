@@ -59,8 +59,6 @@ test: $(TEST_EXES)
 	@if [ ! -f ./libRack.dylib ]; then ln -s $(RACK_DIR)/libRack.dylib; fi
 	for f in $(TEST_EXES); do $$f; done
 
-dist: test
-
 asan_rack:
 	DYLD_INSERT_LIBRARIES=$(wildcard /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/*/lib/darwin/libclang_rt.asan_osx_dynamic.dylib) /Applications/VCV\ Rack\ 2\ Free.app/Contents/MacOS/Rack 
 	
