@@ -28,9 +28,16 @@ DISTRIBUTABLES += $(wildcard presets)
 # Include the Rack plugin Makefile framework
 include $(RACK_DIR)/plugin.mk
 
+# build with the address sanitizer. Must run Rack with the asan_rack
+# target
+asan: ASAN_FLAGS=-fsanitize=address 
+asan: ASAN_LD_FLAGS=-fsanitize=address 
+asan: debug
+
 # When building for debugging, stop the debug symbols from being stripped, and set the optimization level to none
 debug: STRIP = : DEBUG MODE, THIS LINE IS COMMENTED OUT:  strip
-debug: EXTRA_FLAGS = -O0 -DSDTDEBUG
+debug: EXTRA_FLAGS = -O0 -DSDTDEBUG $(ASAN_FLAGS)
+debug: EXTRA_LD_FLAGS=$(ASAN_LD_FLAGS)
 debug: install
 
 release: clean install
@@ -51,4 +58,8 @@ TEST_LDFLAGS = $(subst -shared,,$(LDFLAGS))
 test: $(TEST_EXES)
 	@if [ ! -f ./libRack.dylib ]; then ln -s $(RACK_DIR)/libRack.dylib; fi
 	for f in $(TEST_EXES); do $$f; done
+
+asan_rack:
+	DYLD_INSERT_LIBRARIES=$(wildcard /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/*/lib/darwin/libclang_rt.asan_osx_dynamic.dylib) /Applications/VCV\ Rack\ 2\ Free.app/Contents/MacOS/Rack 
+	
 
