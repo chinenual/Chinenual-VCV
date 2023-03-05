@@ -1,5 +1,6 @@
 #include <osdialog.h>
 
+#include "PitchNote.hpp"
 #include "plugin.hpp"
 
 #define NUM_INPUT_ROWS 6
@@ -186,12 +187,6 @@ namespace DrumMap {
             {
                 map[i] = json_integer_value(val);
             }
-        }
-
-        float pitchToVoltage(int note)
-        {
-            // based on VCV CORE MIDI_CV:
-            return (note - 60.f) / 12.f;
         }
 
         float velToVoltage(int vel)

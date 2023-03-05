@@ -1,5 +1,6 @@
 #include <osdialog.h>
 
+#include "PitchNote.hpp"
 #include "plugin.hpp"
 
 #define NUM_INPUT_ROWS 12
@@ -49,33 +50,6 @@ namespace NoteMeter {
 
         void onReset() override
         {
-        }
-
-        int voltageToPitch(float v)
-        {
-            // based on VCV CORE CV_MIDI:
-            return (int)std::round(v * 12.f + 60.f);
-        }
-
-        float voltageToMicroPitch(float v)
-        {
-            // based on VCV CORE CV_MIDI:
-            return (v * 12.f + 60.f);
-        }
-
-        void pitchToText(std::string& text, int note, float deviation)
-        {
-            const char* noteNames[] = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
-            int nameIndex = note % 12;
-            int octave = (note / 12) - 1; // simple division produces 60=C5; we want to display that as C4, so subtract 1
-            auto absDeviation = std::abs(deviation);
-            if (absDeviation >= 0.01f) {
-                text = string::f("%s%d %s%dc", noteNames[nameIndex], octave,
-                    (deviation > 0 ? "+" : "-"),
-                    (int)(absDeviation * 100));
-            } else {
-                text = string::f("%s%d", noteNames[nameIndex], octave);
-            }
         }
 
         void process(const ProcessArgs& args) override
