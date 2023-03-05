@@ -80,12 +80,14 @@ namespace NoteMeter {
 
         void process(const ProcessArgs& args) override
         {
-            int label_i = 0;
             if ((args.frame % 100) == 0) { // throttle
                 for (int i = 0; i < NUM_INPUTS; i++) {
+                    text[i] = "";
+                }
+                for (int i = 0; i < NUM_INPUTS; i++) {
+                    int label_i = i;
                     auto in = inputs[PITCH_INPUT_1 + i];
                     if (in.isConnected()) {
-                        label_i = i;
                         for (int c = 0; c < in.getChannels(); c++) {
 
                             auto n = voltageToPitch(in.getVoltage(c));
@@ -93,14 +95,9 @@ namespace NoteMeter {
                             pitchToText(text[label_i], n, fn - ((float)n));
                             label_i++;
                             if (label_i >= NUM_INPUTS) {
-                                return;
+                                INFO("  EARLY RETURN[%d]   i = %d   channels = %d\n", label_i, i, in.getChannels());
+                                break; // inner loop
                             }
-                        }
-                    } else {
-                        text[label_i] = "";
-                        label_i++;
-                        if (label_i >= NUM_INPUTS) {
-                            return;
                         }
                     }
                 }
