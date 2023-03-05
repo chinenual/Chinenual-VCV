@@ -8,6 +8,7 @@
 
 using namespace Chinenual;
 using namespace MIDIRecorder;
+using namespace Catch;
 
 TEST_CASE("enums select correct range")
 {
@@ -94,6 +95,17 @@ TEST_CASE("micro v/oct pitch conversion basics")
     CHECK(voltageToMicroPitch(1.f) == 72.f); // C5
     CHECK(voltageToMicroPitch(0.f) == 60.f); // C4
     CHECK(voltageToMicroPitch(-1.f) == 48.f); // C3
+}
+
+TEST_CASE("micro v/oct pitch conversion deviations")
+{
+    float semi = .0833333333f;
+    float cent = semi / 100.f;
+    float epsilon = 0.0001f;
+    REQUIRE_THAT(voltageToPitchDeviation(0.f), WithinAbs(0.f, epsilon)); // C4 exactly
+    REQUIRE_THAT(voltageToPitchDeviation(1.f), WithinAbs(0.f, epsilon)); // C5 exactly
+    REQUIRE_THAT(voltageToPitchDeviation(20 * cent), WithinAbs(0.2f, epsilon)); // C4 +20c
+    REQUIRE_THAT(voltageToPitchDeviation(-20 * cent), WithinAbs(-0.2f, epsilon)); // C4 -20c
 }
 
 TEST_CASE("pitch string conversion basics")
