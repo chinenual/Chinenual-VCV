@@ -71,6 +71,7 @@ namespace Tint {
             for (int n = 0; n < 128; n++) {
                 inChord[n] = -1;
             }
+            INFO("RESET!");
             for (int i = 0; i < rack::PORT_MAX_CHANNELS; i++) {
                 chordState[i] = 0.f;
                 chordDeviation[i] = 0.f;
@@ -138,9 +139,9 @@ namespace Tint {
                         c++;
                     }
                     if (c == count) {
-                        // INFO("n:%d inc:%d  dev:%f -> %f\n,", n, inChord[n], chordDeviation[inChord[n]],
-                        //     microPitchToVoltage(n + (octave * 12) + chordDeviation[inChord[n]]));
-                        return microPitchToVoltage(n + (octave * 12) + chordDeviation[inChord[n]]);
+                        INFO("n:%d inc:%d  dev:%f -> %f\n,", n, inChord[n], chordDeviation[inChord[n] - 1],
+                            microPitchToVoltage(n + (octave * 12) + chordDeviation[inChord[n] - 1]));
+                        return microPitchToVoltage(n + (octave * 12) + chordDeviation[inChord[n] - 1]);
                     }
                 }
             } else {
@@ -151,7 +152,7 @@ namespace Tint {
                         c++;
                     }
                     if (c == count) {
-                        return microPitchToVoltage(n + (octave * 12) + chordDeviation[inChord[n]]);
+                        return microPitchToVoltage(n + (octave * 12) + chordDeviation[inChord[n] - 1]);
                     }
                 }
             }
@@ -184,7 +185,7 @@ namespace Tint {
                     inChord[n] = -1;
                 }
                 for (int c = 0; c < inputs[CHORD_INPUT].getChannels(); c++) {
-                    // INFO("CHORD CHANGE [%d] %f -> %f\n", c, chordState[c], chordDeviation[c]);
+                    INFO("CHORD CHANGE [%d] %f -> %f\n", c, chordState[c], chordDeviation[c]);
                     int chord_n = voltageToPitch(inputs[CHORD_INPUT].getPolyVoltage(c));
                     for (int n = 0; n < 128; n++) {
                         if ((n % 12) == (chord_n % 12)) {
