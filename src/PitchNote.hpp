@@ -24,7 +24,7 @@ inline float voltageToPitchDeviation(float v)
     return voltageToMicroPitch(v) - (float)voltageToPitch(v);
 }
 
-/* Careful: noteDeviation is scalled by note value - not by voltage */
+/* Careful: noteDeviation is scaled by note value - not by voltage */
 inline void pitchToText(std::string& text, int note, float noteDeviation)
 {
     // in case noteDeviation is larger than a semitone, apply it first and compute a new "smaller than semitone" deviation:
