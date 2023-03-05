@@ -97,6 +97,16 @@ TEST_CASE("micro v/oct pitch conversion basics")
     CHECK(voltageToMicroPitch(-1.f) == 48.f); // C3
 }
 
+TEST_CASE("micro v/oct pitch reverse conversion")
+{
+    float epsilon = 0.0001f;
+    REQUIRE_THAT(microPitchToVoltage(72.f), WithinAbs(1.f, epsilon)); // C5
+    REQUIRE_THAT(microPitchToVoltage(60.f), WithinAbs(0.f, epsilon)); // C4
+    REQUIRE_THAT(microPitchToVoltage(48.f), WithinAbs(-1.f, epsilon)); // C3
+
+    REQUIRE_THAT(microPitchToVoltage(60.5f), WithinAbs(0.0416666f, epsilon)); // C4 +50c
+}
+
 TEST_CASE("micro v/oct pitch conversion deviations")
 {
     float semi = .0833333333f;

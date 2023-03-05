@@ -8,6 +8,11 @@ inline float pitchToVoltage(int note)
     // based on VCV CORE MIDI_CV:
     return (note - 60.f) / 12.f;
 }
+inline float microPitchToVoltage(float note)
+{
+    // based on VCV CORE MIDI_CV:
+    return (note - 60.f) / 12.f;
+}
 inline int voltageToPitch(float v)
 {
     // based on VCV CORE CV_MIDI:

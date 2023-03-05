@@ -1,5 +1,6 @@
 #include <osdialog.h>
 
+#include "PitchNote.hpp"
 #include "plugin.hpp"
 
 #define NUM_INPUT_ROWS 6
@@ -42,8 +43,9 @@ namespace Tint {
         Mode mode;
         int octave;
         bool upDown; // current note is playing up or down when bidirectional
-        bool inChord[128];
+        int inChord[128]; // -1 not in chord;  >= 0 index of the reference chord note
         float chordState[rack::PORT_MAX_CHANNELS];
+        float chordDeviation[rack::PORT_MAX_CHANNELS];
         dsp::SchmittTrigger gateTrigger;
 
         Tint()
@@ -67,10 +69,11 @@ namespace Tint {
             upDown = false;
             gateTrigger.reset();
             for (int n = 0; n < 128; n++) {
-                inChord[n] = false;
+                inChord[n] = -1;
             }
             for (int i = 0; i < rack::PORT_MAX_CHANNELS; i++) {
                 chordState[i] = 0.f;
+                chordDeviation[i] = 0.f;
             }
         }
 
@@ -97,18 +100,7 @@ namespace Tint {
             }
         }
 
-        float pitchToVoltage(int note)
-        {
-            // based on VCV CORE MIDI_CV:
-            return (note - 60.f) / 12.f;
-        }
-        int voltageToPitch(float v)
-        {
-            // based on VCV CORE CV_MIDI:
-            return (int)std::round(v * 12.f + 60.f);
-        }
-
-        int tintinnabulate(int note)
+        float tintinnabulate(int note)
         {
             int delta = 0; // up or down
             int count = 0; // (1 = first available note in the chord, 2 = second)
@@ -142,26 +134,29 @@ namespace Tint {
                 // UP
                 int c = 0;
                 for (int n = note + 1; n < 128; n++) {
-                    if (inChord[n]) {
+                    if (inChord[n] >= 0) {
                         c++;
                     }
                     if (c == count) {
-                        return n + (octave * 12);
+                        // INFO("n:%d inc:%d  dev:%f -> %f\n,", n, inChord[n], chordDeviation[inChord[n]],
+                        //     microPitchToVoltage(n + (octave * 12) + chordDeviation[inChord[n]]));
+                        return microPitchToVoltage(n + (octave * 12) + chordDeviation[inChord[n]]);
                     }
                 }
             } else {
                 // DOWN
                 int c = 0;
                 for (int n = note - 1; n > 0; n--) {
-                    if (inChord[n]) {
+                    if (inChord[n] >= 0) {
                         c++;
                     }
                     if (c == count) {
-                        return n + (octave * 12);
+                        return microPitchToVoltage(n + (octave * 12) + chordDeviation[inChord[n]]);
                     }
                 }
             }
-            return note + (octave * 12);
+            // shouldnt happen, but return something reasonable
+            return pitchToVoltage(note + (octave * 12));
         }
 
         void process(const ProcessArgs& args) override
@@ -177,30 +172,36 @@ namespace Tint {
             bool chordChange = false;
             for (int c = 0; c < inputs[CHORD_INPUT].getChannels(); c++) {
                 float v = inputs[CHORD_INPUT].getPolyVoltage(c);
-                if (v != chordState[c]) {
+                float deviate = voltageToPitchDeviation(v);
+                if (v != chordState[c] || deviate != chordDeviation[c]) {
                     chordChange = true;
                 }
                 chordState[c] = v;
+                chordDeviation[c] = deviate;
             }
             if (chordChange) {
                 for (int n = 0; n < 128; n++) {
-                    inChord[n] = false;
+                    inChord[n] = -1;
                 }
                 for (int c = 0; c < inputs[CHORD_INPUT].getChannels(); c++) {
+                    // INFO("CHORD CHANGE [%d] %f -> %f\n", c, chordState[c], chordDeviation[c]);
                     int chord_n = voltageToPitch(inputs[CHORD_INPUT].getPolyVoltage(c));
                     for (int n = 0; n < 128; n++) {
-                        inChord[n] |= (n % 12) == (chord_n % 12);
+                        if ((n % 12) == (chord_n % 12)) {
+                            inChord[n] = c + 1;
+                        }
                     }
                 }
             }
             int tint_c = 0;
             int mix_c = 0;
             for (int c = 0; c < inputs[PITCH_INPUT].getChannels(); c++) {
-                int in = voltageToPitch(inputs[PITCH_INPUT].getPolyVoltage(c));
-                int harm = tintinnabulate(in);
-                outputs[TINT_OUTPUT].setVoltage(pitchToVoltage(harm), tint_c);
-                outputs[MIX_OUTPUT].setVoltage(pitchToVoltage(in), mix_c);
-                outputs[MIX_OUTPUT].setVoltage(pitchToVoltage(harm), mix_c + 1);
+                float in_v = inputs[PITCH_INPUT].getPolyVoltage(c);
+                int in = voltageToPitch(in_v);
+                float tint_v = tintinnabulate(in);
+                outputs[TINT_OUTPUT].setVoltage(tint_v, tint_c);
+                outputs[MIX_OUTPUT].setVoltage(in_v, mix_c);
+                outputs[MIX_OUTPUT].setVoltage(tint_v, mix_c + 1);
                 tint_c += 1;
                 mix_c += 2;
             }
