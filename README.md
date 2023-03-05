@@ -198,14 +198,22 @@ Controls:
    * "Up+1" - second chord note higher than the melody
    * "Down-1" - second chord note lower than the melody
    * "Up+1/Down-1" - alternating up or down 
-
+   * "Quantize" - Choose the "closest" note (which may be itself).
+      This is technically not "tintinnabulation" since if the melody
+      note matches a chord note, it will not create a "harmony" note.
+      However, this allows the Tintinnabulator to be used as a general
+      purpose "chord quantizer".
+   
 * **Octave** - offset the resulting harmony note by up to three
   octaves up or down.
   
  Inputs:
  
  * **Chord** - the notes defining the reference chord (polyphonic:
-   V/Oct).   Aaron Static's ChordCV produces a suitable signal.
+   V/Oct).   Aaron Static's ChordCV produces a suitable signal.  The
+   chord frequencies need not be 12 note equal-temperament.  The
+   resulting harmony notes will be chosen to match whatever tuning
+   system is used in the chord input.
    
  * **Melody** - the pitches to be harmonized.  (polyphonic: V/Oct).
  
