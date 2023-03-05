@@ -37,7 +37,8 @@ namespace Tint {
             MODE_UP_DOWN,
             MODE_UP2,
             MODE_DOWN2,
-            MODE_UP2_DOWN2
+            MODE_UP2_DOWN2,
+            MODE_QUANTIZE
         };
 
         Mode mode;
@@ -58,7 +59,7 @@ namespace Tint {
             configInput(GATE_INPUT, "When to change direction of harmony (if bidirectional)");
             configOutput(TINT_OUTPUT, "Harmonized pitch(es)");
             configOutput(MIX_OUTPUT, "Original plus harmonized pitches");
-            configSwitch(MODE_PARAM, 0, 5, 0, "Mode", { "Up", "Down", "Up/Down", "Up+1", "Down-1", "Up+1/Down-1" });
+            configSwitch(MODE_PARAM, 0, 6, 0, "Mode", { "Up", "Down", "Up/Down", "Up+1", "Down-1", "Up+1/Down-1", "Quantize" });
             configSwitch(OCTAVE_PARAM, -3, 3, 0, "Octave Offset", { "-3", "-2", "-1", "0", "+1", "+2", "+3" });
         }
 
@@ -71,7 +72,7 @@ namespace Tint {
             for (int n = 0; n < 128; n++) {
                 inChord[n] = -1;
             }
-            INFO("RESET!");
+            // INFO("RESET!");
             for (int i = 0; i < rack::PORT_MAX_CHANNELS; i++) {
                 chordState[i] = 0.f;
                 chordDeviation[i] = 0.f;
@@ -101,8 +102,10 @@ namespace Tint {
             }
         }
 
-        float tintinnabulate(int note)
+        float tintinnabulate(float v)
         {
+            int note = voltageToPitch(v);
+
             int delta = 0; // up or down
             int count = 0; // (1 = first available note in the chord, 2 = second)
             switch (mode) {
@@ -130,6 +133,32 @@ namespace Tint {
                 count = 2;
                 delta = upDown ? 1 : -1;
                 break;
+            case MODE_QUANTIZE:
+                // not really tintinnabulation - we just snap to the nearest note in the chord (nearest by frequency)
+                float down_v = 0.f, up_v = 0.f; // voltages of the nearest note up or down
+                for (int n = note; n < 128; n++) {
+                    if (inChord[n] >= 0) {
+                        up_v = microPitchToVoltage(n + chordDeviation[inChord[n] - 1]);
+                        break;
+                    }
+                }
+                for (int n = note - 1; n >= 0; n--) {
+                    if (inChord[n] >= 0) {
+                        down_v = microPitchToVoltage(n + chordDeviation[inChord[n] - 1]);
+                        break;
+                    }
+                }
+                // choose the nearest one
+                if ((up_v - v) < (v - down_v)) {
+                    // INFO("QUANTIZE %f %d %f %f -> %f (%f)", v, note, up_v, down_v, up_v,
+                    //     up_v + octave);
+                    return up_v + octave; // octave can be used directly since V/oct is 1 volt per octave
+                } else {
+                    // INFO("QUANTIZE %f %d %f %f -> %f (%f)", v, note, up_v, down_v, down_v,
+                    //     down_v + octave);
+                    return down_v + octave; // octave can be used directly since V/oct is 1 volt per octave
+                }
+                break;
             }
             if (delta > 0) {
                 // UP
@@ -139,8 +168,8 @@ namespace Tint {
                         c++;
                     }
                     if (c == count) {
-                        INFO("n:%d inc:%d  dev:%f -> %f\n,", n, inChord[n], chordDeviation[inChord[n] - 1],
-                            microPitchToVoltage(n + (octave * 12) + chordDeviation[inChord[n] - 1]));
+                        // INFO("n:%d inc:%d  dev:%f -> %f\n,", n, inChord[n], chordDeviation[inChord[n] - 1],
+                        //     microPitchToVoltage(n + (octave * 12) + chordDeviation[inChord[n] - 1]));
                         return microPitchToVoltage(n + (octave * 12) + chordDeviation[inChord[n] - 1]);
                     }
                 }
@@ -185,7 +214,7 @@ namespace Tint {
                     inChord[n] = -1;
                 }
                 for (int c = 0; c < inputs[CHORD_INPUT].getChannels(); c++) {
-                    INFO("CHORD CHANGE [%d] %f -> %f\n", c, chordState[c], chordDeviation[c]);
+                    // INFO("CHORD CHANGE [%d] %f -> %f\n", c, chordState[c], chordDeviation[c]);
                     int chord_n = voltageToPitch(inputs[CHORD_INPUT].getPolyVoltage(c));
                     for (int n = 0; n < 128; n++) {
                         if ((n % 12) == (chord_n % 12)) {
@@ -198,8 +227,7 @@ namespace Tint {
             int mix_c = 0;
             for (int c = 0; c < inputs[PITCH_INPUT].getChannels(); c++) {
                 float in_v = inputs[PITCH_INPUT].getPolyVoltage(c);
-                int in = voltageToPitch(in_v);
-                float tint_v = tintinnabulate(in);
+                float tint_v = tintinnabulate(in_v);
                 outputs[TINT_OUTPUT].setVoltage(tint_v, tint_c);
                 outputs[MIX_OUTPUT].setVoltage(in_v, mix_c);
                 outputs[MIX_OUTPUT].setVoltage(tint_v, mix_c + 1);

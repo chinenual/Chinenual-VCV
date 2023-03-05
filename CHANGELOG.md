@@ -3,7 +3,13 @@
 ## 2.4.1
 
 * Implements [issue #5](https://github.com/chinenual/Chinenual-VCV/issues/5).
-  The Tintinabulator now supports non-equal temperament tunings.
+  The Tintinabulator now supports non-equal temperament tunings. 
+* Implements [issue #6](https://github.com/chinenual/Chinenual-VCV/issues/6).
+  The Tintinabulator has a new mode, Quantize, that simply snaps the
+  input melody to the nearest "Chord" frequency.   This is technically
+  not "tintinnabulation" since if the melody note matches a chord
+  note, it will not create a "harmony" note.  However, this allows the
+  Tintinnabulator to be used as a general purpose "chord quantizer".
 * Fixes [issue #4](https://github.com/chinenual/Chinenual-VCV/issues/4)
   NoteMeter crash reported on Windows.
 
