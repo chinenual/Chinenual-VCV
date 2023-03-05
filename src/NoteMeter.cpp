@@ -92,14 +92,14 @@ namespace NoteMeter {
                             auto fn = voltageToMicroPitch(in.getVoltage(c));
                             pitchToText(text[label_i], n, fn - ((float)n));
                             label_i++;
-                            if (label_i > NUM_INPUTS) {
+                            if (label_i >= NUM_INPUTS) {
                                 return;
                             }
                         }
                     } else {
                         text[label_i] = "";
                         label_i++;
-                        if (label_i > NUM_INPUTS) {
+                        if (label_i >= NUM_INPUTS) {
                             return;
                         }
                     }
