@@ -80,7 +80,7 @@ namespace MIDIRecorder {
                     const auto first = FIRST_INPUT_ID + t * COLS_PER_TRACK;
                     const auto last = first + COLS_PER_TRACK;
                     activeTrackCache[t] = false;
-                    for (int i = first; i <= last; i++) {
+                    for (int i = first; i < last; i++) {
                         if (inputs[i].isConnected()) {
                             activeTrackCache[t] = true;
                             break;
