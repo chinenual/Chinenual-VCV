@@ -63,9 +63,10 @@ namespace NoteMeter {
                     auto in = inputs[PITCH_INPUT_1 + i];
                     if (in.isConnected()) {
                         for (int c = 0; c < in.getChannels(); c++) {
-
-                            auto n = voltageToPitch(in.getVoltage(c));
-                            auto fn = voltageToMicroPitch(in.getVoltage(c));
+                            // we assume inputs are in +/-10V
+                            auto in_v = clamp(in.getVoltage(c), PITCH_VOCT_MIN, PITCH_VOCT_MAX);
+                            auto n = voltageToPitch(in_v);
+                            auto fn = voltageToMicroPitch(in_v);
                             pitchToText(text[label_i], n, fn - ((float)n));
                             label_i++;
                             if (label_i >= NUM_INPUTS) {

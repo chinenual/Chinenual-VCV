@@ -82,8 +82,8 @@ TEST_CASE("v/oct pitch conversion basics")
     CHECK(voltageToPitch(0.f) == 60); // C4
     CHECK(voltageToPitch(-1.f) == 48); // C3
     // extreme ranges:
-    CHECK(voltageToPitch(10.f) == 180); // C14
-    CHECK(voltageToPitch(-10.f) == -60); // C-6
+    CHECK(voltageToPitch(PITCH_VOCT_MIN) == PITCH_NOTE_MIN); // C-6
+    CHECK(voltageToPitch(PITCH_VOCT_MAX) == PITCH_NOTE_MAX); // C14
 }
 
 TEST_CASE("v/oct pitch reverse conversion basics")
@@ -92,8 +92,8 @@ TEST_CASE("v/oct pitch reverse conversion basics")
     CHECK((0.f) == pitchToVoltage(60)); // C4
     CHECK((-1.f) == pitchToVoltage(48)); // C3
     // extreme ranges:
-    CHECK((10.f) == pitchToVoltage(180)); // C14
-    CHECK((-10.f) == pitchToVoltage(-60)); // C-6
+    CHECK((PITCH_VOCT_MIN) == pitchToVoltage(PITCH_NOTE_MIN)); // C-6
+    CHECK((PITCH_VOCT_MAX) == pitchToVoltage(PITCH_NOTE_MAX)); // C14
 }
 
 TEST_CASE("micro v/oct pitch conversion basics")
