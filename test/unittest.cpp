@@ -81,6 +81,9 @@ TEST_CASE("v/oct pitch conversion basics")
     CHECK(voltageToPitch(1.f) == 72); // C5
     CHECK(voltageToPitch(0.f) == 60); // C4
     CHECK(voltageToPitch(-1.f) == 48); // C3
+    // extreme ranges:
+    CHECK(voltageToPitch(10.f) == 180); // C14
+    CHECK(voltageToPitch(-10.f) == -60); // C-6
 }
 
 TEST_CASE("v/oct pitch reverse conversion basics")
@@ -88,6 +91,9 @@ TEST_CASE("v/oct pitch reverse conversion basics")
     CHECK((1.f) == pitchToVoltage(72)); // C5
     CHECK((0.f) == pitchToVoltage(60)); // C4
     CHECK((-1.f) == pitchToVoltage(48)); // C3
+    // extreme ranges:
+    CHECK((10.f) == pitchToVoltage(180)); // C14
+    CHECK((-10.f) == pitchToVoltage(-60)); // C-6
 }
 
 TEST_CASE("micro v/oct pitch conversion basics")
@@ -175,4 +181,13 @@ TEST_CASE("pitch string conversion cents")
     CHECK("C#4" == str);
     pitchToText(str, 60, 2.f); // D4
     CHECK("D4" == str);
+}
+
+TEST_CASE("pitch string conversion extremes")
+{
+    std::string str;
+    pitchToText(str, voltageToPitch(10.f), 0.f); // C14
+    CHECK("C14" == str);
+    pitchToText(str, voltageToPitch(-10.f), 0.f); // C-6
+    CHECK("C-6" == str);
 }
