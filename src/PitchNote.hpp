@@ -37,7 +37,7 @@ inline float voltageToPitchDeviation(float v)
 
 inline float noteDevToFrequencyDev(float noteDeviation)
 {
-    // an octave is 12 semitones per volt.  noteDeviation is vs. a semitone
+    // an octave is 12 semitones per volt.  noteDeviation is vs. a semitone ("cents / 100")
     // so 0.5 note deviaton is 1/24 of an octave, or 1/25V)
     return noteDeviation / 12.f;
 }

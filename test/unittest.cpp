@@ -499,3 +499,59 @@ TEST_CASE("tintinabulator: tint DOWN2")
     CHECK(C4 + 12 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(G4 + 12))));
     CHECK(E4 + 12 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(A4 + 12))));
 }
+
+TEST_CASE("tintinabulator: tint UP_DOWN")
+{
+    TintQuantizer tq;
+
+    tq.reset();
+    tq.mode = TintQuantizer::MODE_UP_DOWN;
+    tq.octave = 0;
+
+    tq.chordState[0] = pitchToVoltage(C4);
+    tq.chordState[1] = pitchToVoltage(E4);
+    tq.chordState[2] = pitchToVoltage(G4);
+
+    tq.chordDeviation[0] = 0.f;
+    tq.chordDeviation[1] = 0.f;
+    tq.chordDeviation[2] = 0.f;
+
+    tq.setChordNotes(3);
+
+    // since the reference chord is using 12-TET, make the assertions in terms of pitch "note" rather than
+    // frequency.  easier to debug if something goes haywire for the basics.
+    tq.upDown = false;
+    CHECK(G3 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(C4))));
+    tq.upDown = true;
+    CHECK(E4 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(C4))));
+    tq.upDown = false;
+    CHECK(G3 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(C4))));
+}
+
+TEST_CASE("tintinabulator: tint UP2_DOWN2")
+{
+    TintQuantizer tq;
+
+    tq.reset();
+    tq.mode = TintQuantizer::MODE_UP2_DOWN2;
+    tq.octave = 0;
+
+    tq.chordState[0] = pitchToVoltage(C4);
+    tq.chordState[1] = pitchToVoltage(E4);
+    tq.chordState[2] = pitchToVoltage(G4);
+
+    tq.chordDeviation[0] = 0.f;
+    tq.chordDeviation[1] = 0.f;
+    tq.chordDeviation[2] = 0.f;
+
+    tq.setChordNotes(3);
+
+    // since the reference chord is using 12-TET, make the assertions in terms of pitch "note" rather than
+    // frequency.  easier to debug if something goes haywire for the basics.
+    tq.upDown = false;
+    CHECK(E3 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(C4))));
+    tq.upDown = true;
+    CHECK(G4 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(C4))));
+    tq.upDown = false;
+    CHECK(E3 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(C4))));
+}
