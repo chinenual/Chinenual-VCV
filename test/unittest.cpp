@@ -2,6 +2,7 @@
 
 #include "CVRange.hpp"
 #include "PitchNote.hpp"
+#include "TintQuantizer.hpp"
 #undef WARN
 
 #include "catch.hpp"
@@ -190,4 +191,311 @@ TEST_CASE("pitch string conversion extremes")
     CHECK("C14" == str);
     pitchToText(str, voltageToPitch(-10.f), 0.f); // C-6
     CHECK("C-6" == str);
+}
+
+TEST_CASE("pitch string octaves")
+{
+    std::string str;
+    pitchToText(str, voltageToPitch(-10.f), 0.f);
+    CHECK("C-6" == str);
+    pitchToText(str, voltageToPitch(-9.f), 0.f);
+    CHECK("C-5" == str);
+    pitchToText(str, voltageToPitch(-8.f), 0.f);
+    CHECK("C-4" == str);
+    pitchToText(str, voltageToPitch(-7.f), 0.f);
+    CHECK("C-3" == str);
+    pitchToText(str, voltageToPitch(-6.f), 0.f);
+    CHECK("C-2" == str);
+    pitchToText(str, voltageToPitch(-5.f), 0.f);
+    CHECK("C-1" == str);
+    pitchToText(str, voltageToPitch(-4.f), 0.f);
+    CHECK("C0" == str);
+    pitchToText(str, voltageToPitch(-3.f), 0.f);
+    CHECK("C1" == str);
+    pitchToText(str, voltageToPitch(-2.f), 0.f);
+    CHECK("C2" == str);
+    pitchToText(str, voltageToPitch(-1.f), 0.f);
+    CHECK("C3" == str);
+    pitchToText(str, voltageToPitch(0.f), 0.f);
+    CHECK("C4" == str);
+    pitchToText(str, voltageToPitch(1.f), 0.f);
+    CHECK("C5" == str);
+    pitchToText(str, voltageToPitch(2.f), 0.f);
+    CHECK("C6" == str);
+    pitchToText(str, voltageToPitch(3.f), 0.f);
+    CHECK("C7" == str);
+    pitchToText(str, voltageToPitch(4.f), 0.f);
+    CHECK("C8" == str);
+    pitchToText(str, voltageToPitch(5.f), 0.f);
+    CHECK("C9" == str);
+    pitchToText(str, voltageToPitch(6.f), 0.f);
+    CHECK("C10" == str);
+    pitchToText(str, voltageToPitch(7.f), 0.f);
+    CHECK("C11" == str);
+    pitchToText(str, voltageToPitch(8.f), 0.f);
+    CHECK("C12" == str);
+    pitchToText(str, voltageToPitch(9.f), 0.f);
+    CHECK("C13" == str);
+    pitchToText(str, voltageToPitch(10.f), 0.f);
+    CHECK("C14" == str);
+}
+
+TEST_CASE("pitch string octaves - w/ deviations")
+{
+    std::string str;
+    pitchToText(str, voltageToPitch(-10.f), 0.4f);
+    CHECK("C-6 +40c" == str);
+    pitchToText(str, voltageToPitch(-9.f), 0.4f);
+    CHECK("C-5 +40c" == str);
+    pitchToText(str, voltageToPitch(-8.f), 0.4f);
+    CHECK("C-4 +40c" == str);
+    pitchToText(str, voltageToPitch(-7.f), 0.4f);
+    CHECK("C-3 +40c" == str);
+    pitchToText(str, voltageToPitch(-6.f), 0.4f);
+    CHECK("C-2 +40c" == str);
+    pitchToText(str, voltageToPitch(-5.f), 0.4f);
+    CHECK("C-1 +40c" == str);
+    pitchToText(str, voltageToPitch(-4.f), 0.4f);
+    CHECK("C0 +40c" == str);
+    pitchToText(str, voltageToPitch(-3.f), 0.4f);
+    CHECK("C1 +40c" == str);
+    pitchToText(str, voltageToPitch(-2.f), 0.4f);
+    CHECK("C2 +40c" == str);
+    pitchToText(str, voltageToPitch(-1.f), 0.4f);
+    CHECK("C3 +40c" == str);
+    pitchToText(str, voltageToPitch(0.f), 0.4f);
+    CHECK("C4 +40c" == str);
+    pitchToText(str, voltageToPitch(1.f), 0.4f);
+    CHECK("C5 +40c" == str);
+    pitchToText(str, voltageToPitch(2.f), 0.4f);
+    CHECK("C6 +40c" == str);
+    pitchToText(str, voltageToPitch(3.f), 0.4f);
+    CHECK("C7 +40c" == str);
+    pitchToText(str, voltageToPitch(4.f), 0.4f);
+    CHECK("C8 +40c" == str);
+    pitchToText(str, voltageToPitch(5.f), 0.4f);
+    CHECK("C9 +40c" == str);
+    pitchToText(str, voltageToPitch(6.f), 0.4f);
+    CHECK("C10 +40c" == str);
+    pitchToText(str, voltageToPitch(7.f), 0.4f);
+    CHECK("C11 +40c" == str);
+    pitchToText(str, voltageToPitch(8.f), 0.4f);
+    CHECK("C12 +40c" == str);
+    pitchToText(str, voltageToPitch(9.f), 0.4f);
+    CHECK("C13 +40c" == str);
+    pitchToText(str, voltageToPitch(10.f), 0.4f);
+    CHECK("C14 +40c" == str);
+}
+
+// -----------------------------------------------
+using namespace Tint;
+
+// note pitches (MIDI note values) used in the tests
+#define C4 60
+#define D4 62
+#define E4 64
+#define F4 65
+#define G4 67
+#define A4 69
+#define B4 71
+
+#define C3 (C4 - 12)
+#define D3 (D4 - 12)
+#define E3 (E4 - 12)
+#define F3 (F4 - 12)
+#define G3 (G4 - 12)
+#define A3 (A4 - 12)
+#define B3 (B4 - 12)
+
+#define C5 (C4 + 12)
+#define D5 (D4 + 12)
+#define E5 (E4 + 12)
+#define F5 (F4 + 12)
+#define G5 (G4 + 12)
+#define A5 (A4 + 12)
+#define B5 (B4 + 12)
+
+TEST_CASE("tintinabulator: basic quantization")
+{
+    TintQuantizer tq;
+
+    tq.reset();
+    tq.mode = TintQuantizer::MODE_QUANTIZE;
+    tq.octave = 0;
+
+    tq.chordState[0] = pitchToVoltage(C4);
+    tq.chordState[1] = pitchToVoltage(E4);
+    tq.chordState[2] = pitchToVoltage(G4);
+
+    tq.chordDeviation[0] = 0.f;
+    tq.chordDeviation[1] = 0.f;
+    tq.chordDeviation[2] = 0.f;
+
+    tq.setChordNotes(3);
+
+    // since the reference chord is using 12-TET, make the assertions in terms of pitch "note" rather than
+    // frequency.  easier to debug if something goes haywire for the basics.
+    CHECK(C4 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(C4))));
+    CHECK(C4 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(B3))));
+    CHECK(E4 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(E4))));
+    CHECK(E4 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(F4))));
+    CHECK(G4 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(G4))));
+    CHECK(G4 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(A4))));
+
+    // and should work at any octave:
+
+    CHECK(C4 + 12 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(C4 + 12))));
+    CHECK(C4 + 12 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(B3 + 12))));
+    CHECK(E4 + 12 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(E4 + 12))));
+    CHECK(E4 + 12 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(F4 + 12))));
+    CHECK(G4 + 12 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(G4 + 12))));
+    CHECK(G4 + 12 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(A4 + 12))));
+}
+
+TEST_CASE("tintinabulator: tint UP")
+{
+    TintQuantizer tq;
+
+    tq.reset();
+    tq.mode = TintQuantizer::MODE_UP;
+    tq.octave = 0;
+
+    tq.chordState[0] = pitchToVoltage(C4);
+    tq.chordState[1] = pitchToVoltage(E4);
+    tq.chordState[2] = pitchToVoltage(G4);
+
+    tq.chordDeviation[0] = 0.f;
+    tq.chordDeviation[1] = 0.f;
+    tq.chordDeviation[2] = 0.f;
+
+    tq.setChordNotes(3);
+
+    // since the reference chord is using 12-TET, make the assertions in terms of pitch "note" rather than
+    // frequency.  easier to debug if something goes haywire for the basics.
+    CHECK(E4 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(C4))));
+    CHECK(C4 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(B3))));
+    CHECK(G4 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(E4))));
+    CHECK(G4 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(F4))));
+    CHECK(C5 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(G4))));
+    CHECK(C5 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(A4))));
+
+    // and should work at any octave:
+
+    CHECK(E4 + 12 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(C4 + 12))));
+    CHECK(C4 + 12 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(B3 + 12))));
+    CHECK(G4 + 12 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(E4 + 12))));
+    CHECK(G4 + 12 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(F4 + 12))));
+    CHECK(C5 + 12 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(G4 + 12))));
+    CHECK(C5 + 12 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(A4 + 12))));
+}
+
+TEST_CASE("tintinabulator: tint DOWN")
+{
+    TintQuantizer tq;
+
+    tq.reset();
+    tq.mode = TintQuantizer::MODE_DOWN;
+    tq.octave = 0;
+
+    tq.chordState[0] = pitchToVoltage(C4);
+    tq.chordState[1] = pitchToVoltage(E4);
+    tq.chordState[2] = pitchToVoltage(G4);
+
+    tq.chordDeviation[0] = 0.f;
+    tq.chordDeviation[1] = 0.f;
+    tq.chordDeviation[2] = 0.f;
+
+    tq.setChordNotes(3);
+
+    // since the reference chord is using 12-TET, make the assertions in terms of pitch "note" rather than
+    // frequency.  easier to debug if something goes haywire for the basics.
+    CHECK(G3 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(C4))));
+    CHECK(G3 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(B3))));
+    CHECK(C4 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(E4))));
+    CHECK(E4 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(F4))));
+    CHECK(E4 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(G4))));
+    CHECK(G4 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(A4))));
+
+    // and should work at any octave:
+
+    CHECK(G3 + 12 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(C4 + 12))));
+    CHECK(G3 + 12 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(B3 + 12))));
+    CHECK(C4 + 12 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(E4 + 12))));
+    CHECK(E4 + 12 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(F4 + 12))));
+    CHECK(E4 + 12 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(G4 + 12))));
+    CHECK(G4 + 12 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(A4 + 12))));
+}
+
+TEST_CASE("tintinabulator: tint UP2")
+{
+    TintQuantizer tq;
+
+    tq.reset();
+    tq.mode = TintQuantizer::MODE_UP2;
+    tq.octave = 0;
+
+    tq.chordState[0] = pitchToVoltage(C4);
+    tq.chordState[1] = pitchToVoltage(E4);
+    tq.chordState[2] = pitchToVoltage(G4);
+
+    tq.chordDeviation[0] = 0.f;
+    tq.chordDeviation[1] = 0.f;
+    tq.chordDeviation[2] = 0.f;
+
+    tq.setChordNotes(3);
+
+    // since the reference chord is using 12-TET, make the assertions in terms of pitch "note" rather than
+    // frequency.  easier to debug if something goes haywire for the basics.
+    CHECK(G4 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(C4))));
+    CHECK(E4 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(B3))));
+    CHECK(C5 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(E4))));
+    CHECK(C5 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(F4))));
+    CHECK(E5 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(G4))));
+    CHECK(E5 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(A4))));
+
+    // and should work at any octave:
+
+    CHECK(G4 + 12 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(C4 + 12))));
+    CHECK(E4 + 12 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(B3 + 12))));
+    CHECK(C5 + 12 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(E4 + 12))));
+    CHECK(C5 + 12 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(F4 + 12))));
+    CHECK(E5 + 12 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(G4 + 12))));
+    CHECK(E5 + 12 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(A4 + 12))));
+}
+
+TEST_CASE("tintinabulator: tint DOWN2")
+{
+    TintQuantizer tq;
+
+    tq.reset();
+    tq.mode = TintQuantizer::MODE_DOWN2;
+    tq.octave = 0;
+
+    tq.chordState[0] = pitchToVoltage(C4);
+    tq.chordState[1] = pitchToVoltage(E4);
+    tq.chordState[2] = pitchToVoltage(G4);
+
+    tq.chordDeviation[0] = 0.f;
+    tq.chordDeviation[1] = 0.f;
+    tq.chordDeviation[2] = 0.f;
+
+    tq.setChordNotes(3);
+
+    // since the reference chord is using 12-TET, make the assertions in terms of pitch "note" rather than
+    // frequency.  easier to debug if something goes haywire for the basics.
+    CHECK(E3 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(C4))));
+    CHECK(E3 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(B3))));
+    CHECK(G3 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(E4))));
+    CHECK(C4 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(F4))));
+    CHECK(C4 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(G4))));
+    CHECK(E4 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(A4))));
+
+    // and should work at any octave:
+
+    CHECK(E3 + 12 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(C4 + 12))));
+    CHECK(E3 + 12 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(B3 + 12))));
+    CHECK(G3 + 12 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(E4 + 12))));
+    CHECK(C4 + 12 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(F4 + 12))));
+    CHECK(C4 + 12 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(G4 + 12))));
+    CHECK(E4 + 12 == voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(A4 + 12))));
 }

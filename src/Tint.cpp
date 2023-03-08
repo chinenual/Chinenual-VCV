@@ -1,11 +1,8 @@
 #include <osdialog.h>
 
 #include "PitchNote.hpp"
+#include "TintQuantizer.hpp"
 #include "plugin.hpp"
-
-#define NUM_INPUT_ROWS 6
-#define NUM_INPUT_COLS 2
-#define NUM_INPUTS (NUM_INPUT_ROWS * NUM_INPUT_COLS)
 
 namespace Chinenual {
 namespace Tint {
@@ -31,23 +28,8 @@ namespace Tint {
             LIGHTS_LEN
         };
 
-        enum Mode {
-            MODE_UP,
-            MODE_DOWN,
-            MODE_UP_DOWN,
-            MODE_UP2,
-            MODE_DOWN2,
-            MODE_UP2_DOWN2,
-            MODE_QUANTIZE
-        };
-
-        Mode mode;
-        int octave;
-        bool upDown; // current note is playing up or down when bidirectional
-        int chordNotes[PITCH_NOTE_MAX - PITCH_NOTE_MIN]; // -1 not in chord;  >= 0 index of the reference chord note
-        float chordState[rack::PORT_MAX_CHANNELS];
-        float chordDeviation[rack::PORT_MAX_CHANNELS];
         dsp::SchmittTrigger gateTrigger;
+        TintQuantizer tintQuantizer;
 
         Tint()
         {
@@ -65,30 +47,15 @@ namespace Tint {
 
         void onReset() override
         {
-            mode = MODE_UP;
-            octave = 0;
-            upDown = false;
             gateTrigger.reset();
-            for (int n = PITCH_NOTE_MIN; n <= PITCH_NOTE_MAX; n++) {
-                chordNotes[n - PITCH_NOTE_MIN] = -1;
-            }
-            // INFO("RESET!");
-            for (int i = 0; i < rack::PORT_MAX_CHANNELS; i++) {
-                chordState[i] = 0.f;
-                chordDeviation[i] = 0.f;
-            }
-        }
-
-        bool inChord(int note)
-        {
-            return chordNotes[note - PITCH_NOTE_MIN] >= 0;
+            tintQuantizer.reset();
         }
 
         json_t* dataToJson() override
         {
             json_t* rootJ = json_object();
-            json_object_set_new(rootJ, "octave", json_integer(octave));
-            json_object_set_new(rootJ, "mode", json_integer(mode));
+            json_object_set_new(rootJ, "octave", json_integer(tintQuantizer.octave));
+            json_object_set_new(rootJ, "mode", json_integer(tintQuantizer.mode));
             return rootJ;
         }
 
@@ -99,109 +66,22 @@ namespace Tint {
 
             json_t* modeJ = json_object_get(rootJ, "mode");
             if (modeJ) {
-                mode = (Mode)json_integer_value(modeJ);
+                tintQuantizer.mode = (TintQuantizer::Mode)json_integer_value(modeJ);
             }
             json_t* octaveJ = json_object_get(rootJ, "octave");
             if (octaveJ) {
-                octave = json_integer_value(octaveJ);
+                tintQuantizer.octave = json_integer_value(octaveJ);
             }
-        }
-
-        float tintinnabulate(float v)
-        {
-            int note = voltageToPitch(v);
-
-            int delta = 0; // up or down
-            int count = 0; // (1 = first available note in the chord, 2 = second)
-            switch (mode) {
-            case MODE_UP:
-                count = 1;
-                delta = 1;
-                break;
-            case MODE_UP2:
-                count = 2;
-                delta = 1;
-                break;
-            case MODE_DOWN:
-                count = 1;
-                delta = -1;
-                break;
-            case MODE_DOWN2:
-                count = 2;
-                delta = -1;
-                break;
-            case MODE_UP_DOWN:
-                count = 1;
-                delta = upDown ? 1 : -1;
-                break;
-            case MODE_UP2_DOWN2:
-                count = 2;
-                delta = upDown ? 1 : -1;
-                break;
-            case MODE_QUANTIZE:
-                // not really tintinnabulation - we just snap to the nearest note in the chord (nearest by frequency)
-                float down_v = 0.f, up_v = 0.f; // voltages of the nearest note up or down
-                for (int n = note; n <= PITCH_NOTE_MAX; n++) {
-                    if (inChord(n)) {
-                        up_v = microPitchToVoltage(n + chordDeviation[inChord(n) - 1]);
-                        break;
-                    }
-                }
-                for (int n = note - 1; n >= PITCH_NOTE_MIN; n--) {
-                    if (inChord(n)) {
-                        down_v = microPitchToVoltage(n + chordDeviation[inChord(n) - 1]);
-                        break;
-                    }
-                }
-                // choose the nearest one
-                if ((up_v - v) < (v - down_v)) {
-                    // INFO("QUANTIZE %f %d %f %f -> %f (%f)", v, note, up_v, down_v, up_v,
-                    //     up_v + octave);
-                    return up_v + octave; // octave can be used directly since V/oct is 1 volt per octave
-                } else {
-                    // INFO("QUANTIZE %f %d %f %f -> %f (%f)", v, note, up_v, down_v, down_v,
-                    //     down_v + octave);
-                    return down_v + octave; // octave can be used directly since V/oct is 1 volt per octave
-                }
-                break;
-            }
-            if (delta > 0) {
-                // UP
-                int c = 0;
-                for (int n = note + 1; n <= PITCH_NOTE_MAX; n++) {
-                    if (inChord(n)) {
-                        c++;
-                    }
-                    if (c == count) {
-                        // INFO("n:%d inc:%d  dev:%f -> %f\n,", n, inChord(n), chordDeviation[inChord(n) - 1],
-                        //     microPitchToVoltage(n + (octave * 12) + chordDeviation[inChord(n) - 1]));
-                        return microPitchToVoltage(n + (octave * 12) + chordDeviation[inChord(n) - 1]);
-                    }
-                }
-            } else {
-                // DOWN
-                int c = 0;
-                for (int n = note - 1; n >= PITCH_NOTE_MIN; n--) {
-                    if (inChord(n)) {
-                        c++;
-                    }
-                    if (c == count) {
-                        return microPitchToVoltage(n + (octave * 12) + chordDeviation[inChord(n) - 1]);
-                    }
-                }
-            }
-            // shouldnt happen, but return something reasonable
-            return pitchToVoltage(note + (octave * 12));
         }
 
         void process(const ProcessArgs& args) override
         {
             // if (args.frame % 1) {
-            mode = (Mode)(int)params[MODE_PARAM].getValue();
-            octave = (int)params[OCTAVE_PARAM].getValue();
+            tintQuantizer.mode = (TintQuantizer::Mode)(int)params[MODE_PARAM].getValue();
+            tintQuantizer.octave = (int)params[OCTAVE_PARAM].getValue();
             if (gateTrigger.process(inputs[GATE_INPUT].getVoltage(), 1.f, 2.f)) {
                 // toggle the direction
-                upDown = !upDown;
+                tintQuantizer.upDown = !tintQuantizer.upDown;
             }
 
             bool chordChange = false;
@@ -209,34 +89,21 @@ namespace Tint {
                 // we assume inputs are in +/-10V
                 float v = clamp(inputs[CHORD_INPUT].getPolyVoltage(c), PITCH_VOCT_MIN, PITCH_VOCT_MAX);
                 float deviate = voltageToPitchDeviation(v);
-                if (v != chordState[c] || deviate != chordDeviation[c]) {
+                if (v != tintQuantizer.chordState[c] || deviate != tintQuantizer.chordDeviation[c]) {
                     chordChange = true;
                 }
-                chordState[c] = v;
-                chordDeviation[c] = deviate;
+                tintQuantizer.chordState[c] = v;
+                tintQuantizer.chordDeviation[c] = deviate;
             }
             if (chordChange) {
-                for (int n = PITCH_NOTE_MIN; n <= PITCH_NOTE_MIN; n++) {
-                    chordNotes[n - PITCH_NOTE_MIN] = -1;
-                }
-                for (int c = 0; c < inputs[CHORD_INPUT].getChannels(); c++) {
-                    // INFO("CHORD CHANGE [%d] %f -> %f\n", c, chordState[c], chordDeviation[c]);
-                    // we assume inputs are in +/-10V
-                    float v = clamp(inputs[CHORD_INPUT].getPolyVoltage(c), PITCH_VOCT_MIN, PITCH_VOCT_MAX);
-                    int chord_n = voltageToPitch(v);
-                    for (int n = PITCH_NOTE_MIN; n <= PITCH_NOTE_MAX; n++) {
-                        if ((n % 12) == (chord_n % 12)) {
-                            chordNotes[n - PITCH_NOTE_MIN] = c + 1;
-                        }
-                    }
-                }
+                tintQuantizer.setChordNotes(inputs[CHORD_INPUT].getChannels());
             }
             int tint_c = 0;
             int mix_c = 0;
             for (int c = 0; c < inputs[PITCH_INPUT].getChannels(); c++) {
                 // we assume inputs are in +/-10V
                 float in_v = clamp(inputs[PITCH_INPUT].getPolyVoltage(c), PITCH_VOCT_MIN, PITCH_VOCT_MAX);
-                float tint_v = tintinnabulate(in_v);
+                float tint_v = tintQuantizer.tintinnabulate(in_v);
                 outputs[TINT_OUTPUT].setVoltage(tint_v, tint_c);
                 outputs[MIX_OUTPUT].setVoltage(in_v, mix_c);
                 outputs[MIX_OUTPUT].setVoltage(tint_v, mix_c + 1);
