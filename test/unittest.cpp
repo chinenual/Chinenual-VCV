@@ -327,7 +327,7 @@ TEST_CASE("tintinabulator: basic quantization")
     tq.chordInputVoltageState[1] = pitchToVoltage(E4);
     tq.chordInputVoltageState[2] = pitchToVoltage(G4);
 
-    tq.setChordFreqs(3);
+    tq.prepare(3);
 
     // since the reference chord is using 12-TET, make the assertions in terms of pitch "note" rather than
     // frequency.  easier to debug if something goes haywire for the basics.
@@ -360,7 +360,7 @@ TEST_CASE("tintinabulator: tint UP")
     tq.chordInputVoltageState[1] = pitchToVoltage(E4);
     tq.chordInputVoltageState[2] = pitchToVoltage(G4);
 
-    tq.setChordFreqs(3);
+    tq.prepare(3);
 
     // since the reference chord is using 12-TET, make the assertions in terms of pitch "note" rather than
     // frequency.  easier to debug if something goes haywire for the basics.
@@ -393,7 +393,7 @@ TEST_CASE("tintinabulator: tint DOWN")
     tq.chordInputVoltageState[1] = pitchToVoltage(E4);
     tq.chordInputVoltageState[2] = pitchToVoltage(G4);
 
-    tq.setChordFreqs(3);
+    tq.prepare(3);
 
     // since the reference chord is using 12-TET, make the assertions in terms of pitch "note" rather than
     // frequency.  easier to debug if something goes haywire for the basics.
@@ -451,7 +451,7 @@ TEST_CASE("tintinabulator: tint UP2")
     tq.chordInputVoltageState[1] = pitchToVoltage(E4);
     tq.chordInputVoltageState[2] = pitchToVoltage(G4);
 
-    tq.setChordFreqs(3);
+    tq.prepare(3);
 
     // since the reference chord is using 12-TET, make the assertions in terms of pitch "note" rather than
     // frequency.  easier to debug if something goes haywire for the basics.
@@ -484,7 +484,7 @@ TEST_CASE("tintinabulator: tint DOWN2")
     tq.chordInputVoltageState[1] = pitchToVoltage(E4);
     tq.chordInputVoltageState[2] = pitchToVoltage(G4);
 
-    tq.setChordFreqs(3);
+    tq.prepare(3);
 
     // since the reference chord is using 12-TET, make the assertions in terms of pitch "note" rather than
     // frequency.  easier to debug if something goes haywire for the basics.
@@ -517,7 +517,7 @@ TEST_CASE("tintinabulator: tint UP_DOWN")
     tq.chordInputVoltageState[1] = pitchToVoltage(E4);
     tq.chordInputVoltageState[2] = pitchToVoltage(G4);
 
-    tq.setChordFreqs(3);
+    tq.prepare(3);
 
     // since the reference chord is using 12-TET, make the assertions in terms of pitch "note" rather than
     // frequency.  easier to debug if something goes haywire for the basics.
@@ -541,7 +541,7 @@ TEST_CASE("tintinabulator: tint UP2_DOWN2")
     tq.chordInputVoltageState[1] = pitchToVoltage(E4);
     tq.chordInputVoltageState[2] = pitchToVoltage(G4);
 
-    tq.setChordFreqs(3);
+    tq.prepare(3);
 
     // since the reference chord is using 12-TET, make the assertions in terms of pitch "note" rather than
     // frequency.  easier to debug if something goes haywire for the basics.
@@ -569,7 +569,7 @@ TEST_CASE("tintinabulator: quantization with non-12-TET reference")
     tq.chordInputVoltageState[1] = microPitchToVoltage(PE4);
     tq.chordInputVoltageState[2] = microPitchToVoltage(PG4);
 
-    tq.setChordFreqs(3);
+    tq.prepare(3);
 
     float epsilon = 0.0001f;
 
@@ -596,7 +596,7 @@ TEST_CASE("tintinabulator: quantization with non-12-TET reference")
     tq.chordInputVoltageState[1] = microPitchToVoltage(PE4);
     tq.chordInputVoltageState[2] = microPitchToVoltage(PG4 + 5 * 12);
 
-    tq.setChordFreqs(3);
+    tq.prepare(3);
 
     REQUIRE_THAT(PC4, WithinAbs(voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(B3))), epsilon));
     REQUIRE_THAT(PC4, WithinAbs(voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(C4))), epsilon));
@@ -622,7 +622,7 @@ TEST_CASE("tintinabulator: quantization with non-12-TET reference and non-12-TET
     tq.chordInputVoltageState[1] = microPitchToVoltage(PE4);
     tq.chordInputVoltageState[2] = microPitchToVoltage(PG4);
 
-    tq.setChordFreqs(3);
+    tq.prepare(3);
 
     float epsilon = 0.0001f;
 
@@ -655,7 +655,7 @@ TEST_CASE("tintinabulator: quantization with non-12-TET melody - check distance 
     tq.chordInputVoltageState[1] = microPitchToVoltage(E4);
     tq.chordInputVoltageState[2] = microPitchToVoltage(G4);
 
-    tq.setChordFreqs(3);
+    tq.prepare(3);
 
     float epsilon = 0.0001f;
 

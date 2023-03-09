@@ -213,7 +213,10 @@ Controls:
    V/Oct).   Aaron Static's ChordCV produces a suitable signal.  The
    chord frequencies need not be 12 note equal-temperament.  The
    resulting harmony notes will be chosen to match whatever tuning
-   system is used in the chord input.
+   system is used in the chord input. The Tintinnabulator uses the
+   reference chord to layout notes in a normalized octave, then
+   replicates that quantization throughout the full voltage range,
+   repeating the pattern for every octave. 
    
  * **Melody** - the pitches to be harmonized.  (polyphonic: V/Oct).
  

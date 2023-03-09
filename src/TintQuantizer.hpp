@@ -24,13 +24,10 @@ namespace Tint {
         int octave;
         // current note is playing up or down when bidirectional
         bool upDown;
-        // MAX_FLOAT for not in chord
-        float chordFreqs[PITCH_NOTE_MAX - PITCH_NOTE_MIN];
+        // MAX_FLOAT for not in chord; otherwise the quantized v/oct value for the note
+        float quantizedNoteVoltages[PITCH_NOTE_MAX - PITCH_NOTE_MIN];
         // actual voltage specified for the given entry in the reference chord
         float chordInputVoltageState[rack::PORT_MAX_CHANNELS];
-
-        //        // chordDeviation is "cents/100" (pitch deviation) - so relative to 12-TET MIDI note; not frequency.  See pitchDevToFreqDev()
-        //        float chordDeviation[rack::PORT_MAX_CHANNELS];
 
         void reset()
         {
@@ -38,7 +35,7 @@ namespace Tint {
             octave = 0;
             upDown = false;
             for (int n = PITCH_NOTE_MIN; n <= PITCH_NOTE_MAX; n++) {
-                chordFreqs[n - PITCH_NOTE_MIN] = std::numeric_limits<float>::max();
+                quantizedNoteVoltages[n - PITCH_NOTE_MIN] = std::numeric_limits<float>::max();
             }
             // INFO("RESET!");
             for (int i = 0; i < rack::PORT_MAX_CHANNELS; i++) {
@@ -51,11 +48,11 @@ namespace Tint {
         {
             return chordFreq(note) < std::numeric_limits<float>::max();
         }
-        /* note is MIDI note value, return value is the index into chordState if >= 0 (< 0 means not in a chord)
-        Don't use the chordFreqs array directly since it is not "zero based" based on MIDI note value */
+        /* note is MIDI note value, return value it's quantized frequency voltage if < maxfloat (maxfloat means not in a chord)
+        Don't use the quantizedNoteVoltages array directly since it is not "zero based" based on MIDI note value */
         float chordFreq(int note)
         {
-            return chordFreqs[note - PITCH_NOTE_MIN];
+            return quantizedNoteVoltages[note - PITCH_NOTE_MIN];
         }
 
         float tintinnabulate(float v)
@@ -106,12 +103,8 @@ namespace Tint {
                 }
                 // choose the nearest one
                 if ((up_v - v) < (v - down_v)) {
-                    // INFO("QUANTIZE %f %d %f %f -> %f (%f)", v, note, up_v, down_v, up_v,
-                    //     up_v + octave);
                     return up_v + octave; // octave can be used directly since V/oct is 1 volt per octave
                 } else {
-                    // INFO("QUANTIZE %f %d %f %f -> %f (%f)", v, note, up_v, down_v, down_v,
-                    //     down_v + octave);
                     return down_v + octave; // octave can be used directly since V/oct is 1 volt per octave
                 }
                 break;
@@ -143,22 +136,21 @@ namespace Tint {
             return pitchToVoltage(note) + octave; // octave can be used directly since V/oct is 1 volt per octave
         }
 
-        /* Given chordState[] and chordDeviation[], setup the chordFreqs[] array */
-        void setChordFreqs(int noteCount)
+        /* Given chordInputVoltageState[], setup the quantizedNoteVoltages[] array */
+        void prepare(int noteCount)
         {
 
             for (int n = PITCH_NOTE_MIN; n <= PITCH_NOTE_MIN; n++) {
-                chordFreqs[n - PITCH_NOTE_MIN] = std::numeric_limits<float>::max();
+                quantizedNoteVoltages[n - PITCH_NOTE_MIN] = std::numeric_limits<float>::max();
             }
             for (int c = 0; c < noteCount; c++) {
-                // INFO("CHORD CHANGE [%d] %f -> %f\n", c, chordState[c], chordDeviation[c]);
                 // we assume inputs are in +/-10V
                 float v = chordInputVoltageState[c];
                 float deviate = voltageToPitchDeviation(v);
                 int chord_n = voltageToPitch(v);
                 for (int n = PITCH_NOTE_MIN; n <= PITCH_NOTE_MAX; n++) {
                     if ((n % 12) == (chord_n % 12)) {
-                        chordFreqs[n - PITCH_NOTE_MIN] = microPitchToVoltage(deviate + n);
+                        quantizedNoteVoltages[n - PITCH_NOTE_MIN] = microPitchToVoltage(deviate + n);
                     }
                 }
             }
