@@ -642,3 +642,27 @@ TEST_CASE("tintinabulator: quantization with non-12-TET reference and non-12-TET
     REQUIRE_THAT(PG4 + 12, WithinAbs(voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(G4 + 0.2f + 12))), epsilon));
     REQUIRE_THAT(PG4 + 12, WithinAbs(voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(A4 + 0.2f + 12))), epsilon));
 }
+
+TEST_CASE("tintinabulator: quantization with non-12-TET melody - check distance behavior")
+{
+    TintQuantizer tq;
+
+    tq.reset();
+    tq.mode = TintQuantizer::MODE_QUANTIZE;
+    tq.octave = 0;
+
+    tq.chordInputVoltageState[0] = microPitchToVoltage(C4);
+    tq.chordInputVoltageState[1] = microPitchToVoltage(E4);
+    tq.chordInputVoltageState[2] = microPitchToVoltage(G4);
+
+    tq.setChordFreqs(3);
+
+    float epsilon = 0.0001f;
+
+    REQUIRE_THAT(C4, WithinAbs(voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(D4 - 0.1f))), epsilon));
+    REQUIRE_THAT(C4, WithinAbs(voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(D4 - 0.01f))), epsilon));
+    // what happens at "equidistant" is arbitrary - the code prefers snapping up, so test it:
+    REQUIRE_THAT(E4, WithinAbs(voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(D4))), epsilon));
+    REQUIRE_THAT(E4, WithinAbs(voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(D4 + 0.01f))), epsilon));
+    REQUIRE_THAT(E4, WithinAbs(voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(D4 + 0.1f))), epsilon));
+}
