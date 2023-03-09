@@ -29,7 +29,7 @@ namespace Tint {
         };
 
         dsp::SchmittTrigger gateTrigger;
-        TintQuantizer tintQuantizer;
+        TintQuantizer tq;
 
         Tint()
         {
@@ -48,14 +48,14 @@ namespace Tint {
         void onReset() override
         {
             gateTrigger.reset();
-            tintQuantizer.reset();
+            tq.reset();
         }
 
         json_t* dataToJson() override
         {
             json_t* rootJ = json_object();
-            json_object_set_new(rootJ, "octave", json_integer(tintQuantizer.octave));
-            json_object_set_new(rootJ, "mode", json_integer(tintQuantizer.mode));
+            json_object_set_new(rootJ, "octave", json_integer(tq.octave));
+            json_object_set_new(rootJ, "mode", json_integer(tq.mode));
             return rootJ;
         }
 
@@ -66,44 +66,42 @@ namespace Tint {
 
             json_t* modeJ = json_object_get(rootJ, "mode");
             if (modeJ) {
-                tintQuantizer.mode = (TintQuantizer::Mode)json_integer_value(modeJ);
+                tq.mode = (TintQuantizer::Mode)json_integer_value(modeJ);
             }
             json_t* octaveJ = json_object_get(rootJ, "octave");
             if (octaveJ) {
-                tintQuantizer.octave = json_integer_value(octaveJ);
+                tq.octave = json_integer_value(octaveJ);
             }
         }
 
         void process(const ProcessArgs& args) override
         {
             // if (args.frame % 1) {
-            tintQuantizer.mode = (TintQuantizer::Mode)(int)params[MODE_PARAM].getValue();
-            tintQuantizer.octave = (int)params[OCTAVE_PARAM].getValue();
+            tq.mode = (TintQuantizer::Mode)(int)params[MODE_PARAM].getValue();
+            tq.octave = (int)params[OCTAVE_PARAM].getValue();
             if (gateTrigger.process(inputs[GATE_INPUT].getVoltage(), 1.f, 2.f)) {
                 // toggle the direction
-                tintQuantizer.upDown = !tintQuantizer.upDown;
+                tq.upDown = !tq.upDown;
             }
 
             bool chordChange = false;
             for (int c = 0; c < inputs[CHORD_INPUT].getChannels(); c++) {
                 // we assume inputs are in +/-10V
                 float v = clamp(inputs[CHORD_INPUT].getPolyVoltage(c), PITCH_VOCT_MIN, PITCH_VOCT_MAX);
-                float deviate = voltageToPitchDeviation(v);
-                if (v != tintQuantizer.chordState[c] || deviate != tintQuantizer.chordDeviation[c]) {
+                if (v != tq.chordInputVoltageState[c]) {
                     chordChange = true;
                 }
-                tintQuantizer.chordState[c] = v;
-                tintQuantizer.chordDeviation[c] = deviate;
+                tq.chordInputVoltageState[c] = v;
             }
             if (chordChange) {
-                tintQuantizer.setChordNotes(inputs[CHORD_INPUT].getChannels());
+                tq.setChordFreqs(inputs[CHORD_INPUT].getChannels());
             }
             int tint_c = 0;
             int mix_c = 0;
             for (int c = 0; c < inputs[PITCH_INPUT].getChannels(); c++) {
                 // we assume inputs are in +/-10V
                 float in_v = clamp(inputs[PITCH_INPUT].getPolyVoltage(c), PITCH_VOCT_MIN, PITCH_VOCT_MAX);
-                float tint_v = tintQuantizer.tintinnabulate(in_v);
+                float tint_v = tq.tintinnabulate(in_v);
                 outputs[TINT_OUTPUT].setVoltage(tint_v, tint_c);
                 outputs[MIX_OUTPUT].setVoltage(in_v, mix_c);
                 outputs[MIX_OUTPUT].setVoltage(tint_v, mix_c + 1);

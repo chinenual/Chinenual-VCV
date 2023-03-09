@@ -22,10 +22,15 @@ namespace Tint {
 
         Mode mode;
         int octave;
-        bool upDown; // current note is playing up or down when bidirectional
-        int chordNotes[PITCH_NOTE_MAX - PITCH_NOTE_MIN]; // -1 not in chord;  >= 0 index of the reference chord note
-        float chordState[rack::PORT_MAX_CHANNELS];
-        float chordDeviation[rack::PORT_MAX_CHANNELS];
+        // current note is playing up or down when bidirectional
+        bool upDown;
+        // MAX_FLOAT for not in chord
+        float chordFreqs[PITCH_NOTE_MAX - PITCH_NOTE_MIN];
+        // actual voltage specified for the given entry in the reference chord
+        float chordInputVoltageState[rack::PORT_MAX_CHANNELS];
+
+        //        // chordDeviation is "cents/100" (pitch deviation) - so relative to 12-TET MIDI note; not frequency.  See pitchDevToFreqDev()
+        //        float chordDeviation[rack::PORT_MAX_CHANNELS];
 
         void reset()
         {
@@ -33,18 +38,24 @@ namespace Tint {
             octave = 0;
             upDown = false;
             for (int n = PITCH_NOTE_MIN; n <= PITCH_NOTE_MAX; n++) {
-                chordNotes[n - PITCH_NOTE_MIN] = -1;
+                chordFreqs[n - PITCH_NOTE_MIN] = MAXFLOAT;
             }
             // INFO("RESET!");
             for (int i = 0; i < rack::PORT_MAX_CHANNELS; i++) {
-                chordState[i] = 0.f;
-                chordDeviation[i] = 0.f;
+                chordInputVoltageState[i] = 0.f;
             }
         }
 
+        /* note is MIDI note value */
         bool inChord(int note)
         {
-            return chordNotes[note - PITCH_NOTE_MIN] >= 0;
+            return chordFreq(note) < MAXFLOAT;
+        }
+        /* note is MIDI note value, return value is the index into chordState if >= 0 (< 0 means not in a chord)
+        Don't use the chordFreqs array directly since it is not "zero based" based on MIDI note value */
+        float chordFreq(int note)
+        {
+            return chordFreqs[note - PITCH_NOTE_MIN];
         }
 
         float tintinnabulate(float v)
@@ -83,13 +94,13 @@ namespace Tint {
                 float down_v = 0.f, up_v = 0.f; // voltages of the nearest note up or down
                 for (int n = note; n <= PITCH_NOTE_MAX; n++) {
                     if (inChord(n)) {
-                        up_v = microPitchToVoltage(n + chordDeviation[inChord(n) - 1]);
+                        up_v = chordFreq(n);
                         break;
                     }
                 }
                 for (int n = note - 1; n >= PITCH_NOTE_MIN; n--) {
                     if (inChord(n)) {
-                        down_v = microPitchToVoltage(n + chordDeviation[inChord(n) - 1]);
+                        down_v = chordFreq(n);
                         break;
                     }
                 }
@@ -113,9 +124,7 @@ namespace Tint {
                         c++;
                     }
                     if (c == count) {
-                        // INFO("n:%d inc:%d  dev:%f -> %f\n,", n, inChord(n), chordDeviation[inChord(n) - 1],
-                        //     microPitchToVoltage(n + (octave * 12) + chordDeviation[inChord(n) - 1]));
-                        return microPitchToVoltage(n + (octave * 12) + chordDeviation[inChord(n) - 1]);
+                        return chordFreq(n) + octave; // octave can be used directly since V/oct is 1 volt per octave
                     }
                 }
             } else {
@@ -126,27 +135,30 @@ namespace Tint {
                         c++;
                     }
                     if (c == count) {
-                        return microPitchToVoltage(n + (octave * 12) + chordDeviation[inChord(n) - 1]);
+                        return chordFreq(n) + octave; // octave can be used directly since V/oct is 1 volt per octave
                     }
                 }
             }
             // shouldnt happen, but return something reasonable
-            return pitchToVoltage(note + (octave * 12));
+            return pitchToVoltage(note) + octave; // octave can be used directly since V/oct is 1 volt per octave
         }
-        /* Given chordState[] and chordDeviation[], setup the chordNotes[] array */
-        void setChordNotes(int noteCount)
+
+        /* Given chordState[] and chordDeviation[], setup the chordFreqs[] array */
+        void setChordFreqs(int noteCount)
         {
+
             for (int n = PITCH_NOTE_MIN; n <= PITCH_NOTE_MIN; n++) {
-                chordNotes[n - PITCH_NOTE_MIN] = -1;
+                chordFreqs[n - PITCH_NOTE_MIN] = MAXFLOAT;
             }
             for (int c = 0; c < noteCount; c++) {
                 // INFO("CHORD CHANGE [%d] %f -> %f\n", c, chordState[c], chordDeviation[c]);
                 // we assume inputs are in +/-10V
-                float v = chordState[c];
+                float v = chordInputVoltageState[c];
+                float deviate = voltageToPitchDeviation(v);
                 int chord_n = voltageToPitch(v);
                 for (int n = PITCH_NOTE_MIN; n <= PITCH_NOTE_MAX; n++) {
                     if ((n % 12) == (chord_n % 12)) {
-                        chordNotes[n - PITCH_NOTE_MIN] = c + 1;
+                        chordFreqs[n - PITCH_NOTE_MIN] = microPitchToVoltage(deviate + n);
                     }
                 }
             }

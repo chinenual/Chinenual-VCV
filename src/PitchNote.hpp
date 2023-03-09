@@ -29,17 +29,17 @@ inline float voltageToMicroPitch(float v)
     // based on VCV CORE CV_MIDI:
     return (v * 12.f + 60.f);
 }
-/* deviation from equal temperament */
+/* deviation from equal temperament (cents/100) */
 inline float voltageToPitchDeviation(float v)
 {
     return voltageToMicroPitch(v) - (float)voltageToPitch(v);
 }
 
-inline float noteDevToFrequencyDev(float noteDeviation)
+inline float pitchDevToFrequencyDev(float pitchDeviation)
 {
-    // an octave is 12 semitones per volt.  noteDeviation is vs. a semitone ("cents / 100")
-    // so 0.5 note deviaton is 1/24 of an octave, or 1/25V)
-    return noteDeviation / 12.f;
+    // an octave is 12 semitones per volt.  pitchDeviation is vs. a semitone ("cents / 100")
+    // so 0.5 pitch deviaton is 1/24 of an octave, or 1/25V)
+    return pitchDeviation / 12.f;
 }
 
 /* Careful: noteDeviation is scaled by note value - not by voltage */
