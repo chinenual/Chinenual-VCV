@@ -94,7 +94,7 @@ namespace Tint {
                 tq.chordInputVoltageState[c] = v;
             }
             if (chordChange) {
-                tq.setChordFreqs(inputs[CHORD_INPUT].getChannels());
+                tq.prepare(inputs[CHORD_INPUT].getChannels());
             }
             int tint_c = 0;
             int mix_c = 0;
