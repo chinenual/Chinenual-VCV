@@ -38,7 +38,7 @@ namespace Tint {
             octave = 0;
             upDown = false;
             for (int n = PITCH_NOTE_MIN; n <= PITCH_NOTE_MAX; n++) {
-                chordFreqs[n - PITCH_NOTE_MIN] = MAXFLOAT;
+                chordFreqs[n - PITCH_NOTE_MIN] = std::numeric_limits<float>::max();
             }
             // INFO("RESET!");
             for (int i = 0; i < rack::PORT_MAX_CHANNELS; i++) {
@@ -49,7 +49,7 @@ namespace Tint {
         /* note is MIDI note value */
         bool inChord(int note)
         {
-            return chordFreq(note) < MAXFLOAT;
+            return chordFreq(note) < std::numeric_limits<float>::max();
         }
         /* note is MIDI note value, return value is the index into chordState if >= 0 (< 0 means not in a chord)
         Don't use the chordFreqs array directly since it is not "zero based" based on MIDI note value */
@@ -148,7 +148,7 @@ namespace Tint {
         {
 
             for (int n = PITCH_NOTE_MIN; n <= PITCH_NOTE_MIN; n++) {
-                chordFreqs[n - PITCH_NOTE_MIN] = MAXFLOAT;
+                chordFreqs[n - PITCH_NOTE_MIN] = std::numeric_limits<float>::max();
             }
             for (int c = 0; c < noteCount; c++) {
                 // INFO("CHORD CHANGE [%d] %f -> %f\n", c, chordState[c], chordDeviation[c]);
