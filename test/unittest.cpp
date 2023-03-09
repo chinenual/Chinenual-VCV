@@ -588,4 +588,57 @@ TEST_CASE("tintinabulator: quantization with non-12-TET reference")
     REQUIRE_THAT(PE4 + 12, WithinAbs(voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(F4 + 12))), epsilon));
     REQUIRE_THAT(PG4 + 12, WithinAbs(voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(G4 + 12))), epsilon));
     REQUIRE_THAT(PG4 + 12, WithinAbs(voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(A4 + 12))), epsilon));
+
+    // based on the 8-mar bug report, set one of the reference notes to far outside the octave.  Should
+    // normalize and work as if the chord was all within an octave:
+
+    tq.chordInputVoltageState[0] = microPitchToVoltage(PC4);
+    tq.chordInputVoltageState[1] = microPitchToVoltage(PE4);
+    tq.chordInputVoltageState[2] = microPitchToVoltage(PG4 + 5 * 12);
+
+    tq.setChordFreqs(3);
+
+    REQUIRE_THAT(PC4, WithinAbs(voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(B3))), epsilon));
+    REQUIRE_THAT(PC4, WithinAbs(voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(C4))), epsilon));
+    REQUIRE_THAT(PE4, WithinAbs(voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(E4))), epsilon));
+    REQUIRE_THAT(PE4, WithinAbs(voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(F4))), epsilon));
+    REQUIRE_THAT(PG4, WithinAbs(voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(G4))), epsilon));
+    REQUIRE_THAT(PG4, WithinAbs(voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(A4))), epsilon));
+}
+
+TEST_CASE("tintinabulator: quantization with non-12-TET reference and non-12-TET melody")
+{
+    TintQuantizer tq;
+
+    tq.reset();
+    tq.mode = TintQuantizer::MODE_QUANTIZE;
+    tq.octave = 0;
+
+    const float PC4 = C4 + 0.2f;
+    const float PE4 = E4 - 0.4f;
+    const float PG4 = G4 + 0.6f;
+
+    tq.chordInputVoltageState[0] = microPitchToVoltage(PC4);
+    tq.chordInputVoltageState[1] = microPitchToVoltage(PE4);
+    tq.chordInputVoltageState[2] = microPitchToVoltage(PG4);
+
+    tq.setChordFreqs(3);
+
+    float epsilon = 0.0001f;
+
+    REQUIRE_THAT(PC4, WithinAbs(voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(B3 + 0.2f))), epsilon));
+    REQUIRE_THAT(PC4, WithinAbs(voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(C4 + 0.2f))), epsilon));
+    REQUIRE_THAT(PE4, WithinAbs(voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(E4 + 0.2f))), epsilon));
+    REQUIRE_THAT(PE4, WithinAbs(voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(F4 + 0.2f))), epsilon));
+    REQUIRE_THAT(PG4, WithinAbs(voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(G4 + 0.2f))), epsilon));
+    REQUIRE_THAT(PG4, WithinAbs(voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(A4 + 0.2f))), epsilon));
+
+    // and should work at any octave:
+
+    REQUIRE_THAT(PC4 + 12, WithinAbs(voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(B3 + 0.2f + 12))), epsilon));
+    REQUIRE_THAT(PC4 + 12, WithinAbs(voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(C4 + 0.2f + 12))), epsilon));
+    REQUIRE_THAT(PE4 + 12, WithinAbs(voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(E4 + 0.2f + 12))), epsilon));
+    REQUIRE_THAT(PE4 + 12, WithinAbs(voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(F4 + 0.2f + 12))), epsilon));
+    REQUIRE_THAT(PG4 + 12, WithinAbs(voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(G4 + 0.2f + 12))), epsilon));
+    REQUIRE_THAT(PG4 + 12, WithinAbs(voltageToMicroPitch(tq.tintinnabulate(pitchToVoltage(A4 + 0.2f + 12))), epsilon));
 }

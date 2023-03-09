@@ -1,6 +1,6 @@
 # Change log for Chinenual-VCV
 
-## 2.4.1
+## 2.4.2
 
 * Implements [issue #5](https://github.com/chinenual/Chinenual-VCV/issues/5).
   The Tintinabulator now supports non-equal temperament tunings. 
@@ -12,6 +12,10 @@
   Tintinnabulator to be used as a general purpose "chord quantizer".
 * Fixes [issue #4](https://github.com/chinenual/Chinenual-VCV/issues/4)
   NoteMeter crash reported on Windows.
+
+## 2.4.1
+
+* Skipped due to release build mixup.
 
 ## 2.4.0
 
