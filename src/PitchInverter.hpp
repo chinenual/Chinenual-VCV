@@ -8,7 +8,9 @@ namespace Inv {
     struct PitchInverter {
         enum Mode {
             MODE_CHROMATIC,
-            MODE_DIATONIC,
+            // no support for TONAL inversion (yet?).  Requires more thought on how to specify the pitch offset
+            // to start the inversion
+            // MODE_DIATONIC,
         };
 
         Mode mode;
@@ -18,17 +20,15 @@ namespace Inv {
             mode = MODE_CHROMATIC;
         }
 
-        float invert(float pivot, float v)
+        /* All args in V/oct.  pivot: the note around which to reflect; v: the note to invert */
+        float invert(float pivot_v, float v)
         {
-            int note_pivot = voltageToPitch(pivot);
-            int note_v = voltageToPitch(v);
-
             if (mode == MODE_CHROMATIC) {
-                float offset = v - pivot;
-                return pivot - offset;
+                float offset = v - pivot_v;
+                return pivot_v - offset;
             }
-            // else return something "reasonable"
-            return pitchToVoltage(note_v);
+            // should never happen. return something "reasonable"
+            return v;
         }
     };
 
