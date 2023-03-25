@@ -1,7 +1,7 @@
 {
 	"slug": "Chinenual-VCV",
 	"name": "Chinenual",
-	"version": "2.4.2",
+	"version": "2.5.0-beta1",
 	"license": "GPL-3.0-or-later",
 	"brand": "Chinenual",
 	"author": "Steve Tynor",
@@ -45,25 +45,35 @@
 				"drum"
 			]
 		},
-                {       
-                        "slug": "Tint",
-                        "name": "Tintinnabulator",
-                        "description": "Harmonizes via Arvo Pärt style Tintinnabulation",
-                        "manualUrl": "https://github.com/chinenual/Chinenual-VCV/blob/main/README.md#tintinnabulator",
-                        "tags": [
-                                "quantizer",
-                                "utility"
-                        ]
-                },
-                {       
-                        "slug": "NoteMeter",
-                        "name": "NoteMeter",
-                        "description": "Display note names for inbound V/Oct voltages",
-                        "manualUrl": "https://github.com/chinenual/Chinenual-VCV/blob/main/README.md#notemeter",
-                        "tags": [
-                                "visual",
-                                "utility"
-                        ]
-                }      
+		{
+			"slug": "Tint",
+			"name": "Tintinnabulator",
+			"description": "Harmonizes via Arvo Pärt style Tintinnabulation",
+			"manualUrl": "https://github.com/chinenual/Chinenual-VCV/blob/main/README.md#tintinnabulator",
+			"tags": [
+				"quantizer",
+				"utility"
+			]
+		},
+		{
+			"slug": "NoteMeter",
+			"name": "NoteMeter",
+			"description": "Display note names for inbound V/Oct voltages",
+			"manualUrl": "https://github.com/chinenual/Chinenual-VCV/blob/main/README.md#notemeter",
+			"tags": [
+				"visual",
+				"utility"
+			]
+		},
+		{
+			"slug": "Inv",
+			"name": "Melody Inverter",
+			"description": "Produce inverted melodies",
+			"manualUrl": "https://github.com/chinenual/Chinenual-VCV/blob/main/README.md#inv",
+			"tags": [
+				"quantizer",
+				"utility"
+			]
+		}
 	]
 }

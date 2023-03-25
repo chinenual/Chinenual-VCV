@@ -12,3 +12,4 @@ extern Model* modelMIDIRecorderCC;
 extern Model* modelDrumMap;
 extern Model* modelTint;
 extern Model* modelNoteMeter;
+extern Model* modelInv;
