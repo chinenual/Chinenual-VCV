@@ -1,5 +1,9 @@
 # Change log for Chinenual-VCV
 
+## 2.5.0
+
+* New module, Inv, produces a chromatically inverted V/oct pitch relative to a specified "pivot" pitch.
+
 ## 2.4.2
 
 * Implements [issue #5](https://github.com/chinenual/Chinenual-VCV/issues/5).

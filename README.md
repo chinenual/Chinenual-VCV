@@ -25,6 +25,8 @@ The [Changelog](./CHANGELOG.md) describes changes.
 * [Tintinnabulator](#tintinnabulator) - Produce a harmonized pitch from an input chord and melody using Arvo Pärt-style tintinnabulation.
 
 * [NoteMeter](#notemeter) - a polyphonic metering module that displays note names from V/Oct inputs.
+
+* [Inv](#inv) - Produce a chromatically inverted V/oct pitch relative to a specified "pivot" pitch.
   
 ### MIDI Recorder
 
@@ -240,7 +242,14 @@ NoteMeter is a polyphonic metering module that displays note names
 from V/Oct inputs.	If the input voltage does not align exactly with a
 note voltage it indicates the deviance from the closest note as
 "cents". 
+
+### Inv
+
+![module-screenshot](./doc/Inv.png) 
+![module-screenshot](./doc/InvPatched.png) 
    
+Inv produces a chromatically inverted V/oct pitch relative to a specified "pivot" pitch. Consider quantizing the resulting signal to approximate diatonic inversion.
+
 ## Acknowledgements
 
 The MIDIRecorder leverages builtin functionality of the VCV Rack core
