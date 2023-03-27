@@ -13,6 +13,7 @@ The [Changelog](./CHANGELOG.md) describes changes.
 [![module-screenshot](./doc/DrumMap.png) ](#drummap)
 [![module-screenshot](./doc/Tint.png)](#tintinnabulator) 
 [![module-screenshot](./doc/NoteMeter.png)](#notemeter) 
+[![module-screenshot](./doc/Inv.png)](#inv) 
 
 * [MIDI Recorder](#midi-recorder) - a polyphonic multi-track recorder
   to convert CV to standard MIDI files.
