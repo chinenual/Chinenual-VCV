@@ -243,13 +243,28 @@ NoteMeter is a polyphonic metering module that displays note names
 from V/Oct inputs.	If the input voltage does not align exactly with a
 note voltage it indicates the deviance from the closest note as
 "cents". 
-
+ 
 ### Inv
 
 ![module-screenshot](./doc/Inv.png) 
 ![module-screenshot](./doc/InvPatched.png) 
    
 Inv produces a chromatically inverted V/oct pitch relative to a specified "pivot" pitch. Consider quantizing the resulting signal to approximate diatonic inversion.
+
+ Inputs:
+ 
+ * **Pivot** - the pitch/frequency around which the melody should be
+   inverted. (monophonic (V/Oct). 
+      
+ * **Melody** - the pitches to be inverted.  (polyphonic: V/Oct).
+
+
+Outputs:
+
+* **Inv** - the resulting inverted pitches (polyphonic: V/Oct). 
+
+* **Mix** - The original melody and inverted pitches mixed into a
+  common polyphonic output (polyphonic: V/Oct).
 
 ## Acknowledgements
 
