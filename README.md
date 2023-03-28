@@ -254,7 +254,7 @@ Inv produces a chromatically inverted V/oct pitch relative to a specified "pivot
  Inputs:
  
  * **Pivot** - the pitch/frequency around which the melody should be
-   inverted. (monophonic (V/Oct). 
+   inverted. (monophonic: V/Oct). 
       
  * **Melody** - the pitches to be inverted.  (polyphonic: V/Oct).
 
