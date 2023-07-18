@@ -14,6 +14,8 @@ void init(Plugin* p)
     p->addModel(modelTint);
     p->addModel(modelNoteMeter);
     p->addModel(modelInv);
+    p->addModel(modelSplitSort);
+    p->addModel(modelMergeSort);
 
     // Any other plugin initialization may go here.
     // As an alternative, consider lazy-loading assets and lookup tables when your

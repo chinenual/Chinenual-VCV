@@ -51,6 +51,7 @@
 			"description": "Harmonizes via Arvo Pärt style Tintinnabulation",
 			"manualUrl": "https://github.com/chinenual/Chinenual-VCV/blob/main/README.md#tintinnabulator",
 			"tags": [
+				"polyphonic",
 				"quantizer",
 				"utility"
 			]
@@ -61,6 +62,7 @@
 			"description": "Display note names for inbound V/Oct voltages",
 			"manualUrl": "https://github.com/chinenual/Chinenual-VCV/blob/main/README.md#notemeter",
 			"tags": [
+				"polyphonic",
 				"visual",
 				"utility"
 			]
@@ -71,7 +73,28 @@
 			"description": "Produce inverted melodies",
 			"manualUrl": "https://github.com/chinenual/Chinenual-VCV/blob/main/README.md#inv",
 			"tags": [
+				"polyphonic",
 				"quantizer",
+				"utility"
+			]
+		},
+		{
+			"slug": "SplitSort",
+			"name": "Polyphonic Splitter with Sort",
+			"description": "Split polyphonic signal and share sort criteriea with other SplitSort or MergeSort (inspired by Aria Salvatrice's Splort)",
+			"manualUrl": "https://github.com/chinenual/Chinenual-VCV/blob/main/README.md#polysort",
+			"tags": [
+				"polyphonic",
+				"utility"
+			]
+		},
+		{
+			"slug": "MergeSort",
+			"name": "Polyphonic Merger with Sort",
+			"description": "Merge signals into a polyphonic output and share sort criteriea with other SplitSort or MergeSort (inspired by Aria Salvatrice's Smerge)",
+			"manualUrl": "https://github.com/chinenual/Chinenual-VCV/blob/main/README.md#mergesort",
+			"tags": [
+				"polyphonic",
 				"utility"
 			]
 		}

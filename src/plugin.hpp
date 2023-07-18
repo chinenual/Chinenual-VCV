@@ -7,9 +7,11 @@ using namespace rack;
 extern Plugin* pluginInstance;
 
 // Declare each Model, defined in each module source file
+extern Model* modelDrumMap;
+extern Model* modelInv;
+extern Model* modelMergeSort;
 extern Model* modelMIDIRecorder;
 extern Model* modelMIDIRecorderCC;
-extern Model* modelDrumMap;
-extern Model* modelTint;
 extern Model* modelNoteMeter;
-extern Model* modelInv;
+extern Model* modelSplitSort;
+extern Model* modelTint;
