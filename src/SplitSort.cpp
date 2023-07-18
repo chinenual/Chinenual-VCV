@@ -28,10 +28,10 @@ namespace SplitSort {
         SplitSort()
         {
             config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
-            configParam(SORT_PARAM, 0.f, 1.f, 0.f, "Sort channels");
+            configParam(SORT_PARAM, 0.f, 1.f, 0.f, "Sort");
             configInput(LINK_INPUT, "Sorting Link");
             configOutput(LINK_OUTPUT, "Sorting Link");
-            configInput(POLY_INPUT, "Polyphonic Input");
+            configInput(POLY_INPUT, "");
             for (int i = 0; i < 16; i++) {
                 configOutput(SPLIT_OUTPUT + i, string::f("Channel %d", i + 1));
             }
@@ -66,6 +66,7 @@ namespace SplitSort {
             outputs[LINK_OUTPUT].setChannels(numChannels);
 
             if (params[SORT_PARAM].getValue()) {
+                lights[SORT_LIGHT].setBrightness(1.0f);
                 if (inputs[LINK_INPUT].isConnected()) {
                     // just use the order recorded in the LINK
                     for (int i = 0; i < 16; i++) {
@@ -99,6 +100,7 @@ namespace SplitSort {
                 }
             } else {
                 // unsorted:
+                lights[SORT_LIGHT].setBrightness(0.0f);
                 for (int i = 0; i < 16; i++) {
                     outputs[SPLIT_OUTPUT + i].setVoltage(inputs[POLY_INPUT].getVoltage(i));
                     outputs[LINK_OUTPUT].setVoltage(i, i < numChannels ? 0.1f * i : 0.f);
@@ -119,8 +121,9 @@ namespace SplitSort {
 #define BUTTON_OFFSET_Y -5.0
 
     struct SplitSortWidget : ModuleWidget {
-        struct RedLightIM : GrayModuleLightWidget {
-            RedLightIM()
+
+        struct SortLight : GrayModuleLightWidget {
+            SortLight()
             {
                 addBaseColor(nvgRGB(0xff, 0x33, 0x33));
             }
@@ -142,8 +145,8 @@ namespace SplitSort {
                 mm2px(Vec(FIRST_X, FIRST_Y_A + 0 * SPACING_Y)), module,
                 SplitSort::POLY_INPUT));
 
-            addParam(createParamCentered<LEDBezel>(mm2px(Vec(FIRST_X + SPACING_X, FIRST_Y_A + 0 * SPACING_Y)), module, SplitSort::SORT_PARAM));
-            addChild(createLightCentered<LEDBezelLight<RedLightIM>>(mm2px(Vec(FIRST_X + SPACING_X, FIRST_Y_A + 0 * SPACING_Y)), module, SplitSort::SORT_LIGHT));
+            addChild(createParamCentered<VCVBezelLatch>(mm2px(Vec(FIRST_X + SPACING_X, FIRST_Y_A + 0 * SPACING_Y)), module, SplitSort::SORT_PARAM));
+            addChild(createLightCentered<LEDBezelLight<SortLight>>(mm2px(Vec(FIRST_X + SPACING_X, FIRST_Y_A + 0 * SPACING_Y)), module, SplitSort::SORT_LIGHT));
 
             for (int i = 0; i < 8; i++) {
                 addOutput(createOutputCentered<PJ301MPort>(
