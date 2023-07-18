@@ -60,6 +60,6 @@ test: $(TEST_EXES)
 	for f in $(TEST_EXES); do echo $$f; $$f; done
 
 asan_rack:
-	DYLD_INSERT_LIBRARIES=$(wildcard /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/*/lib/darwin/libclang_rt.asan_osx_dynamic.dylib) /Applications/VCV\ Rack\ 2\ Free.app/Contents/MacOS/Rack 
+	DYLD_INSERT_LIBRARIES=$(wildcard /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/*/lib/darwin/libclang_rt.asan_osx_dynamic.dylib) /Applications/VCV\ Rack\ 2\ Pro.app/Contents/MacOS/Rack 
 	
 
