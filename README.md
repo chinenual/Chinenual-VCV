@@ -294,6 +294,9 @@ Outputs:
 
 * **Link** - a polyphonic signal that can be used to control the sort order of another MergeSort or SplitSort module.  Can be daisy chained - the first module in the chain determines the sort order.
 
+For example, a set of three SplitSort modules can be used to sort incoming MIDI note/gate/velocity all sorted by the same V/Oct criteria:
+
+![module-screenshot](./doc/SplitSort-chained.png) 
 
 ### MergeSort
 
