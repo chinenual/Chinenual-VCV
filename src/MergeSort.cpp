@@ -62,6 +62,7 @@ namespace MergeSort {
 
         void process(const ProcessArgs& args) override
         {
+            bool useLink = inputs[LINK_INPUT].isConnected();
             int numChannels = 0;
             for (int i = 15; i >= 0; i--) {
                 if (inputs[SPLIT_INPUT + i].isConnected()) {
@@ -70,49 +71,46 @@ namespace MergeSort {
                 }
             }
             outputs[LINK_OUTPUT].setChannels(numChannels);
+            outputs[POLY_OUTPUT].setChannels(numChannels);
 
             if (params[SORT_PARAM].getValue()) {
                 lights[SORT_LIGHT].setBrightness(1.0f);
-                if (inputs[LINK_INPUT].isConnected()) {
-                    // just use the order recorded in the LINK.  If there are less channels in the link than there are in this merge, then
-                    // extra channels will just be appended unsorted
-                    for (int i = 0; i < 16; i++) {
-                        // daisy chain the link input to the output:
-                        outputs[LINK_OUTPUT].setVoltage(inputs[LINK_INPUT].getVoltage(i), i);
-                        // the link element represents this element's "original unsorted position" encoded as 0.1v, 0.2v, ...
-                        int j = ((int)(inputs[LINK_INPUT].getVoltage(i) * 10.0f)) - 1;
-                        if (j < 0) {
-                            // link value was 0.f: i.e., unconnected.
-                            outputs[POLY_OUTPUT].setVoltage(0.f, i);
-                        } else {
-                            if (j >= 0 && j < 16) {
-                                // nop if out of bounds
-                                outputs[POLY_OUTPUT].setVoltage(inputs[SPLIT_INPUT + i].getVoltage(j), i);
-                            }
-                        }
-                    }
-                } else {
-                    // sort on our own and populate the LINK array.  Put the voltages in a vector with the LINK
-                    // values and sort both together using the first element as the comparison value:
-                    std::array<std::array<float, 2>, 16> sorted;
-                    for (int i = 0; i < 16; i++) {
-                        sorted[i][0] = inputs[SPLIT_INPUT + i].getVoltage();
+                // sort on our own and populate the LINK array.  Put the voltages in a vector with the LINK
+                // values and sort both together using the first element as the comparison value if sorting without
+                // a link, or the second element if using the link as the sort element.
+                std::array<std::array<float, 2>, 16> sorted;
+                for (int i = 0; i < 16; i++) {
+                    sorted[i][0] = inputs[SPLIT_INPUT + i].getVoltage();
+                    if (useLink) {
+                        // will be 0.0f for unused channels
+                        sorted[i][1] = inputs[LINK_INPUT].getVoltage(i);
+                    } else {
                         sorted[i][1] = (i + 1) * 0.1f;
                     }
-                    std::sort(sorted.begin(), sorted.begin() + numChannels,
-                        [](const std::array<float, 2>& a, const std::array<float, 2>& b) {
+                }
+                std::sort(sorted.begin(), sorted.begin() + numChannels,
+                    [useLink](const std::array<float, 2>& a, const std::array<float, 2>& b) {
+                        if (useLink) {
+                            if (a[1] == 0.0f) {
+                                // 0.0f might have meant an unused channel on the link input.
+                                // Treat it as "leave this position in place"
+                                return false;
+                            } else {
+                                return a[1] < b[1];
+                            }
+                        } else {
                             return a[0] < b[0];
-                        });
-                    for (int i = 0; i < 16; i++) {
-                        outputs[POLY_OUTPUT].setVoltage(sorted[i][0], i);
-                        outputs[LINK_OUTPUT].setVoltage(sorted[i][1], i);
-                    }
+                        }
+                    });
+                for (int i = 0; i < 16; i++) {
+                    outputs[POLY_OUTPUT].setVoltage(sorted[i][0], i);
+                    outputs[LINK_OUTPUT].setVoltage(sorted[i][1], i);
                 }
             } else {
                 // unsorted:
                 lights[SORT_LIGHT].setBrightness(0.0f);
                 for (int i = 0; i < 16; i++) {
-                    outputs[POLY_OUTPUT].setVoltage(inputs[SPLIT_INPUT + i].getVoltage(i), i);
+                    outputs[POLY_OUTPUT].setVoltage(inputs[SPLIT_INPUT + i].getVoltage(), i);
                     outputs[LINK_OUTPUT].setVoltage(i < numChannels ? 0.1f * i : 0.f, i);
                 }
             }
