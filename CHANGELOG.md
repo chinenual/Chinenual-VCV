@@ -1,5 +1,9 @@
 # Change log for Chinenual-VCV
 
+## 2.6.0
+
+* New modules, SplitSort and MergeSort, split and merge polyphonic cables while sorting the channels.  Sort criteria can be shared across modules via a LINK cable. A reimplementation of Aria Salvatrice's Splort and Splirge modules. 
+
 ## 2.5.0
 
 * New module, Inv, produces a chromatically inverted V/oct pitch relative to a specified "pivot" pitch.

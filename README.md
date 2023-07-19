@@ -14,6 +14,8 @@ The [Changelog](./CHANGELOG.md) describes changes.
 [![module-screenshot](./doc/Tint.png)](#tintinnabulator) 
 [![module-screenshot](./doc/NoteMeter.png)](#notemeter) 
 [![module-screenshot](./doc/Inv.png)](#inv) 
+[![module-screenshot](./doc/SplitSort.png)](#splitsort) 
+[![module-screenshot](./doc/MergeSort.png)](#mergesort) 
 
 * [MIDI Recorder](#midi-recorder) - a polyphonic multi-track recorder
   to convert CV to standard MIDI files.
@@ -28,6 +30,10 @@ The [Changelog](./CHANGELOG.md) describes changes.
 * [NoteMeter](#notemeter) - a polyphonic metering module that displays note names from V/Oct inputs.
 
 * [Inv](#inv) - Produce a chromatically inverted V/oct pitch relative to a specified "pivot" pitch.
+
+* [SplitSort](#splitsort) - Split a polyphonic cable and optionally sort the channels, with possibility to share sort criteria with another SplitSort or MergeSort.
+  
+* [MergeSort](#mergesort) - Merge monophonic cables into a  polyphonic output and optionally sort the channels, with possibility to share sort criteria with another SplitSort or MergeSort.
   
 ### MIDI Recorder
 
@@ -266,9 +272,55 @@ Outputs:
 * **Mix** - The original melody and inverted pitches mixed into a
   common polyphonic output (polyphonic: V/Oct).
 
+### SplitSort
+
+![module-screenshot](./doc/SplitSort.png) 
+
+Splits a polyphonic cable and optionally sorts the channels, with possibility to share sort criteria with another SplitSort or MergeSort.
+
+Buttons:
+
+* **Sort** - sort the signals when pressed. 
+
+Inputs:
+
+* **Poly** - the polyphonic cable to be split.
+
+* **Link** - if connected, sort based on the values in the Link rather than the values in the Poly.  This allows multiple modules to be sorted in the same order. Can be daisy chained - the first module in the chain determines the sort order.
+
+Outputs:
+
+* **Split** - 16 separate outputs, one for each channel of the Poly input. 
+
+* **Link** - a polyphonic signal that can be used to control the sort order of another MergeSort or SplitSort module.  Can be daisy chained - the first module in the chain determines the sort order.
+
+
+### MergeSort
+
+![module-screenshot](./doc/MergeSort.png) 
+
+Merges a set of monophonic signals into a polyphonic cable and optionally sorts the channels, with possibility to share sort criteria with another SplitSort or MergeSort.
+
+Buttons:
+
+* **Sort** - sort the signals when pressed. 
+
+Inputs:
+
+* **Split** - 16 separate inputs, one for each channel of the Poly output.  
+
+* **Link** - if connected, sort based on the values in the Link rather than the values in the Poly.  This allows multiple modules to be sorted in the same order. Can be daisy chained - the first module in the chain determines the sort order.
+
+Outputs:
+
+* **Poly** - the polyphonic output.
+
+* **Link** - a polyphonic signal that can be used to control the sort order of another MergeSort or SplitSort module.  Can be daisy chained - the first module in the chain determines the sort order.
+
+
 ## Acknowledgements
 
 The MIDIRecorder leverages builtin functionality of the VCV Rack core
 MIDI support and uses the same third party MIDI File library as
 Squinky Lab's SEQ++ (Craig Stewart's [midifile](https://github.com/craigsapp/midifile) library). 
-
+MergeSort and SplitSort are reimplementations of Aria Salvatrice's Splort and Splirge modules.
