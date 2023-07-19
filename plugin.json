@@ -91,7 +91,7 @@
 		{
 			"slug": "MergeSort",
 			"name": "Polyphonic Merger with Sort",
-			"description": "Merge signals into a polyphonic output and share sort criteriea with other SplitSort or MergeSort (inspired by Aria Salvatrice's Smerge)",
+			"description": "Merge signals into a polyphonic output and share sort criteriea with other SplitSort or MergeSort (inspired by Aria Salvatrice's Splirge)",
 			"manualUrl": "https://github.com/chinenual/Chinenual-VCV/blob/main/README.md#mergesort",
 			"tags": [
 				"polyphonic",
