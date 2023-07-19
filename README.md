@@ -284,13 +284,13 @@ Buttons:
 
 Inputs:
 
-* **Poly** - the polyphonic cable to be split.
+* **In** - the polyphonic cable to be split.
 
 * **Link** - if connected, sort based on the values in the Link rather than the values in the Poly.  This allows multiple modules to be sorted in the same order. Can be daisy chained - the first module in the chain determines the sort order.
 
 Outputs:
 
-* **Split** - 16 separate outputs, one for each channel of the Poly input. 
+* **Out** - 16 separate outputs, one for each channel of the Poly input. 
 
 * **Link** - a polyphonic signal that can be used to control the sort order of another MergeSort or SplitSort module.  Can be daisy chained - the first module in the chain determines the sort order.
 
@@ -310,13 +310,13 @@ Buttons:
 
 Inputs:
 
-* **Split** - 16 separate inputs, one for each channel of the Poly output.  
+* **In** - 16 separate inputs, one for each channel of the Poly output.  
 
 * **Link** - if connected, sort based on the values in the Link rather than the values in the Poly.  This allows multiple modules to be sorted in the same order. Can be daisy chained - the first module in the chain determines the sort order.
 
 Outputs:
 
-* **Poly** - the polyphonic output.
+* **Out** - the polyphonic output.
 
 * **Link** - a polyphonic signal that can be used to control the sort order of another MergeSort or SplitSort module.  Can be daisy chained - the first module in the chain determines the sort order.
 
