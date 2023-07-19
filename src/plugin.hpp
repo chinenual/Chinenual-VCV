@@ -13,5 +13,6 @@ extern Model* modelMergeSort;
 extern Model* modelMIDIRecorder;
 extern Model* modelMIDIRecorderCC;
 extern Model* modelNoteMeter;
+extern Model* modelPolySort;
 extern Model* modelSplitSort;
 extern Model* modelTint;

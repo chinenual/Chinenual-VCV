@@ -3,6 +3,7 @@
 ## 2.6.0
 
 * New modules, SplitSort and MergeSort, split and merge polyphonic cables while sorting the channels.  Sort criteria can be shared across modules via a LINK cable. A reimplementation of Aria Salvatrice's Splort and Smerge modules. 
+* A related module, PolySort, sorts polyphonic signals, optionally reusing sort order foe each signal.
 
 ## 2.5.0
 

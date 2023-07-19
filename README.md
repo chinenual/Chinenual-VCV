@@ -16,6 +16,7 @@ The [Changelog](./CHANGELOG.md) describes changes.
 [![module-screenshot](./doc/Inv.png)](#inv) 
 [![module-screenshot](./doc/SplitSort.png)](#splitsort) 
 [![module-screenshot](./doc/MergeSort.png)](#mergesort) 
+[![module-screenshot](./doc/PolySort.png)](#polysort) 
 
 * [MIDI Recorder](#midi-recorder) - a polyphonic multi-track recorder
   to convert CV to standard MIDI files.
@@ -34,6 +35,8 @@ The [Changelog](./CHANGELOG.md) describes changes.
 * [SplitSort](#splitsort) - Split a polyphonic cable and optionally sort the channels, with possibility to share sort criteria with another SplitSort or MergeSort.
   
 * [MergeSort](#mergesort) - Merge monophonic cables into a  polyphonic output and optionally sort the channels, with possibility to share sort criteria with another SplitSort or MergeSort.
+
+* [PolySort](#polysort) - Sort polyphonic signals, optionally reusing the same sort order as other inputs.
   
 ### MIDI Recorder
 
@@ -319,6 +322,28 @@ Outputs:
 * **Out** - the polyphonic output.
 
 * **Link** - a polyphonic signal that can be used to control the sort order of another MergeSort or SplitSort module.  Can be daisy chained - the first module in the chain determines the sort order.
+
+### PolySort
+
+![module-screenshot](./doc/PolySort.png) 
+
+Sort polyphonic signals, optionally reusing the same sort order as other inputs. Sorted output remain in sync with one another at the sample level.
+
+Buttons:
+
+* **Link** - When pressed, the input is sorted using the same sort order and the previous input above it.  When unpressed, the input is sorted on its own. 
+
+Inputs:
+
+* **In** - 10 separate polyphonic inputs.  
+
+Outputs:
+
+* **Out** - 10 polyphonic sorted output corresponding to each input.
+
+For example, an alternate way to sort MIDI similar to the example above for SplitSort](#splitsort) would be:
+
+![module-screenshot](./doc/PolySort-chained.png) 
 
 
 ## Acknowledgements

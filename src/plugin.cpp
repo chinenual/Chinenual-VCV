@@ -7,7 +7,6 @@ void init(Plugin* p)
     pluginInstance = p;
 
     // Add modules here
-    // p->addModel(modelMyModule);
     p->addModel(modelMIDIRecorder);
     p->addModel(modelMIDIRecorderCC);
     p->addModel(modelDrumMap);
@@ -16,6 +15,7 @@ void init(Plugin* p)
     p->addModel(modelInv);
     p->addModel(modelSplitSort);
     p->addModel(modelMergeSort);
+    p->addModel(modelPolySort);
 
     // Any other plugin initialization may go here.
     // As an alternative, consider lazy-loading assets and lookup tables when your

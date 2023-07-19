@@ -1,7 +1,7 @@
 {
 	"slug": "Chinenual-VCV",
 	"name": "Chinenual",
-	"version": "2.6.0-beta1",
+	"version": "2.6.0-beta2",
 	"license": "GPL-3.0-or-later",
 	"brand": "Chinenual",
 	"author": "Steve Tynor",
@@ -93,6 +93,16 @@
 			"name": "Polyphonic Merger with Sort",
 			"description": "Merge signals into a polyphonic output and share sort criteriea with other SplitSort or MergeSort (inspired by Aria Salvatrice's Smerge)",
 			"manualUrl": "https://github.com/chinenual/Chinenual-VCV/blob/main/README.md#mergesort",
+			"tags": [
+				"polyphonic",
+				"utility"
+			]
+		},
+		{
+			"slug": "PolySort",
+			"name": "Polyphonic signal sorter with linked sort",
+			"description": "Sorts polyphonic signals, optionally linking the sort order to other signals",
+			"manualUrl": "https://github.com/chinenual/Chinenual-VCV/blob/main/README.md#polysort",
 			"tags": [
 				"polyphonic",
 				"utility"
