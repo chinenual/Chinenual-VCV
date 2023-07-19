@@ -106,7 +106,7 @@ namespace SplitSort {
                 lights[SORT_LIGHT].setBrightness(0.0f);
                 for (int i = 0; i < 16; i++) {
                     outputs[SPLIT_OUTPUT + i].setVoltage(inputs[POLY_INPUT].getVoltage(i));
-                    outputs[LINK_OUTPUT].setVoltage(i, i < numChannels ? 0.1f * i : 0.f);
+                    outputs[LINK_OUTPUT].setVoltage(i < numChannels ? 0.1f * i : 0.f, i);
                 }
             }
         };
