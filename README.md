@@ -341,7 +341,7 @@ Outputs:
 
 * **Out** - 10 polyphonic sorted output corresponding to each input.
 
-For example, an alternate way to sort MIDI similar to the example above for SplitSort](#splitsort) would be:
+For example, an alternate way to sort MIDI similar to the example above for [SplitSort](#splitsort) would be:
 
 ![module-screenshot](./doc/PolySort-chained.png) 
 
