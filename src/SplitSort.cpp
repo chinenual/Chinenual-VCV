@@ -68,38 +68,52 @@ namespace SplitSort {
             if (params[SORT_PARAM].getValue()) {
                 lights[SORT_LIGHT].setBrightness(1.0f);
                 if (inputs[LINK_INPUT].isConnected()) {
-                    // just use the order recorded in the LINK
+                    // DEBUG("LINKED SORT");
+                    //  just use the order recorded in the LINK
                     for (int i = 0; i < 16; i++) {
                         // daisy chain the link input to the output:
-                        outputs[LINK_OUTPUT].setVoltage(i, inputs[LINK_OUTPUT].getVoltage(i));
+                        outputs[LINK_OUTPUT].setVoltage(inputs[LINK_INPUT].getVoltage(i), i);
                         // the link element represents this element's "original unsorted position" encoded as 0.1v, 0.2v, ...
                         int j = ((int)(inputs[LINK_INPUT].getVoltage(i) * 10.0f)) - 1;
+                        // DEBUG("LINKED SORT: %d %d", i, j);
                         if (j < 0) {
                             // link value was 0.f: i.e., unconnected.
                             outputs[SPLIT_OUTPUT + i].setVoltage(0.f);
                         } else {
-                            outputs[SPLIT_OUTPUT + i].setVoltage(inputs[POLY_INPUT].getVoltage(j));
+                            if (j >= 0 && j < 16) {
+                                // nop if out of bounds
+                                outputs[SPLIT_OUTPUT + i].setVoltage(inputs[POLY_INPUT].getVoltage(j));
+                            }
                         }
                     }
                 } else {
                     // sort on our own and populate the LINK array.  Put the voltages in a vector with the LINK
-                    // values and sort both together:
+                    // values and sort both together using the first element as the comparison value:
+                    // DEBUG("SELF SORT");
                     std::array<std::array<float, 2>, 16> sorted;
                     for (int i = 0; i < 16; i++) {
                         sorted[i][0] = inputs[POLY_INPUT].getVoltage(i);
                         sorted[i][1] = (i + 1) * 0.1f;
+                        // if (inputs[POLY_INPUT].getVoltage(0) != 0.f) {
+                        //     DEBUG("UNSORTED[%d] %f %f", i, sorted[i][0], sorted[i][1]);
+                        // }
                     }
                     std::sort(sorted.begin(), sorted.begin() + numChannels,
                         [](const std::array<float, 2>& a, const std::array<float, 2>& b) {
                             return a[0] < b[0];
                         });
                     for (int i = 0; i < 16; i++) {
+                        // if (inputs[POLY_INPUT].getVoltage(0) != 0.f) {
+                        //     DEBUG("SORT RESULT[%d] %f %f", i, sorted[i][0], sorted[i][1]);
+                        // }
                         outputs[SPLIT_OUTPUT + i].setVoltage(sorted[i][0]);
-                        outputs[LINK_OUTPUT].setVoltage(i, sorted[i][1]);
+                        outputs[LINK_OUTPUT].setVoltage(sorted[i][1], i);
+                        // DEBUG("CABLES[%d] %f %f", i, outputs[SPLIT_OUTPUT + i].getVoltage(), outputs[LINK_OUTPUT].getVoltage(i));
                     }
                 }
             } else {
                 // unsorted:
+                // DEBUG("NO SORT");
                 lights[SORT_LIGHT].setBrightness(0.0f);
                 for (int i = 0; i < 16; i++) {
                     outputs[SPLIT_OUTPUT + i].setVoltage(inputs[POLY_INPUT].getVoltage(i));
