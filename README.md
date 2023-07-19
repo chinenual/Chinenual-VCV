@@ -286,7 +286,7 @@ Inputs:
 
 * **In** - the polyphonic cable to be split.
 
-* **Link** - if connected, sort based on the values in the Link rather than the values in the Poly.  This allows multiple modules to be sorted in the same order. Can be daisy chained - the first module in the chain determines the sort order.
+* **Link** - if connected, sort based on the values in the Link rather than the values in the Input.  This allows multiple modules to be sorted in the same order. Can be daisy chained - the first module in the chain determines the sort order.
 
 Outputs:
 
@@ -312,7 +312,7 @@ Inputs:
 
 * **In** - 16 separate inputs, one for each channel of the Poly output.  
 
-* **Link** - if connected, sort based on the values in the Link rather than the values in the Poly.  This allows multiple modules to be sorted in the same order. Can be daisy chained - the first module in the chain determines the sort order.
+* **Link** - if connected, sort based on the values in the Link rather than the values in the Inputs.  This allows multiple modules to be sorted in the same order. Can be daisy chained - the first module in the chain determines the sort order.
 
 Outputs:
 
@@ -326,4 +326,4 @@ Outputs:
 The MIDIRecorder leverages builtin functionality of the VCV Rack core
 MIDI support and uses the same third party MIDI File library as
 Squinky Lab's SEQ++ (Craig Stewart's [midifile](https://github.com/craigsapp/midifile) library). 
-MergeSort and SplitSort are reimplementations of Aria Salvatrice's Splort and Splirge modules.
+MergeSort and SplitSort are reimplementations of Aria Salvatrice's Splort and Smerge modules.
