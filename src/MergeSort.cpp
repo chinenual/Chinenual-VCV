@@ -1,6 +1,7 @@
 #include <osdialog.h>
 
 #include "plugin.hpp"
+#include <array>
 
 namespace Chinenual {
 namespace MergeSort {
