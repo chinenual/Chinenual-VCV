@@ -98,14 +98,18 @@ namespace SplitSort {
                     });
                 for (int ch = 0; ch < 16; ch++) {
                     outputs[SPLIT_OUTPUT + ch].setVoltage(sorted[ch][0]);
-                    outputs[LINK_OUTPUT].setVoltage(sorted[ch][1], ch);
+                    if (useLink) {
+                        outputs[LINK_OUTPUT].setVoltage(inputs[LINK_INPUT].getVoltage(ch), ch);
+                    } else {
+                        outputs[LINK_OUTPUT].setVoltage(inputs[POLY_INPUT].getVoltage(ch), ch);
+                    }
                 }
             } else {
                 // unsorted:
                 lights[SORT_LIGHT].setBrightness(0.0f);
                 for (int ch = 0; ch < 16; ch++) {
                     outputs[SPLIT_OUTPUT + ch].setVoltage(inputs[POLY_INPUT].getVoltage(ch));
-                    outputs[LINK_OUTPUT].setVoltage(ch < numChannels ? 0.1f * ch : 0.f, ch);
+                    outputs[LINK_OUTPUT].setVoltage(inputs[POLY_INPUT].getVoltage(ch), ch);
                 }
             }
         };

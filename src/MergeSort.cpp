@@ -105,14 +105,18 @@ namespace MergeSort {
                     });
                 for (int ch = 0; ch < 16; ch++) {
                     outputs[POLY_OUTPUT].setVoltage(sorted[ch][0], ch);
-                    outputs[LINK_OUTPUT].setVoltage(sorted[ch][1], ch);
+                    if (useLink) {
+                        outputs[LINK_OUTPUT].setVoltage(inputs[LINK_INPUT].getVoltage(ch), ch);
+                    } else {
+                        outputs[LINK_OUTPUT].setVoltage(inputs[SPLIT_INPUT + ch].getVoltage(), ch);
+                    }
                 }
             } else {
                 // unsorted:
                 lights[SORT_LIGHT].setBrightness(0.0f);
                 for (int ch = 0; ch < 16; ch++) {
                     outputs[POLY_OUTPUT].setVoltage(inputs[SPLIT_INPUT + ch].getVoltage(), ch);
-                    outputs[LINK_OUTPUT].setVoltage(ch < numChannels ? 0.1f * ch : 0.f, ch);
+                    outputs[LINK_OUTPUT].setVoltage(inputs[SPLIT_INPUT + ch].getVoltage(), ch);
                 }
             }
         };
