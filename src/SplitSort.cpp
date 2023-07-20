@@ -73,13 +73,13 @@ namespace SplitSort {
                 // values and sort both together using the first element as the comparison value if sorting without
                 // a link, or the second element if using the link as the sort element.
                 std::array<std::array<float, 2>, 16> sorted;
-                for (int i = 0; i < 16; i++) {
-                    sorted[i][0] = inputs[POLY_INPUT].getVoltage(i);
+                for (int ch = 0; ch < 16; ch++) {
+                    sorted[ch][0] = inputs[POLY_INPUT].getVoltage(ch);
                     if (useLink) {
                         // will be 0.0f for unused channels
-                        sorted[i][1] = inputs[LINK_INPUT].getVoltage(i);
+                        sorted[ch][1] = inputs[LINK_INPUT].getVoltage(ch);
                     } else {
-                        sorted[i][1] = (i + 1) * 0.1f;
+                        sorted[ch][1] = sorted[ch][0];
                     }
                 }
                 std::sort(sorted.begin(), sorted.begin() + numChannels,
@@ -96,16 +96,16 @@ namespace SplitSort {
                             return a[0] < b[0];
                         }
                     });
-                for (int i = 0; i < 16; i++) {
-                    outputs[SPLIT_OUTPUT + i].setVoltage(sorted[i][0]);
-                    outputs[LINK_OUTPUT].setVoltage(sorted[i][1], i);
+                for (int ch = 0; ch < 16; ch++) {
+                    outputs[SPLIT_OUTPUT + ch].setVoltage(sorted[ch][0]);
+                    outputs[LINK_OUTPUT].setVoltage(sorted[ch][1], ch);
                 }
             } else {
                 // unsorted:
                 lights[SORT_LIGHT].setBrightness(0.0f);
-                for (int i = 0; i < 16; i++) {
-                    outputs[SPLIT_OUTPUT + i].setVoltage(inputs[POLY_INPUT].getVoltage(i));
-                    outputs[LINK_OUTPUT].setVoltage(i < numChannels ? 0.1f * i : 0.f, i);
+                for (int ch = 0; ch < 16; ch++) {
+                    outputs[SPLIT_OUTPUT + ch].setVoltage(inputs[POLY_INPUT].getVoltage(ch));
+                    outputs[LINK_OUTPUT].setVoltage(ch < numChannels ? 0.1f * ch : 0.f, ch);
                 }
             }
         };

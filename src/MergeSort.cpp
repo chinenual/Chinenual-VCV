@@ -33,8 +33,8 @@ namespace MergeSort {
             configInput(LINK_INPUT, "Sorting Link");
             configOutput(LINK_OUTPUT, "Sorting Link");
             configOutput(POLY_OUTPUT, "");
-            for (int i = 0; i < 16; i++) {
-                configInput(SPLIT_INPUT + i, string::f("Channel %d", i + 1));
+            for (int ch = 0; ch < 16; ch++) {
+                configInput(SPLIT_INPUT + ch, string::f("Channel %d", ch + 1));
             }
             onReset();
         }
@@ -65,9 +65,9 @@ namespace MergeSort {
         {
             bool useLink = inputs[LINK_INPUT].isConnected();
             int numChannels = 0;
-            for (int i = 15; i >= 0; i--) {
-                if (inputs[SPLIT_INPUT + i].isConnected()) {
-                    numChannels = i + 1;
+            for (int ch = 15; ch >= 0; ch--) {
+                if (inputs[SPLIT_INPUT + ch].isConnected()) {
+                    numChannels = ch + 1;
                     break;
                 }
             }
@@ -80,13 +80,13 @@ namespace MergeSort {
                 // values and sort both together using the first element as the comparison value if sorting without
                 // a link, or the second element if using the link as the sort element.
                 std::array<std::array<float, 2>, 16> sorted;
-                for (int i = 0; i < 16; i++) {
-                    sorted[i][0] = inputs[SPLIT_INPUT + i].getVoltage();
+                for (int ch = 0; ch < 16; ch++) {
+                    sorted[ch][0] = inputs[SPLIT_INPUT + ch].getVoltage();
                     if (useLink) {
                         // will be 0.0f for unused channels
-                        sorted[i][1] = inputs[LINK_INPUT].getVoltage(i);
+                        sorted[ch][1] = inputs[LINK_INPUT].getVoltage(ch);
                     } else {
-                        sorted[i][1] = (i + 1) * 0.1f;
+                        sorted[ch][1] = (ch + 1) * 0.1f;
                     }
                 }
                 std::sort(sorted.begin(), sorted.begin() + numChannels,
@@ -103,16 +103,16 @@ namespace MergeSort {
                             return a[0] < b[0];
                         }
                     });
-                for (int i = 0; i < 16; i++) {
-                    outputs[POLY_OUTPUT].setVoltage(sorted[i][0], i);
-                    outputs[LINK_OUTPUT].setVoltage(sorted[i][1], i);
+                for (int ch = 0; ch < 16; ch++) {
+                    outputs[POLY_OUTPUT].setVoltage(sorted[ch][0], ch);
+                    outputs[LINK_OUTPUT].setVoltage(sorted[ch][1], ch);
                 }
             } else {
                 // unsorted:
                 lights[SORT_LIGHT].setBrightness(0.0f);
-                for (int i = 0; i < 16; i++) {
-                    outputs[POLY_OUTPUT].setVoltage(inputs[SPLIT_INPUT + i].getVoltage(), i);
-                    outputs[LINK_OUTPUT].setVoltage(i < numChannels ? 0.1f * i : 0.f, i);
+                for (int ch = 0; ch < 16; ch++) {
+                    outputs[POLY_OUTPUT].setVoltage(inputs[SPLIT_INPUT + ch].getVoltage(), ch);
+                    outputs[LINK_OUTPUT].setVoltage(ch < numChannels ? 0.1f * ch : 0.f, ch);
                 }
             }
         };
@@ -157,15 +157,15 @@ namespace MergeSort {
             addChild(createParamCentered<VCVBezelLatch>(mm2px(Vec(FIRST_X + SPACING_X, FIRST_Y_A + 0 * SPACING_Y)), module, MergeSort::SORT_PARAM));
             addChild(createLightCentered<LEDBezelLight<SortLight>>(mm2px(Vec(FIRST_X + SPACING_X, FIRST_Y_A + 0 * SPACING_Y)), module, MergeSort::SORT_LIGHT));
 
-            for (int i = 0; i < 8; i++) {
+            for (int ch = 0; ch < 8; ch++) {
                 addInput(createInputCentered<PJ301MPort>(
-                    mm2px(Vec(FIRST_X, FIRST_Y_B + i * SPACING_Y)), module,
-                    MergeSort::SPLIT_INPUT + i));
+                    mm2px(Vec(FIRST_X, FIRST_Y_B + ch * SPACING_Y)), module,
+                    MergeSort::SPLIT_INPUT + ch));
             }
-            for (int i = 0; i < 8; i++) {
+            for (int ch = 0; ch < 8; ch++) {
                 addInput(createInputCentered<PJ301MPort>(
-                    mm2px(Vec(FIRST_X + SPACING_X, FIRST_Y_B + i * SPACING_Y)), module,
-                    MergeSort::SPLIT_INPUT + 8 + i));
+                    mm2px(Vec(FIRST_X + SPACING_X, FIRST_Y_B + ch * SPACING_Y)), module,
+                    MergeSort::SPLIT_INPUT + 8 + ch));
             }
             addInput(createInputCentered<PJ301MPort>(
                 mm2px(Vec(FIRST_X, FIRST_Y_C)), module,
