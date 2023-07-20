@@ -301,6 +301,8 @@ For example, a set of three SplitSort modules can be used to sort incoming MIDI 
 
 ![module-screenshot](./doc/SplitSort-chained.png) 
 
+See [PolySort](#polysort) for an alternate approach.
+
 ### MergeSort
 
 ![module-screenshot](./doc/MergeSort.png) 
