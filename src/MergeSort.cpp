@@ -86,7 +86,7 @@ namespace MergeSort {
                         // will be 0.0f for unused channels
                         sorted[ch][1] = inputs[LINK_INPUT].getVoltage(ch);
                     } else {
-                        sorted[ch][1] = (ch + 1) * 0.1f;
+                        sorted[ch][1] = sorted[ch][0];
                     }
                 }
                 std::sort(sorted.begin(), sorted.begin() + numChannels,
