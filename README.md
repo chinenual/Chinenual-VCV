@@ -333,7 +333,7 @@ Sort polyphonic signals, optionally reusing the same sort order as other inputs.
 
 Buttons:
 
-* **Link** - When pressed, the input is sorted using the same sort order as the previous input above it.  When unpressed, the input is sorted on its own. 
+* **Link** - When pressed, the input is sorted using the same sort order as the input above it.  When unpressed, the input is sorted on its own. 
 
 Inputs:
 
