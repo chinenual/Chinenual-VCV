@@ -25,7 +25,7 @@ namespace Tint {
         // current note is playing up or down when bidirectional
         bool upDown;
         // MAX_FLOAT for not in chord; otherwise the quantized v/oct value for the note
-        float quantizedNoteVoltages[PITCH_NOTE_MAX - PITCH_NOTE_MIN];
+        float quantizedNoteVoltages[PITCH_NOTE_MAX - PITCH_NOTE_MIN + 1];
         // actual voltage specified for the given entry in the reference chord
         float chordInputVoltageState[rack::PORT_MAX_CHANNELS];
 
@@ -139,8 +139,7 @@ namespace Tint {
         /* Given chordInputVoltageState[], setup the quantizedNoteVoltages[] array */
         void prepare(int noteCount)
         {
-
-            for (int n = PITCH_NOTE_MIN; n <= PITCH_NOTE_MIN; n++) {
+            for (int n = PITCH_NOTE_MIN; n <= PITCH_NOTE_MAX; n++) {
                 quantizedNoteVoltages[n - PITCH_NOTE_MIN] = std::numeric_limits<float>::max();
             }
             for (int c = 0; c < noteCount; c++) {
