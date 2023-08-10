@@ -2,7 +2,7 @@
 
 ## 2.6.1
 
-* Fixes [issue #7[(https://github.com/chinenual/Chinenual-VCV/issues/7) a bug in the Tintinabulator that sometimes caused it to mis-track the input Chord values as they change.
+* Fixes [issue #7](https://github.com/chinenual/Chinenual-VCV/issues/7) a bug in the Tintinabulator that sometimes caused it to mis-track the input Chord values as they change.
 
 ## 2.6.0
 
