@@ -24,6 +24,9 @@ namespace Harp {
             LIGHTS_LEN
         };
 
+	bool notePlaying;
+        float currNote;
+	    
         Harp()
         {
             onReset();
@@ -37,6 +40,8 @@ namespace Harp {
 
         void onReset() override
         {
+	    notePlaying = false;
+	    currNote = 0.0f;
         }
 
         json_t* dataToJson() override
@@ -53,6 +58,25 @@ namespace Harp {
 
         void process(const ProcessArgs& args) override
         {
+	    bool noteWasPlaying = notePlaying;
+	    float prevNote = currNote;
+	    
+	    bool notePlaying = inputs[GATE_INPUT].getVoltage() >= 1.f;
+	    if (notePlaying) {
+   	         // map the input voltage to a note on the scale
+		    // TEMPORARY: just to test gates
+		 currNote = std::round(inputs[PITCH_INPUT].getVoltage() * 10.f) / 10.f;
+	    }
+
+	    bool noteChanged = prevNote != currNote;
+	    outputs[PITCH_OUTPUT].setVoltage(currNote);
+	    if (noteChanged) {
+		// Use this clock cycle for the "off"; we'll turn the new
+   	        // note on on the next process cycle.
+		outputs[GATE_OUTPUT].setVoltage(0.f);
+	    } else { 
+		outputs[GATE_OUTPUT].setVoltage(notePlaying ? 10.f : 0.f);
+	    }
         }
     };
 
