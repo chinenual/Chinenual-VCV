@@ -12,6 +12,7 @@ void init(Plugin* p)
     p->addModel(modelDrumMap);
     p->addModel(modelTint);
     p->addModel(modelNoteMeter);
+    p->addModel(modelHarp);
     p->addModel(modelInv);
     p->addModel(modelSplitSort);
     p->addModel(modelMergeSort);

@@ -8,6 +8,7 @@ extern Plugin* pluginInstance;
 
 // Declare each Model, defined in each module source file
 extern Model* modelDrumMap;
+extern Model* modelHarp;
 extern Model* modelInv;
 extern Model* modelMergeSort;
 extern Model* modelMIDIRecorder;
@@ -16,3 +17,4 @@ extern Model* modelNoteMeter;
 extern Model* modelPolySort;
 extern Model* modelSplitSort;
 extern Model* modelTint;
+
