@@ -24,6 +24,10 @@ namespace Harp {
             LIGHTS_LEN
         };
 
+        const int noteRange = 20; // number of notes to map into the cv range
+        const float inputCvMin = 0.f;
+	const float inputCvMax = 10.f;
+	    
 	bool notePlaying;
         float currNote;
 	    
@@ -58,14 +62,20 @@ namespace Harp {
 
         void process(const ProcessArgs& args) override
         {
-	    bool noteWasPlaying = notePlaying;
 	    float prevNote = currNote;
-	    
+
 	    bool notePlaying = inputs[GATE_INPUT].getVoltage() >= 1.f;
 	    if (notePlaying) {
    	         // map the input voltage to a note on the scale
-		    // TEMPORARY: just to test gates
-		 currNote = std::round(inputs[PITCH_INPUT].getVoltage() * 10.f) / 10.f;
+		 // TEMPORARY: just to test gates
+		 //currNote = std::round(inputs[PITCH_INPUT].getVoltage() * 10.f) / 10.f;
+		 auto v = inputs[PITCH_INPUT].getVoltage();
+		 int s = std::round((v - inputCvMin) / (inputCvMax - inputCvMin) * noteRange);
+		 int degree = s % inputs[SCALE_INPUT].getChannels();
+		 int octave = s / inputs[SCALE_INPUT].getChannels();
+		 // auto rootNote = inputs[SCALE_INPUT].getPolyVoltage(0);
+		 currNote = inputs[SCALE_INPUT].getPolyVoltage(degree) + (octave * 1.f);
+		 //INFO("HARP %f %d %d %d %f\n",v,s,degree,octave,currNote);
 	    }
 
 	    bool noteChanged = prevNote != currNote;
