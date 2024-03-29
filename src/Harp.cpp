@@ -24,12 +24,14 @@ namespace Harp {
             LIGHTS_LEN
         };
 
-        const int noteRange = 20; // number of notes to map into the cv range
+        const int noteRange = 16; // number of notes to map into the cv range
         const float inputCvMin = 0.f;
 	const float inputCvMax = 10.f;
+        const int numOutputChannels = 5;
 	    
 	bool notePlaying;
         float currNote;
+        int currChan;
 	    
         Harp()
         {
@@ -45,7 +47,8 @@ namespace Harp {
         void onReset() override
         {
 	    notePlaying = false;
-	    currNote = 0.0f;
+	    currNote = -1.0f; // out of range so first use will detect note "change"
+	    currChan = 0;
         }
 
         json_t* dataToJson() override
@@ -66,27 +69,30 @@ namespace Harp {
 
 	    bool notePlaying = inputs[GATE_INPUT].getVoltage() >= 1.f;
 	    if (notePlaying) {
-   	         // map the input voltage to a note on the scale
-		 // TEMPORARY: just to test gates
-		 //currNote = std::round(inputs[PITCH_INPUT].getVoltage() * 10.f) / 10.f;
 		 auto v = inputs[PITCH_INPUT].getVoltage();
 		 int s = std::round((v - inputCvMin) / (inputCvMax - inputCvMin) * noteRange);
 		 int degree = s % inputs[SCALE_INPUT].getChannels();
 		 int octave = s / inputs[SCALE_INPUT].getChannels();
-		 // auto rootNote = inputs[SCALE_INPUT].getPolyVoltage(0);
 		 currNote = inputs[SCALE_INPUT].getPolyVoltage(degree) + (octave * 1.f);
 		 //INFO("HARP %f %d %d %d %f\n",v,s,degree,octave,currNote);
 	    }
 
-	    bool noteChanged = prevNote != currNote;
-	    outputs[PITCH_OUTPUT].setVoltage(currNote);
-	    if (noteChanged) {
-		// Use this clock cycle for the "off"; we'll turn the new
-   	        // note on on the next process cycle.
-		outputs[GATE_OUTPUT].setVoltage(0.f);
-	    } else { 
-		outputs[GATE_OUTPUT].setVoltage(notePlaying ? 10.f : 0.f);
+	    if (notePlaying) {
+		bool noteChanged = prevNote != currNote;
+		if (noteChanged) {
+		    //INFO("HARP: note change %d %f %f\n", currChan, prevNote,currNote);
+		    outputs[GATE_OUTPUT].setVoltage(0.f, currChan);
+		    currChan = (currChan + 1) % numOutputChannels;
+		}
+		//INFO("HARP: note ON %d %f\n", currChan, currNote);
+		outputs[GATE_OUTPUT].setVoltage(10.f, currChan);
+		outputs[PITCH_OUTPUT].setVoltage(currNote, currChan);
+	    } else {
+		//INFO("HARP: note OFF %d\n", currChan);
+	        outputs[GATE_OUTPUT].setVoltage(0.f, currChan);
 	    }
+	    outputs[GATE_OUTPUT].setChannels(numOutputChannels);
+	    outputs[PITCH_OUTPUT].setChannels(numOutputChannels);
         }
     };
 
