@@ -357,7 +357,7 @@ For example, an alternate way to sort MIDI similar to the example above for [Spl
 A reimagining of [Iasos's](https://iasos.com) ["Golden Harp"](https://www.youtube.com/watch?v=cd00t0UGsC0).
 Maps a continuous pitch CV input signal to a scale and generates gated notes as you "strum".
 
-{% include youtube.html id=" GX6pSZ1lvWQ" %}
+{% include youtube.html id="GX6pSZ1lvWQ" %}
 
 Iasos was, by most accounts, one of the originators of New Age music.
 I had the privilege of working with him in [modernizing his Golden Harp](https://chinenual.com#iasoss-golden-harp) (it originally relied on software running on a Commodore64; I replaced that with a small Arduino based controller.)  The harp is a unique instrument that used the chicklet strips on a Colortone Pro music keyboard.  Iasos would strum those chicklets like a harp.  (he used several dozen scales; he had a different musical and emotional effect in his music).  
