@@ -142,6 +142,13 @@ jobs:
           file: _artifacts/**/*.vcvplugin
           tag: ${{ github.ref }}
           file_glob: true
+      - name: Upload release assets2
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: src/*.touchosc
+          tag: ${{ github.ref }}
+          file_glob: true
 
 #  publish-nightly:
 #    name: Publish Nightly

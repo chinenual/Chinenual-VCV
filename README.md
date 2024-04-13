@@ -361,7 +361,7 @@ Maps a continuous pitch CV input signal to a scale and generates gated notes as 
 [![demo](https://img.youtube.com/vi/GX6pSZ1lvWQ/maxresdefault.jpg)](https://www.youtube.com/watch?v=GX6pSZ1lvWQ)
 
 Iasos was, by most accounts, one of the originators of New Age music.
-I had the privilege of working with him in [modernizing his Golden Harp](https://chinenual.com#iasoss-golden-harp) (it originally relied on software running on a Commodore64; I replaced that with a small Arduino based controller.)  The harp is a unique instrument that used the chicklet strips on a Colortone Pro music keyboard.  Iasos would strum those chicklets like a harp.  (he used several dozen scales; he had a different musical and emotional effect in his music).  
+I had the privilege of working with him in [modernizing his Golden Harp](https://chinenual.com#iasoss-golden-harp) (it originally relied on software running on a Commodore64; I replaced that with a small Arduino based controller.)  The harp is a unique instrument that used the chicklet strips on a Colortone Pro music keyboard.  Iasos would strum those chicklets like a harp.  (he used several dozen scales; each had a different musical and emotional effect in his music).  
 
 There really is nothing currently available to replicate what his harp could do.  The closest you might get is a ribbon controller or iPad and some specialized software.
 
@@ -403,7 +403,7 @@ The signal range of the control surface is configured via the context menu:
 
 ![module-screenshot](./doc/Harp-patched.png) 
 
-[Harp.touchosc](https://github.com/chinenual/Chinenual-VCV/releases/latest/Harp-v1.touchosc)
+[OSCHarp.touchosc](https://github.com/chinenual/Chinenual-VCV/releases/latest/OSCHarp-v1.touchosc)
 
 Harp does not depend on any particular control surface and can be configured to work with a variety of CV input ranges.  You can use it with anything that can create a continuous voltage as the musician "strums" (could be a slider on a MIDI control surface, a ribbon controller, etc.)   I've created a simple control surface for the iPad using TouchOSC.  Use Trowasoft's cvOSCcv to convert its OSC messages to CV:
 
