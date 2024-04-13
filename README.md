@@ -379,9 +379,9 @@ Inputs:
 
 Outputs:
 
-* **V/Oct** - pitch of the strummed note.
+* **V/Oct** - pitch of the strummed note.  Polyphonic.  Strummed notes cycle through the polyphonic channels to allow notes to "ring" and decay even when strumming quickly.
 
-* **Gate** - gate of the strummed note.
+* **Gate** - gate of the strummed note. Polyphonic.
 
 The signal range of the control surface is configured via the context menu:
 
