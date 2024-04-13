@@ -53,8 +53,8 @@ Each row of inputs corresponds to one track of MIDI.
 
 #### Motivation
 
-I run VCV Rack on a fairly low performance laptop (by current
-standards).  I can't run Rack and a DAW at the same time, so I can't
+I originally ran VCV Rack on a fairly low performance laptop (by current
+standards).  I couldn't run Rack and a DAW at the same time, so I couldn't
 just stream MIDI out of Rack and record it in my DAW.   I suspect I'm
 not alone.   This module lets me capture 10 tracks of MIDI into a standard MIDI
 file and then import it into my DAW.
@@ -403,7 +403,7 @@ The signal range of the control surface is configured via the context menu:
 
 ![module-screenshot](./doc/Harp-patched.png) 
 
-[OSCHarp.touchosc](https://github.com/chinenual/Chinenual-VCV/releases/latest/OSCHarp-v1.touchosc)
+[OSCHarp.touchosc](https://github.com/chinenual/Chinenual-VCV/releases/latest)
 
 Harp does not depend on any particular control surface and can be configured to work with a variety of CV input ranges.  You can use it with anything that can create a continuous voltage as the musician "strums" (could be a slider on a MIDI control surface, a ribbon controller, etc.)   I've created a simple control surface for the iPad using TouchOSC.  Use Trowasoft's cvOSCcv to convert its OSC messages to CV:
 
