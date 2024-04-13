@@ -354,7 +354,7 @@ For example, an alternate way to sort MIDI similar to the example above for [Spl
 
 ![module-screenshot](./doc/Harp.png) 
 
-* [Harp](#harp) - a reimagining of [Iasos's](https://iasos.com) ["Golden Harp"](https://www.youtube.com/watch?v=cd00t0UGsC0).
+A reimagining of [Iasos's](https://iasos.com) ["Golden Harp"](https://www.youtube.com/watch?v=cd00t0UGsC0).
 Maps a continuous pitch CV input signal to a scale and generates gated notes as you "strum".
 
 Iasos was, by most accounts, one of the originators of New Age music.
@@ -386,7 +386,7 @@ The signal range of the control surface is configured via the context menu:
 
 #### Differences from the Real Thing
 
-[colortone-pro](./doc/colortone-pro.jpeg) 
+[!colortone-pro](./doc/colortone-pro.jpeg) 
 
 * Iasos's Golden Harp's chicklet strips provide a tactile feedback - you can feel where your fingers are as you strum up and down the strip.  The iPad based OSC interface, or ribbon cable provides no such feedback.
 
