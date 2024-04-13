@@ -1,12 +1,15 @@
 #include <osdialog.h>
 
+#include "CVRange.hpp"
 #include "plugin.hpp"
 
 namespace Chinenual {
 namespace Harp {
-
+	
     struct Harp : Module {
         enum ParamId {
+	    NOTE_RANGE_PARAM,
+	    PITCH_CV_RANGE_PARAM,
             PARAMS_LEN
         };
         enum InputId {
@@ -24,9 +27,9 @@ namespace Harp {
             LIGHTS_LEN
         };
 
-        const int noteRange = 16; // number of notes to map into the cv range
-        const float inputCvMin = 0.f;
-	const float inputCvMax = 10.f;
+        //int noteRange; // number of notes to map into the cv range
+	//MIDIRecorder::CVRangeIndex cvConfigPitch;
+
         const int numOutputChannels = 5;
 	    
 	bool notePlaying;
@@ -37,11 +40,22 @@ namespace Harp {
         {
             onReset();
             config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
-            configInput(SCALE_INPUT, "Scale");
+
+	    configInput(SCALE_INPUT, "Scale");
 	    configInput(PITCH_INPUT, "Unquantized pitch");
 	    configInput(GATE_INPUT, "Gate");
-            configOutput(PITCH_OUTPUT, "Pitch V/Oct");
+
+	    configOutput(PITCH_OUTPUT, "Pitch V/Oct");
             configOutput(GATE_OUTPUT, "Gate");
+
+	    configParam(NOTE_RANGE_PARAM, 2.f, 16.f, 48.f,
+			"Number of notes in pitch range");
+	    configParam(PITCH_CV_RANGE_PARAM,
+			0.f,
+			MIDIRecorder::CV_RANGE_0_10,
+			MIDIRecorder::CVRangeNames.size()-1,
+			"Pitch CV voltage range",
+			*MIDIRecorder::CVRangeNames.data());
         }
 
         void onReset() override
@@ -51,18 +65,6 @@ namespace Harp {
 	    currChan = 0;
         }
 
-        json_t* dataToJson() override
-        {
-            json_t* rootJ = json_object();
-            return rootJ;
-        }
-
-        void dataFromJson(json_t* rootJ) override
-        {
-            if (rootJ == 0)
-                return;
-        }
-
         void process(const ProcessArgs& args) override
         {
 	    float prevNote = currNote;
@@ -70,25 +72,26 @@ namespace Harp {
 	    bool notePlaying = inputs[GATE_INPUT].getVoltage() >= 1.f;
 	    if (notePlaying) {
 		 auto v = inputs[PITCH_INPUT].getVoltage();
+		 int cvConfigPitch = (int)params[PITCH_CV_RANGE_PARAM].getValue();
+		 int noteRange = (int)params[NOTE_RANGE_PARAM].getValue();
+
+		 auto inputCvMin = MIDIRecorder::CVRanges[cvConfigPitch].low;
+		 auto inputCvMax = MIDIRecorder::CVRanges[cvConfigPitch].high;
 		 int s = std::round((v - inputCvMin) / (inputCvMax - inputCvMin) * noteRange);
 		 int degree = s % inputs[SCALE_INPUT].getChannels();
 		 int octave = s / inputs[SCALE_INPUT].getChannels();
 		 currNote = inputs[SCALE_INPUT].getPolyVoltage(degree) + (octave * 1.f);
-		 //INFO("HARP %f %d %d %d %f\n",v,s,degree,octave,currNote);
 	    }
 
 	    if (notePlaying) {
 		bool noteChanged = prevNote != currNote;
 		if (noteChanged) {
-		    //INFO("HARP: note change %d %f %f\n", currChan, prevNote,currNote);
 		    outputs[GATE_OUTPUT].setVoltage(0.f, currChan);
 		    currChan = (currChan + 1) % numOutputChannels;
 		}
-		//INFO("HARP: note ON %d %f\n", currChan, currNote);
 		outputs[GATE_OUTPUT].setVoltage(10.f, currChan);
 		outputs[PITCH_OUTPUT].setVoltage(currNote, currChan);
 	    } else {
-		//INFO("HARP: note OFF %d\n", currChan);
 	        outputs[GATE_OUTPUT].setVoltage(0.f, currChan);
 	    }
 	    outputs[GATE_OUTPUT].setChannels(numOutputChannels);
@@ -137,6 +140,34 @@ namespace Harp {
             addOutput(createOutputCentered<PJ301MPort>(
                 mm2px(Vec(FIRST_X_OUT + SPACING_X_OUT + 0 * SPACING_X_OUT, FIRST_Y + SPACING_Y * 7)), module, Harp::GATE_OUTPUT));
         }
+
+	void appendContextMenu(Menu* menu) override
+        {
+            Harp* module = dynamic_cast<Harp*>(this->module);
+
+            menu->addChild(new MenuSeparator);
+
+	    /* Grrr, no ready-made way to get numeric input via text box or slider.   Punt and just produce a list of likely options. */
+            menu->addChild(createIndexSubmenuItem(
+						  "Number of notes mapped to the input CV pitch range",
+						  {/*"0", "1",*/ "2","3","4","5","6","7","8","9",
+							 "10", "11", "12","13","14","15","16","17","18","19",
+							 "20", "21", "22","23","24","25","26","27","28","29",
+							 "30", "31", "32","33","34","35","36","37","38","39",
+							 "40", "41", "42","43","44","45","46","47","48" },
+													 
+						  [=]() { return module->params[Harp::NOTE_RANGE_PARAM].getValue()-2; },
+                [=](int val) {
+                    module->params[Harp::NOTE_RANGE_PARAM].setValue((int)val+2);
+                }));
+            menu->addChild(createIndexSubmenuItem(
+                "Pitch CV Input Range", MIDIRecorder::CVRangeNames,
+                [=]() { return module->params[Harp::PITCH_CV_RANGE_PARAM].getValue(); },
+                [=](int val) {
+		    module->params[Harp::PITCH_CV_RANGE_PARAM].setValue((MIDIRecorder::CVRangeIndex)val);
+                }));
+        }
+	
     };
 
 } // namespace Harp
