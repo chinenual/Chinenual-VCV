@@ -385,7 +385,7 @@ Outputs:
 
 The signal range of the control surface is configured via the context menu:
 
-* **Number of notes mapped to the input CV pitch range** - the number of scale notes mapped to the input signal (the "range" of noted)
+* **Number of notes mapped to the input CV pitch range** - the number of scale notes mapped to the input signal.   Adjust this to your control surface size - a smaller control surface will likely require a smaller number of notes than a control surface with a longer "throw". 
 
 * **Pitch CV Input Range** - the voltage range of the CV signal patched into the **Pitch** input
 
