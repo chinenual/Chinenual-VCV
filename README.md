@@ -386,7 +386,7 @@ The signal range of the control surface is configured via the context menu:
 
 #### Differences from the Real Thing
 
-[!colortone-pro](./doc/colortone-pro.jpeg) 
+![colortone-pro](./doc/colortone-pro.jpeg) 
 
 * Iasos's Golden Harp's chicklet strips provide a tactile feedback - you can feel where your fingers are as you strum up and down the strip.  The iPad based OSC interface, or ribbon cable provides no such feedback.
 
