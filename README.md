@@ -357,7 +357,7 @@ For example, an alternate way to sort MIDI similar to the example above for [Spl
 A reimagining of [Iasos's](https://iasos.com) "Golden Harp".
 Maps a continuous pitch CV input signal to a scale and generates gated notes as you "strum".
 
-[![Iasos performance](https://img.youtube.com/vi/cd00t0UGsC0/maxresdefault.jpg)](https://www.youtube.com/watch?v=cd00t0UGsC0)
+[![Iasos performance](https://img.youtube.com/vi/cd00t0UGsC0/hqdefault.jpg)](https://www.youtube.com/watch?v=cd00t0UGsC0)
 
 <!-- {% include youtube.html id="GX6pSZ1lvWQ" %} -->
 [![demo](https://img.youtube.com/vi/GX6pSZ1lvWQ/hqdefault.jpg)](https://www.youtube.com/watch?v=GX6pSZ1lvWQ)
