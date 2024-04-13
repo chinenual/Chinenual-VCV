@@ -77,9 +77,10 @@ namespace Harp {
 
 		 auto inputCvMin = MIDIRecorder::CVRanges[cvConfigPitch].low;
 		 auto inputCvMax = MIDIRecorder::CVRanges[cvConfigPitch].high;
-		 int s = std::round((v - inputCvMin) / (inputCvMax - inputCvMin) * noteRange);
+		 int s = std::round((v - inputCvMin) / (inputCvMax - inputCvMin) * (noteRange-1));
 		 int degree = s % inputs[SCALE_INPUT].getChannels();
 		 int octave = s / inputs[SCALE_INPUT].getChannels();
+		 //INFO("note: r:%d pi:%d s:%d d:%d o:%d",noteRange, cvConfigPitch,s,degree,octave);
 		 currNote = inputs[SCALE_INPUT].getPolyVoltage(degree) + (octave * 1.f);
 	    }
 
