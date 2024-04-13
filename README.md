@@ -17,6 +17,7 @@ The [Changelog](./CHANGELOG.md) describes changes.
 [![module-screenshot](./doc/SplitSort.png)](#splitsort) 
 [![module-screenshot](./doc/MergeSort.png)](#mergesort) 
 [![module-screenshot](./doc/PolySort.png)](#polysort) 
+[![module-screenshot](./doc/Harp.png)](#harp) 
 
 * [MIDI Recorder](#midi-recorder) - a polyphonic multi-track recorder
   to convert CV to standard MIDI files.
@@ -37,6 +38,8 @@ The [Changelog](./CHANGELOG.md) describes changes.
 * [MergeSort](#mergesort) - Merge monophonic cables into a  polyphonic output and optionally sort the channels, with possibility to share sort criteria with another SplitSort or MergeSort.
 
 * [PolySort](#polysort) - Sort polyphonic signals, optionally reusing the same sort order as other inputs.
+
+* [Harp](#harp) - a reimagining of Iasos's Golden Harp.  Maps a continuous pitch CV input signal to a scale and generates gated notes as you "strum".
   
 ### MIDI Recorder
 
@@ -347,6 +350,66 @@ For example, an alternate way to sort MIDI similar to the example above for [Spl
 
 ![module-screenshot](./doc/PolySort-chained.png) 
 
+### Harp
+
+![module-screenshot](./doc/Harp.png) 
+
+* [Harp](#harp) - a reimagining of [Iasos's](https://iasos.com) ["Golden Harp"](https://www.youtube.com/watch?v=cd00t0UGsC0).
+Maps a continuous pitch CV input signal to a scale and generates gated notes as you "strum".
+
+Iasos was, by most accounts, one of the originators of New Age music.
+I had the privilege of working with him in [modernizing his Golden Harp](https://chinenual.com#iasoss-golden-harp) (it originally relied on software running on a Commodore64; I replaced that with a small Arduino based controller.)  The harp is a unique instrument that used the chicklet strips on a Colortone Pro music keyboard.  Iasos would strum those chicklets like a harp.  (he used several dozen scales; he had a different musical and emotional effect in his music).  
+
+There really is nothing currently available to replicate what his harp could do.  The closest you might get is a ribbon controller or iPad and some specialized software.
+
+This is that specialized software. 
+
+Inputs:
+
+* **Scale** - Defines the notes of the scale to be strummed (V/Oct, polyphonic).  Channel 0 is treated as the "root" of the strum range.   The expected format is compatible with docB's Gen Scale and Aaron Static's ScaleCV modules.
+
+* **Pitch** - The CV signal from the control surface. Not V/Oct; just a continous range of voltage that corresponds to where the musicians fingers are touching the control surface.  Valid voltange range is determined by context menu (see below).
+
+* **Gate** - When non-zero, the musician's fingers are strumming.  Notes are triggered when the computed scale pitch changes.
+
+Outputs:
+
+* **V/Oct** - pitch of the strummed note.
+
+* **Gate** - gate of the strummed note.
+
+The signal range of the control surface is configured via the context menu:
+
+* **Number of notes mapped to the input CV pitch range** - the number of scale notes mapped to the input signal (the "range" of noted)
+
+* **Pitch CV Input Range** - the voltage range of the CV signal patched into the **Pitch** input
+
+#### Differences from the Real Thing
+
+[colortone-pro](./doc/colortone-pro.jpeg) 
+
+* Iasos's Golden Harp's chicklet strips provide a tactile feedback - you can feel where your fingers are as you strum up and down the strip.  The iPad based OSC interface, or ribbon cable provides no such feedback.
+
+* The musician can change scales and root notes on the fly.  This could be emulated by mapping a control surface button control the scale generator.
+
+* The strips are polyphonic - you can trigger more than one note at a time.  Harp only emulates the "strum the strip like a harp" mode - which was how Iasos used the instrument most of the time.
+
+* The physical size of the strummable surface is quite a bit larger than an iPad and most ribbon controllers.  It is about 19" long and the strip has 27 and 29 notes (one strip had two fewer keys).
+
+#### Harp TouchOSC Control Surface
+
+![module-screenshot](./doc/Harp-patched.png) 
+
+[Harp.touchosc](https://github.com/chinenual/Chinenual-VCV/releases/latest/Harp-v1.touchosc)
+
+Harp does not depend on any particular control surface and can be configured to work with a variety of CV input ranges.  You can use it with anything that can create a continuous voltage as the musician "strums" (could be a slider on a MIDI control surface, a ribbon controller, etc.)   I've created a simple control surface for the iPad using TouchOSC.  Use Trowasoft's cvOSCcv to convert its OSC messages to CV:
+
+* **/1/fader1 - Left pitch - sends 0.0 through 10.0 corresponding to where the left control strip is being touched.
+* **/1/fader1/z - Left gate - 1 when the user is touching the left control strip; 0 when not touching
+* **/1/fader2 - Right pitch - sends 0.0 through 10.0 corresponding to where the right control strip is being touched.
+* **/1/fader2/z - Right gate - 1 when the user is touching the right control strip; 0 when not touching
+
+Works best when wired with a direct USB connection.  Be sure to enable "touch messages" (/z). 
 
 ## Acknowledgements
 
