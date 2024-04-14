@@ -69,7 +69,13 @@ namespace Harp {
         {
 	    float prevNote = currNote;
 
-	    bool notePlaying = inputs[GATE_INPUT].getVoltage() >= 1.f;
+	    bool notePlaying;
+	    if (inputs[GATE_INPUT].isConnected()) {
+		notePlaying = inputs[GATE_INPUT].getVoltage() >= 1.f;
+	    } else {
+		notePlaying = true;
+	    }
+	    
 	    if (notePlaying) {
 		 auto v = inputs[PITCH_INPUT].getVoltage();
 		 int cvConfigPitch = (int)params[PITCH_CV_RANGE_PARAM].getValue();
