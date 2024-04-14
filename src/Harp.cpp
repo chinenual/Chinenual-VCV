@@ -82,11 +82,12 @@ namespace Harp {
 		 int scaleSize = 11; // default to chromatic
 		 if (inputs[SCALE_INPUT].isConnected()) {
 		     scaleSize = inputs[SCALE_INPUT].getChannels();
-		     scaledPitch = inputs[SCALE_INPUT].getPolyVoltage(degree);
 		 }
 		 int degree = s % scaleSize;
 	         int octave = s / scaleSize;
-		 if (! inputs[SCALE_INPUT].isConnected()) {
+		 if (inputs[SCALE_INPUT].isConnected()) {
+		     scaledPitch = inputs[SCALE_INPUT].getPolyVoltage(degree);
+		 } else {
 		     // default is chromatic with root at C4
 		     const float C4 = 0.0f;
 		     const float SEMITONE = 1.0f/12.f;
