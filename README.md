@@ -405,7 +405,7 @@ The signal range of the control surface is configured via the context menu:
 
 ![module-screenshot](./doc/Harp-patched.png) 
 
-Harp does not depend on any particular control surface and can be configured to work with a variety of CV input ranges.  You can use it with anything that can create a continuous voltage as the musician "strums" (could be a slider on a MIDI control surface, a ribbon controller, etc.)   I've created a [simple control surface for the iPad using TouchOSC](https://github.com/chinenual/Chinenual-VCV/releases/latest).  Use Trowasoft's cvOSCcv to convert its OSC messages to CV:
+Harp does not depend on any particular control surface and can be configured to work with a variety of CV input ranges.  You can use it with anything that can create a continuous voltage as the musician "strums" (could be a slider on a MIDI control surface, a ribbon controller, heck, even an LFO)   I've created a [simple control surface for the iPad using TouchOSC](https://github.com/chinenual/Chinenual-VCV/releases/latest).  Use Trowasoft's cvOSCcv to convert its OSC messages to CV:
 
 * **/1/fader1** - Left pitch - sends 0.0 through 10.0 corresponding to where the left control strip is being touched.
 * **/1/fader1/z** - Left gate - 1 when the user is touching the left control strip; 0 when not touching
