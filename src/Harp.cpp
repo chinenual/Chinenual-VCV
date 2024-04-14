@@ -78,10 +78,22 @@ namespace Harp {
 		 auto inputCvMin = MIDIRecorder::CVRanges[cvConfigPitch].low;
 		 auto inputCvMax = MIDIRecorder::CVRanges[cvConfigPitch].high;
 		 int s = std::round((v - inputCvMin) / (inputCvMax - inputCvMin) * (noteRange-1));
-		 int degree = s % inputs[SCALE_INPUT].getChannels();
-		 int octave = s / inputs[SCALE_INPUT].getChannels();
+		 float scaledPitch;
+		 int scaleSize = 11; // default to chromatic
+		 if (inputs[SCALE_INPUT].isConnected()) {
+		     scaleSize = inputs[SCALE_INPUT].getChannels();
+		     scaledPitch = inputs[SCALE_INPUT].getPolyVoltage(degree);
+		 }
+		 int degree = s % scaleSize;
+	         int octave = s / scaleSize;
+		 if (! inputs[SCALE_INPUT].isConnected()) {
+		     // default is chromatic with root at C4
+		     const float C4 = 0.0f;
+		     const float SEMITONE = 1.0f/12.f;
+		     scaledPitch = C4 + (degree * SEMITONE);
+		 }
 		 //INFO("note: r:%d pi:%d s:%d d:%d o:%d",noteRange, cvConfigPitch,s,degree,octave);
-		 currNote = inputs[SCALE_INPUT].getPolyVoltage(degree) + (octave * 1.f);
+		 currNote = scaledPitch + (octave * 1.f);
 	    }
 
 	    if (notePlaying) {

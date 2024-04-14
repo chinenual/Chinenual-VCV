@@ -3,6 +3,7 @@
 ## 2.7.0-beta2
 
 * Changed Harp output polyphony to 16 channels (was only 5 in beta1).
+* Handled unconnected Scale input in Harp - treat as a chromatic scale rooted at C4. 
 
 ## 2.7.0-beta1
 

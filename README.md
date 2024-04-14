@@ -371,7 +371,7 @@ This is that specialized software.
 
 Inputs:
 
-* **Scale** - Defines the notes of the scale to be strummed (V/Oct, polyphonic).  Channel 0 is treated as the "root" of the strum range.   The expected format is compatible with docB's Gen Scale and Aaron Static's ScaleCV modules.
+* **Scale** - Defines the notes of the scale to be strummed (V/Oct, polyphonic).  Channel 0 is treated as the "root" of the strum range.   The expected format is compatible with docB's Gen Scale and Aaron Static's ScaleCV modules.  If unconnected, the Harp uses a chromatic scale rooted at C4. 
 
 * **Pitch** - The CV signal from the control surface. Not V/Oct; just a continous range of voltage that corresponds to where the musicians fingers are touching the control surface.  Valid voltage range is determined by context menu (see below).
 
