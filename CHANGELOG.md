@@ -1,5 +1,9 @@
 # Change log for Chinenual-VCV
 
+## 2.7.0-beta1
+
+* New module, Harp; a reimagining of Iasos's Golden Harp.
+
 ## 2.6.1
 
 * Fixes [issue #7](https://github.com/chinenual/Chinenual-VCV/issues/7) a bug in the Tintinabulator that sometimes caused it to mis-track the input Chord values as they change.
