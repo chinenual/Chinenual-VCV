@@ -375,7 +375,7 @@ Inputs:
 
 * **Pitch** - The CV signal from the control surface. Not V/Oct; just a continous range of voltage that corresponds to where the musicians fingers are touching the control surface.  Valid voltage range is determined by context menu (see below).
 
-* **Gate** - When non-zero, the musician's fingers are strumming.  Notes are triggered when the computed scale pitch changes.
+* **Gate** - When non-zero, the musician's fingers are strumming.  Notes are triggered when the computed scale pitch changes.  If unconnected, "always strumming".
 
 Outputs:
 

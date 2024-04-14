@@ -1,5 +1,9 @@
 # Change log for Chinenual-VCV
 
+## 2.7.0-beta3
+
+* Handled unconnected Gate input in Harp - treat as "always on".
+
 ## 2.7.0-beta2
 
 * Changed Harp output polyphony to 16 channels (was only 5 in beta1).
