@@ -30,7 +30,7 @@ namespace Harp {
         //int noteRange; // number of notes to map into the cv range
 	//MIDIRecorder::CVRangeIndex cvConfigPitch;
 
-        const int numOutputChannels = 5;
+        const int numOutputChannels = 16;
 	    
 	bool notePlaying;
         float currNote;

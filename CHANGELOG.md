@@ -1,5 +1,9 @@
 # Change log for Chinenual-VCV
 
+## 2.7.0-beta2
+
+* Changed Harp output polyphony to 16 channels (was only 5 in beta1).
+
 ## 2.7.0-beta1
 
 * New module, Harp; a reimagining of Iasos's Golden Harp.
