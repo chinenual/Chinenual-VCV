@@ -2,12 +2,12 @@
 
 ## 2.7.0-beta3
 
-* Handled unconnected Gate input in Harp - treat as "always on".
+* Handle unconnected Gate input in Harp - treat as "always on".
 
 ## 2.7.0-beta2
 
 * Changed Harp output polyphony to 16 channels (was only 5 in beta1).
-* Handled unconnected Scale input in Harp - treat as a chromatic scale rooted at C4. 
+* Handle unconnected Scale input in Harp - treat as a chromatic scale rooted at C4. 
 
 ## 2.7.0-beta1
 
