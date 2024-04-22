@@ -1,3 +1,4 @@
+
 # Chinenual-VCV
 
 Virtual Eurorack modules for [VCV Rack](https://vcvrack.com), available in the [plugin library](https://library.vcvrack.com/).
@@ -357,10 +358,12 @@ For example, an alternate way to sort MIDI similar to the example above for [Spl
 A reimagining of [Iasos's](https://iasos.com) "Golden Harp".
 Maps a continuous pitch CV input signal to a scale and generates gated notes as you "strum".
 
-[![Iasos performance](https://img.youtube.com/vi/cd00t0UGsC0/hqdefault.jpg)](https://www.youtube.com/watch?v=cd00t0UGsC0)
-
+<!--[![Iasos performance](https://img.youtube.com/vi/cd00t0UGsC0/hqdefault.jpg)](https://www.youtube.com/watch?v=cd00t0UGsC0)-->
+[![YouTube](http://i.ytimg.com/vi/cd00t0UGsC0/hqdefault.jpg)](https://www.youtube.com/watch?v=cd00t0UGsC0)
+ 
 <!-- {% include youtube.html id="GX6pSZ1lvWQ" %} -->
-[![demo](https://img.youtube.com/vi/GX6pSZ1lvWQ/hqdefault.jpg)](https://www.youtube.com/watch?v=GX6pSZ1lvWQ)
+<!--[![demo](https://img.youtube.com/vi/GX6pSZ1lvWQ/hqdefault.jpg)](https://www.youtube.com/watch?v=GX6pSZ1lvWQ)-->
+[![YouTube](http://i.ytimg.com/vi/GX6pSZ1lvWQ/hqdefault.jpg)](https://www.youtube.com/watch?v=GX6pSZ1lvWQ)
 
 Iasos was one of the originators of New Age music.
 I had the privilege of working with him in [modernizing his Golden Harp](https://chinenual.com#iasoss-golden-harp) (it originally relied on software running on a Commodore64; I replaced that with a small Arduino based controller.)  The harp is a unique instrument that used the chicklet strips on a Colortone Pro music keyboard.  Iasos would strum those strips like a harp.  (he used several dozen scales (though never simple "church scales"); each had a different musical and emotional effect in his music).  
