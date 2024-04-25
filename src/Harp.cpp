@@ -57,12 +57,12 @@ namespace Harp {
 
 	    configParam(NOTE_RANGE_PARAM, 2.f, 16.f, 48.f,
 			"Number of notes in pitch range");
-	    configParam(PITCH_CV_RANGE_PARAM,
+	    configSwitch(PITCH_CV_RANGE_PARAM,
 			0.f,
-			MIDIRecorder::CV_RANGE_0_10,
 			MIDIRecorder::CVRangeNames.size()-1,
+			MIDIRecorder::CV_RANGE_0_10,
 			"Pitch CV voltage range",
-			*MIDIRecorder::CVRangeNames.data());
+			MIDIRecorder::CVRangeNames);
         }
 
         void onReset() override
