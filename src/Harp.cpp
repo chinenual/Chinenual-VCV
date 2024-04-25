@@ -35,9 +35,11 @@ namespace Harp {
 
         std::string rootNote_text;
         std::string playingNote_text;
-	    
+
+	// transient properties:
 	bool notePlaying;
         float currNote;
+	int currDegree; 
         int currChan;
 	    
         Harp()
@@ -66,16 +68,16 @@ namespace Harp {
         {
 	    notePlaying = false;
 	    currNote = -1.0f; // out of range so first use will detect note "change"
-	    currChan = 0;
+	    currDegree = 0;
 	    rootNote_text = "";
 	    playingNote_text = "";
+	    currChan = 0;	    
         }
 
         void process(const ProcessArgs& args) override
         {
 	    float prevNote = currNote;
 
-	    bool notePlaying;
 	    if (inputs[GATE_INPUT].isConnected()) {
 		notePlaying = inputs[GATE_INPUT].getVoltage() >= 1.f;
 	    } else {
@@ -107,6 +109,7 @@ namespace Harp {
 		 }
 		 //INFO("note: r:%d pi:%d s:%d d:%d o:%d",noteRange, cvConfigPitch,s,degree,octave);
 		 currNote = scaledPitch + (octave * 1.f);
+		 currDegree = degree + (octave * scaleSize);
 	    }
 
 	    if (notePlaying) {
@@ -185,6 +188,7 @@ namespace Harp {
 
 #define FIRST_X -5.0
 #define FIRST_Y 5.0
+#define LAST_Y 125.0
 #define SPACING_X 20.0
 #define SPACING_Y 15.0
 #define FIRST_X_OUT -6.3
@@ -194,12 +198,49 @@ namespace Harp {
 #define LABEL_HEIGHT 22
 #define LABEL_WIDTH 55
 
+#define STRIP_X_MIN (FIRST_X+SPACING_X)
+#define STRIP_Y_MIN (FIRST_Y+(SPACING_Y/2.0))
+#define STRIP_Y_MAX LAST_Y
+#define STRIP_LED_WIDTH 25.0
+#define STRIP_LED_X_OFFSET 5.0
+#define STRIP_WIDTH 12.0
+#define STRIP_HEIGHT (115.0-STRIP_Y_MIN)
+    
 #define SPACING_X_OUT 14.1
 #define LABEL_OFFSET_X_OUT (LABEL_OFFSET_X + 2.0)
 #define LABEL_OFFSET_Y_OUT (LABEL_OFFSET_Y - 0.5) // leave space for the shading under the output jacks
 
 #define LED_OFFSET_X -5.0
 #define LED_OFFSET_Y -5.0
+
+    struct StripDisplay : LedDisplay {
+
+	Harp* module;
+
+	void drawLayer(const DrawArgs& args, int layer) override {
+	    if (layer != 1)
+		return;
+
+	    if (! module)
+		return;
+	    
+	    if (module->notePlaying) {
+		int noteRange = (int)module->params[Harp::NOTE_RANGE_PARAM].getValue();
+
+		float pos = (float)module->currDegree / (float)noteRange;
+		float x = STRIP_LED_X_OFFSET;
+		float y = 0.f + STRIP_HEIGHT * (1.f - pos);
+		float height =  STRIP_HEIGHT / noteRange;
+		nvgBeginPath(args.vg);
+		nvgFillColor(args.vg, ledTextColor);
+		//INFO("rect %f %f %f %f %f",x, y, STRIP_LED_WIDTH, height, pos);
+		nvgRect(args.vg, x, y, STRIP_LED_WIDTH, height);
+		nvgClosePath(args.vg);
+		nvgFill(args.vg);
+	    }
+	    
+	}
+    };
     
     struct HarpWidget : ModuleWidget {
         HarpWidget(Harp* module)
@@ -236,7 +277,11 @@ namespace Harp {
 	    playingNoteDisplay->box.size = Vec(30, 10);
 	    playingNoteDisplay->box.pos = mm2px(Vec(LED_OFFSET_X + FIRST_X_OUT + SPACING_X_OUT + 0 * SPACING_X_OUT, LED_OFFSET_Y + FIRST_Y + SPACING_Y * 5));
 	    addChild(playingNoteDisplay);
-
+	    
+StripDisplay* display = createWidget<StripDisplay>(mm2px(Vec(STRIP_X_MIN, STRIP_Y_MIN)));
+		display->box.size = mm2px(Vec(STRIP_WIDTH, STRIP_HEIGHT));
+		display->module = module;
+		addChild(display);
         }
 
 	void appendContextMenu(Menu* menu) override
