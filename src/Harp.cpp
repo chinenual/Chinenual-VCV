@@ -35,6 +35,7 @@ namespace Harp {
 
         std::string rootNote_text;
         std::string playingNote_text;
+	std::string debug_text;
 
 	// transient properties:
 	bool notePlaying;
@@ -71,6 +72,7 @@ namespace Harp {
 	    currDegree = 0;
 	    rootNote_text = "";
 	    playingNote_text = "";
+	    debug_text = "";
 	    currChan = 0;	    
         }
 
@@ -87,11 +89,12 @@ namespace Harp {
 	    if (notePlaying) {
 		 auto v = inputs[PITCH_INPUT].getVoltage();
 		 int cvConfigPitch = (int)params[PITCH_CV_RANGE_PARAM].getValue();
+		 // number of voltage "buckets":
 		 int noteRange = (int)params[NOTE_RANGE_PARAM].getValue();
 
 		 auto inputCvMin = MIDIRecorder::CVRanges[cvConfigPitch].low;
 		 auto inputCvMax = MIDIRecorder::CVRanges[cvConfigPitch].high;
-		 int s = std::round((v - inputCvMin) / (inputCvMax - inputCvMin) * (noteRange-1));
+		 int s = std::round(((v - inputCvMin) / (inputCvMax - inputCvMin)) * (noteRange-1));
 		 float scaledPitch;
 		 int scaleSize = 11; // default to chromatic
 		 if (inputs[SCALE_INPUT].isConnected()) {
@@ -107,7 +110,7 @@ namespace Harp {
 		     const float SEMITONE = 1.0f/12.f;
 		     scaledPitch = C4 + (degree * SEMITONE);
 		 }
-		 //INFO("note: r:%d pi:%d s:%d d:%d o:%d",noteRange, cvConfigPitch,s,degree,octave);
+		 //INFO("note: r:%d pi:%d s:%d d:%d o:%d cn:%f cd:%d",noteRange, cvConfigPitch,s,degree,octave,currNote,currDegree);
 		 currNote = scaledPitch + (octave * 1.f);
 		 currDegree = degree + (octave * scaleSize);
 	    }
@@ -143,6 +146,7 @@ namespace Harp {
 		    auto n = voltageToPitch(play_v);
 		    auto fn = voltageToMicroPitch(play_v);
 		    pitchToText(playingNote_text, n, fn - ((float)n));
+		    debug_text=rack::string::f("%d", currDegree);
 		} else {
 		    playingNote_text = "";
 		}
@@ -227,13 +231,13 @@ namespace Harp {
 	    if (module->notePlaying) {
 		int noteRange = (int)module->params[Harp::NOTE_RANGE_PARAM].getValue();
 
-		float pos = (float)module->currDegree / (float)noteRange;
+#define STRIP_LED_Y_OFFSET 5.0		
+		float height =  (box.getHeight()-(2.f*STRIP_LED_Y_OFFSET)) / noteRange;
 		float x = STRIP_LED_X_OFFSET;
-		float y = 0.f + STRIP_HEIGHT * (1.f - pos);
-		float height =  STRIP_HEIGHT / noteRange;
+		float y = STRIP_LED_X_OFFSET + (height * ((noteRange-1)-module->currDegree));
 		nvgBeginPath(args.vg);
 		nvgFillColor(args.vg, ledTextColor);
-		//INFO("rect %f %f %f %f %f",x, y, STRIP_LED_WIDTH, height, pos);
+		//INFO("rect %f %f %f %f %f",x, y, STRIP_LED_WIDTH, height, ratio);
 		nvgRect(args.vg, x, y, STRIP_LED_WIDTH, height);
 		nvgClosePath(args.vg);
 		nvgFill(args.vg);
@@ -277,6 +281,11 @@ namespace Harp {
 	    playingNoteDisplay->box.size = Vec(30, 10);
 	    playingNoteDisplay->box.pos = mm2px(Vec(LED_OFFSET_X + FIRST_X_OUT + SPACING_X_OUT + 0 * SPACING_X_OUT, LED_OFFSET_Y + FIRST_Y + SPACING_Y * 5));
 	    addChild(playingNoteDisplay);
+	    
+	    auto debugDisplay = new NoteDisplayWidget(module ? &module->debug_text : NULL);
+	    debugDisplay->box.size = Vec(30, 10);
+	    debugDisplay->box.pos = mm2px(Vec(LED_OFFSET_X + FIRST_X_OUT + SPACING_X_OUT + 0 * SPACING_X_OUT, LED_OFFSET_Y + FIRST_Y + SPACING_Y * 4.5));
+	    addChild(debugDisplay);
 	    
 StripDisplay* display = createWidget<StripDisplay>(mm2px(Vec(STRIP_X_MIN, STRIP_Y_MIN)));
 		display->box.size = mm2px(Vec(STRIP_WIDTH, STRIP_HEIGHT));
