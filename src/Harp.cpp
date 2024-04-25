@@ -146,7 +146,7 @@ namespace Harp {
 		    auto n = voltageToPitch(play_v);
 		    auto fn = voltageToMicroPitch(play_v);
 		    pitchToText(playingNote_text, n, fn - ((float)n));
-		    debug_text=rack::string::f("%d", currDegree);
+		    //debug_text=rack::string::f("%d", currDegree);
 		} else {
 		    playingNote_text = "";
 		}

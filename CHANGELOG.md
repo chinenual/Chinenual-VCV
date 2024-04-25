@@ -1,5 +1,10 @@
 # Change log for Chinenual-VCV
 
+## 2.7.0-beta4
+
+* Add some eye-candy to the Harp.  Print the quantized note and also display it graphically on an LED strip. 
+* Fix an off-by-one in the quantization computation.
+
 ## 2.7.0-beta3
 
 * Handle unconnected Gate input in Harp - treat as "always on".
