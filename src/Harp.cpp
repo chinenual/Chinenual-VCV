@@ -1,5 +1,6 @@
 #include <osdialog.h>
 
+#include "PitchNote.hpp"
 #include "CVRange.hpp"
 #include "plugin.hpp"
 
@@ -31,6 +32,9 @@ namespace Harp {
 	//MIDIRecorder::CVRangeIndex cvConfigPitch;
 
         const int numOutputChannels = 16;
+
+        std::string rootNote_text;
+        std::string playingNote_text;
 	    
 	bool notePlaying;
         float currNote;
@@ -63,6 +67,8 @@ namespace Harp {
 	    notePlaying = false;
 	    currNote = -1.0f; // out of range so first use will detect note "change"
 	    currChan = 0;
+	    rootNote_text = "";
+	    playingNote_text = "";
         }
 
         void process(const ProcessArgs& args) override
@@ -111,11 +117,69 @@ namespace Harp {
 		}
 		outputs[GATE_OUTPUT].setVoltage(10.f, currChan);
 		outputs[PITCH_OUTPUT].setVoltage(currNote, currChan);
+		
 	    } else {
 	        outputs[GATE_OUTPUT].setVoltage(0.f, currChan);
 	    }
 	    outputs[GATE_OUTPUT].setChannels(numOutputChannels);
+
+            if ((args.frame % 100) == 0) { // throttle
+		float root_v;
+		float play_v = currNote;
+		{
+		    if (inputs[SCALE_INPUT].isConnected()) {
+			root_v = inputs[SCALE_INPUT].getPolyVoltage(0);
+		    } else {
+			root_v = 0.0f;
+		    }
+		    auto n = voltageToPitch(root_v);
+		    auto fn = voltageToMicroPitch(root_v);
+		    pitchToText(rootNote_text, n, fn - ((float)n));
+		}
+		if (notePlaying) {
+		    auto n = voltageToPitch(play_v);
+		    auto fn = voltageToMicroPitch(play_v);
+		    pitchToText(playingNote_text, n, fn - ((float)n));
+		} else {
+		    playingNote_text = "";
+		}
+	    }
 	    outputs[PITCH_OUTPUT].setChannels(numOutputChannels);
+        }
+    };
+
+        static const NVGcolor textColor_red = nvgRGB(0xff, 0x33, 0x33);
+    static const NVGcolor ledTextColor = textColor_red;
+
+    struct NoteDisplayWidget : TransparentWidget {
+        std::shared_ptr<Font> font;
+        std::string fontPath;
+        char displayStr[16];
+        std::string* text;
+
+        NoteDisplayWidget(std::string* t)
+        {
+            text = t;
+            fontPath = std::string(
+                asset::plugin(pluginInstance, "res/fonts/opensans/OpenSans-Bold.ttf"));
+        }
+
+        void drawLayer(const DrawArgs& args, int layer) override
+        {
+            if (layer == 1) {
+                if (!(font = APP->window->loadFont(fontPath))) {
+                    return;
+                }
+                nvgFontSize(args.vg, 18.0);
+                nvgFontFaceId(args.vg, font->handle);
+
+                Vec textPos = Vec(6, 24);
+
+                nvgFillColor(args.vg, ledTextColor);
+
+                nvgTextAlign(args.vg, NVG_ALIGN_LEFT | NVG_ALIGN_BOTTOM);
+                nvgText(args.vg, textPos.x, textPos.y, text ? text->c_str() : "", NULL);
+            }
         }
     };
 
@@ -134,6 +198,9 @@ namespace Harp {
 #define LABEL_OFFSET_X_OUT (LABEL_OFFSET_X + 2.0)
 #define LABEL_OFFSET_Y_OUT (LABEL_OFFSET_Y - 0.5) // leave space for the shading under the output jacks
 
+#define LED_OFFSET_X -5.0
+#define LED_OFFSET_Y -5.0
+    
     struct HarpWidget : ModuleWidget {
         HarpWidget(Harp* module)
         {
@@ -159,6 +226,17 @@ namespace Harp {
                 mm2px(Vec(FIRST_X_OUT + SPACING_X_OUT + 0 * SPACING_X_OUT, FIRST_Y + SPACING_Y * 6)), module, Harp::PITCH_OUTPUT));
             addOutput(createOutputCentered<PJ301MPort>(
                 mm2px(Vec(FIRST_X_OUT + SPACING_X_OUT + 0 * SPACING_X_OUT, FIRST_Y + SPACING_Y * 7)), module, Harp::GATE_OUTPUT));
+
+	    auto rootNoteDisplay = new NoteDisplayWidget(module ? &module->rootNote_text : NULL);
+	    rootNoteDisplay->box.size = Vec(30, 10);
+	    rootNoteDisplay->box.pos = mm2px(Vec(LED_OFFSET_X + FIRST_X_OUT + SPACING_X_OUT + 0 * SPACING_X_OUT, LED_OFFSET_Y + FIRST_Y + SPACING_Y * 1));
+	    addChild(rootNoteDisplay);
+
+	    auto playingNoteDisplay = new NoteDisplayWidget(module ? &module->playingNote_text : NULL);
+	    playingNoteDisplay->box.size = Vec(30, 10);
+	    playingNoteDisplay->box.pos = mm2px(Vec(LED_OFFSET_X + FIRST_X_OUT + SPACING_X_OUT + 0 * SPACING_X_OUT, LED_OFFSET_Y + FIRST_Y + SPACING_Y * 5));
+	    addChild(playingNoteDisplay);
+
         }
 
 	void appendContextMenu(Menu* menu) override
