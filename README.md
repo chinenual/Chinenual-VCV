@@ -363,7 +363,8 @@ Maps a continuous pitch CV input signal to a scale and generates gated notes as 
  
 <!-- {% include youtube.html id="GX6pSZ1lvWQ" %} -->
 <!--[![demo](https://img.youtube.com/vi/GX6pSZ1lvWQ/hqdefault.jpg)](https://www.youtube.com/watch?v=GX6pSZ1lvWQ)-->
-[![YouTube](http://i.ytimg.com/vi/GX6pSZ1lvWQ/hqdefault.jpg)](https://www.youtube.com/watch?v=GX6pSZ1lvWQ)
+[![YouTube](http://i.ytimg.com/vi/L3YgVw3E8Hg/hqdefault.jpg)](https://www.youtube.com/watch?v=L3YgVw3E8Hg)
+
 
 Iasos was one of the originators of New Age music.
 I had the privilege of working with him in [modernizing his Golden Harp](https://chinenual.com#iasoss-golden-harp) (it originally relied on software running on a Commodore64; I replaced that with a small Arduino based controller.)  The harp is a unique instrument that used the chicklet strips on a Colortone Pro music keyboard.  Iasos would strum those strips like a harp.  (he used several dozen scales (though never simple "church scales"); each had a different musical and emotional effect in his music).  
