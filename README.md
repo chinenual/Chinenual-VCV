@@ -416,7 +416,7 @@ Harp does not depend on any particular control surface and can be configured to 
 * **/1/fader2** - Right pitch - sends 0.0 through 10.0 corresponding to where the right control strip is being touched.
 * **/1/fader2z** - Right gate - 1 when the user is touching the right control strip; 0 when not touching
 
-Works best when wired with a direct USB connection.  Be sure to enable "touch messages" (/z). 
+Works best when wired with a direct USB (bridged) connection. 
 
 ## Acknowledgements
 
