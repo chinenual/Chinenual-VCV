@@ -405,11 +405,26 @@ The signal range of the control surface is configured via the context menu:
 
 * The physical size of the strummable surface is quite a bit larger than an iPad and most ribbon controllers.  It is about 19" long and the strip has 27 and 29 notes (one strip had two fewer keys).
 
-#### Harp TouchOSC Control Surface
+#### Harp TouchOSC OSC or MIDI Control Surface
 
-![module-screenshot](./doc/Harp-patched.png) 
+Harp does not depend on any particular control surface and can be configured to work with a variety of CV input ranges.  You can use it with anything that can create a continuous voltage as the musician "strums" (could be a slider on a MIDI control surface, a ribbon controller, heck, even an LFO)   I've created a [simple control surface for the iPad using TouchOSC](https://github.com/chinenual/Chinenual-VCV/releases/latest).  The control surface sends both MIDI and OSC messages as the faders move; use whichever works best for you.
 
-Harp does not depend on any particular control surface and can be configured to work with a variety of CV input ranges.  You can use it with anything that can create a continuous voltage as the musician "strums" (could be a slider on a MIDI control surface, a ribbon controller, heck, even an LFO)   I've created a [simple control surface for the iPad using TouchOSC](https://github.com/chinenual/Chinenual-VCV/releases/latest).  Use Trowasoft's cvOSCcv to convert its OSC messages to CV:
+### MIDI
+
+![module-screenshot](./doc/Harp-patched-MIDI.png) 
+
+Use the VCV Fundamental MIDI-CV module to capture Pitchbend events sent from the control surface.
+
+* **Channel** - the left fader sends on Channel 1; the right fader sends on channel 2
+* **PW** - the control surface sends the full pitchbend range; configure MIDI-CV to "2 semitones" to create a -5V .. 5V range for the control.
+* **GATE** - If you configure MIDI-CV to be monophonic, you can just patch **GATE** directly to the Harp.  The control surface creates NOTE-ON and NOTE-OFF events for MIDI 64, but all you need is the corresponding gate and the pitchbend info to control the harp.
+
+### OSC 
+
+![module-screenshot](./doc/Harp-patched-OSC.png) 
+
+
+Use Trowasoft's cvOSCcv to convert its OSC messages to CV:
 
 * **/1/fader1** - Left pitch - sends 0.0 through 10.0 corresponding to where the left control strip is being touched.
 * **/1/fader1z** - Left gate - 1 when the user is touching the left control strip; 0 when not touching
