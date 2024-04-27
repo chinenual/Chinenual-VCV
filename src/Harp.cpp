@@ -163,10 +163,12 @@ namespace Harp {
         std::string fontPath;
         char displayStr[16];
         std::string* text;
-
-        NoteDisplayWidget(std::string* t)
+        std::string fakeData;
+	
+        NoteDisplayWidget(std::string* t, std::string fakeData)
         {
             text = t;
+	    this->fakeData = fakeData;
             fontPath = std::string(
                 asset::plugin(pluginInstance, "res/fonts/opensans/OpenSans-Bold.ttf"));
         }
@@ -185,7 +187,7 @@ namespace Harp {
                 nvgFillColor(args.vg, ledTextColor);
 
                 nvgTextAlign(args.vg, NVG_ALIGN_LEFT | NVG_ALIGN_BOTTOM);
-                nvgText(args.vg, textPos.x, textPos.y, text ? text->c_str() : "", NULL);
+                nvgText(args.vg, textPos.x, textPos.y, text ? text->c_str() : fakeData.c_str(), NULL);
             }
         }
     };
@@ -224,17 +226,24 @@ namespace Harp {
 	void drawLayer(const DrawArgs& args, int layer) override {
 	    if (layer != 1)
 		return;
-
-	    if (! module)
-		return;
 	    
-	    if (module->notePlaying) {
-		int noteRange = (int)module->params[Harp::NOTE_RANGE_PARAM].getValue();
+	    if ((!module) || module->notePlaying) {
+		
+		int noteRange;
+		int currDegree;
+		if (module) {
+		    noteRange = (int)module->params[Harp::NOTE_RANGE_PARAM].getValue();
+		    currDegree = module->currDegree;
+		} else {
+		    // fake data for the module browser:
+		    noteRange = 24;
+		    currDegree = 6;
+		}
 
 #define STRIP_LED_Y_OFFSET 5.0		
 		float height =  (box.getHeight()-(2.f*STRIP_LED_Y_OFFSET)) / noteRange;
 		float x = STRIP_LED_X_OFFSET;
-		float y = STRIP_LED_X_OFFSET + (height * ((noteRange-1)-module->currDegree));
+		float y = STRIP_LED_X_OFFSET + (height * ((noteRange-1)-currDegree));
 		nvgBeginPath(args.vg);
 		nvgFillColor(args.vg, ledTextColor);
 		//INFO("rect %f %f %f %f %f",x, y, STRIP_LED_WIDTH, height, ratio);
@@ -272,17 +281,17 @@ namespace Harp {
             addOutput(createOutputCentered<PJ301MPort>(
                 mm2px(Vec(FIRST_X_OUT + SPACING_X_OUT + 0 * SPACING_X_OUT, FIRST_Y + SPACING_Y * 7)), module, Harp::GATE_OUTPUT));
 
-	    auto rootNoteDisplay = new NoteDisplayWidget(module ? &module->rootNote_text : NULL);
+	    auto rootNoteDisplay = new NoteDisplayWidget(module ? &module->rootNote_text : NULL, "C4");
 	    rootNoteDisplay->box.size = Vec(30, 10);
 	    rootNoteDisplay->box.pos = mm2px(Vec(LED_OFFSET_X + FIRST_X_OUT + SPACING_X_OUT + 0 * SPACING_X_OUT, LED_OFFSET_Y + FIRST_Y + SPACING_Y * 1));
 	    addChild(rootNoteDisplay);
 
-	    auto playingNoteDisplay = new NoteDisplayWidget(module ? &module->playingNote_text : NULL);
+	    auto playingNoteDisplay = new NoteDisplayWidget(module ? &module->playingNote_text : NULL, "E4");
 	    playingNoteDisplay->box.size = Vec(30, 10);
 	    playingNoteDisplay->box.pos = mm2px(Vec(LED_OFFSET_X + FIRST_X_OUT + SPACING_X_OUT + 0 * SPACING_X_OUT, LED_OFFSET_Y + FIRST_Y + SPACING_Y * 5));
 	    addChild(playingNoteDisplay);
 	    
-	    auto debugDisplay = new NoteDisplayWidget(module ? &module->debug_text : NULL);
+	    auto debugDisplay = new NoteDisplayWidget(module ? &module->debug_text : NULL, "");
 	    debugDisplay->box.size = Vec(30, 10);
 	    debugDisplay->box.pos = mm2px(Vec(LED_OFFSET_X + FIRST_X_OUT + SPACING_X_OUT + 0 * SPACING_X_OUT, LED_OFFSET_Y + FIRST_Y + SPACING_Y * 4.5));
 	    addChild(debugDisplay);
