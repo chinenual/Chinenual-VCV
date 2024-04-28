@@ -240,6 +240,11 @@ namespace Harp {
 		    currDegree = 6;
 		}
 
+		if (currDegree < 0 || currDegree >= noteRange) {
+		    // don't draw outside the box if something goes haywire
+		    return;
+		}
+		
 #define STRIP_LED_Y_OFFSET 5.0		
 		float height =  (box.getHeight()-(2.f*STRIP_LED_Y_OFFSET)) / noteRange;
 		float x = STRIP_LED_X_OFFSET;
