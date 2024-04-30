@@ -1,21 +1,6 @@
 # Change log for Chinenual-VCV
 
-## 2.7.0-beta4
-
-* Add some eye-candy to the Harp.  Print the quantized note and also display it graphically on an LED strip. 
-* Fix an off-by-one in the quantization computation.
-* Replace the TouchOSC v1 example client with one built in TouchOSC v2.  Had some problems with the touch messages from v1 confusing cvOSCcv. 
-
-## 2.7.0-beta3
-
-* Handle unconnected Gate input in Harp - treat as "always on".
-
-## 2.7.0-beta2
-
-* Changed Harp output polyphony to 16 channels (was only 5 in beta1).
-* Handle unconnected Scale input in Harp - treat as a chromatic scale rooted at C4. 
-
-## 2.7.0-beta1
+## 2.7.0
 
 * New module, Harp; a reimagining of Iasos's Golden Harp.
 
