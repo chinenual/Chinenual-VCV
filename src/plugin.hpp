@@ -2,6 +2,7 @@
 #include <rack.hpp>
 
 using namespace rack;
+using namespace rack::plugin;
 
 // Declare the Plugin, defined in plugin.cpp
 extern Plugin* pluginInstance;
