@@ -13,6 +13,8 @@ namespace NoteMeter {
     struct NoteMeter : Module {
         enum ParamId {
             NOTE_ACCIDENTAL_PARAM,
+            VOLTAGE_MODE_PARAM,
+            VOLTAGE_DECIMALS_PARAM,
             PARAMS_LEN
         };
         enum InputId {
@@ -46,9 +48,12 @@ namespace NoteMeter {
                 configInput(i, string::f("Pitch %d", i - PITCH_INPUT_1));
             }
             configParam(NOTE_ACCIDENTAL_PARAM, 0.f, 1.f, 0.f, "Display notes as sharps or flats");
+            configParam(VOLTAGE_MODE_PARAM, 0.f, 1.f, 0.f, "Display voltage value rather than note name");
+            configParam(VOLTAGE_DECIMALS_PARAM, 0.f, 8.f, 6.f, "Number of decimal places to display in voltage value");
         }
 
         std::string text[NUM_INPUTS];
+        std::string voltagePrintfFormat = "% 2.6f";
 
         void onReset() override
         {
@@ -65,11 +70,17 @@ namespace NoteMeter {
                     auto in = inputs[PITCH_INPUT_1 + i];
                     if (in.isConnected()) {
                         for (int c = 0; c < in.getChannels(); c++) {
-                            // we assume inputs are in +/-10V
-                            auto in_v = clamp(in.getVoltage(c), PITCH_VOCT_MIN, PITCH_VOCT_MAX);
-                            auto n = voltageToPitch(in_v);
-                            auto fn = voltageToMicroPitch(in_v);
-                            pitchToText(text[label_i], n, fn - ((float)n), (Chinenual::NoteAccidental)(params[NOTE_ACCIDENTAL_PARAM].getValue()));
+                            if (params[VOLTAGE_MODE_PARAM].getValue()) {
+                                char buff[40];
+                                std::snprintf(buff, sizeof(buff), voltagePrintfFormat.c_str(), in.getVoltage(c));
+                                text[label_i] = buff;
+                            } else {
+                                // we assume inputs are in +/-10V
+                                auto in_v = clamp(in.getVoltage(c), PITCH_VOCT_MIN, PITCH_VOCT_MAX);
+                                auto n = voltageToPitch(in_v);
+                                auto fn = voltageToMicroPitch(in_v);
+                                pitchToText(text[label_i], n, fn - ((float)n), (Chinenual::NoteAccidental)(params[NOTE_ACCIDENTAL_PARAM].getValue()));
+                            }
                             label_i++;
                             if (label_i >= NUM_INPUTS) {
                                 // INFO("  EARLY RETURN[%d]   i = %d   channels = %d\n", label_i, i, in.getChannels());
@@ -173,7 +184,30 @@ namespace NoteMeter {
                 "Sharps or Flats", Chinenual::NoteAccidentalNames,
                 [=]() { return module->params[NoteMeter::NOTE_ACCIDENTAL_PARAM].getValue(); },
                 [=](int val) {
-                    module->params[NoteMeter::NOTE_ACCIDENTAL_PARAM].setValue((Chinenual::NoteAccidental)val);
+                    module->params[NoteMeter::NOTE_ACCIDENTAL_PARAM].setValue((bool)val);
+                }));
+            menu->addChild(createBoolMenuItem("Display voltage instead of note name", "", [=]() { return module->params[NoteMeter::VOLTAGE_MODE_PARAM].getValue(); }, [=](int val) { module->params[NoteMeter::VOLTAGE_MODE_PARAM].setValue((bool)val); }));
+            /* Grrr, no ready-made way to get numeric input via text box or slider.   Punt and just produce a list of likely options. */
+            menu->addChild(createIndexSubmenuItem(
+                "Number decimal places in voltage display",
+                {
+                    "0",
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                },
+
+                [=]() { return module->params[NoteMeter::VOLTAGE_DECIMALS_PARAM].getValue(); },
+                [=](int val) {
+                    module->params[NoteMeter::VOLTAGE_DECIMALS_PARAM].setValue((int)val);
+                    char buff[40];
+                    std::snprintf(buff, sizeof(buff), "%% 2.%df", (int)val);
+                    module->voltagePrintfFormat = buff;
                 }));
         }
     };
