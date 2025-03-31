@@ -9,6 +9,15 @@ static const float PITCH_VOCT_MAX = 10.f;
 static const int PITCH_NOTE_MIN = -60; // MIDI note values
 static const int PITCH_NOTE_MAX = 180;
 
+enum NoteAccidental {
+    SHARP,
+    FLAT
+};
+static std::vector<std::string> NoteAccidentalNames = {
+    "Sharp",
+    "Flat",
+};
+
 inline float pitchToVoltage(int note)
 {
     // based on VCV CORE MIDI_CV:
@@ -43,7 +52,7 @@ inline float pitchDevToFrequencyDev(float pitchDeviation)
 }
 
 /* Careful: noteDeviation is scaled by note value - not by voltage */
-inline void pitchToText(std::string& text, int note, float noteDeviation)
+inline void pitchToText(std::string& text, int note, float noteDeviation, NoteAccidental accidentalMode)
 {
     // warning: note is not just in the MIDI range - might be much lower (-10v in v/oct == -60 "note")
 
@@ -51,7 +60,12 @@ inline void pitchToText(std::string& text, int note, float noteDeviation)
     int n = std::round(note + noteDeviation);
     float nDeviation = noteDeviation - (n - note);
 
-    const char* noteNames[] = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
+    std::vector<std::string> noteNames;
+    if (accidentalMode == SHARP) {
+        noteNames = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
+    } else {
+        noteNames = { "C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B" };
+    }
 
     // ensure nameIndex is positive -- add several octaves to ensure we the numerator is > 0.  n could be as low
     // as -60.   But just in case we feed this something way out of range, add even more.  (Bogaudio LLFO seems to somehow be abnle to send +/- 12V?)
@@ -60,12 +74,11 @@ inline void pitchToText(std::string& text, int note, float noteDeviation)
     int octave = (n / 12) - 1; // simple division produces 60=C5; we want to display that as C4, so subtract 1
     auto absDeviation = std::abs(nDeviation);
     if (absDeviation >= 0.01f) {
-        text = rack::string::f("%s%d %s%dc", noteNames[nameIndex], octave,
+        text = rack::string::f("%s%d %s%dc", noteNames[nameIndex].c_str(), octave,
             (nDeviation > 0 ? "+" : "-"),
             (int)(absDeviation * 100));
     } else {
-        text = rack::string::f("%s%d", noteNames[nameIndex], octave);
+        text = rack::string::f("%s%d", noteNames[nameIndex].c_str(), octave);
     }
 }
-
 }

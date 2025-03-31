@@ -1,5 +1,9 @@
 # Change log for Chinenual-VCV
 
+## 2.7.1
+
+* New option for Harp and NoteMeter - choose between displaying notes with Sharps vs. Flats via a new context menu option.
+
 ## 2.7.0
 
 * New module, Harp; a reimagining of Iasos's Golden Harp.
