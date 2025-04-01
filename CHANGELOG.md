@@ -2,8 +2,8 @@
 
 ## 2.7.1
 
-* Implements [Issue #9]: New option for Harp and NoteMeter - choose between displaying notes with Sharps vs. Flats via a new context menu option.
-* Implements [Issue #10]: NoteMeter can now display raw voltage with configurable precision via a new context menu option.
+* Implements [issue #9](https://github.com/chinenual/Chinenual-VCV/issues/9): New option for Harp and NoteMeter - choose between displaying notes with Sharps vs. Flats via a new context menu option.
+* Implements [issue #10](https://github.com/chinenual/Chinenual-VCV/issues/10): NoteMeter can now display raw voltage with configurable precision via a new context menu option.
 
 ## 2.7.0
 
