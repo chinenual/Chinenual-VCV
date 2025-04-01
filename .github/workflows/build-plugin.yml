@@ -1,3 +1,4 @@
+# adapted from https://github.com/qno/vcv-plugin-github-actions-example
 name: Build VCV Rack Plugin
 on: [push, pull_request]
 

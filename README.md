@@ -257,8 +257,13 @@ from V/Oct inputs.	If the input voltage does not align exactly with a
 note voltage it indicates the deviance from the closest note as
 "cents". 
  
- You can choose to display notes as "sharps" (the default) or flats via the context menu.
- 
+ Context menu:
+
+ * **Sharps for Flats**: Choose to display notes as "sharps" (the default) or flats
+ * **Display voltage instead of note name**: Choose to display the raw voltage value instead of a note name.
+ * **Number decimal places in voltage display**: Set the precision of the numbers displayed for voltages.
+
+
 ### Inv
 
 ![module-screenshot](./doc/Inv.png) 
@@ -395,7 +400,7 @@ The signal range of the control surface is configured via the context menu:
 
 * **Pitch CV Input Range** - the voltage range of the CV signal patched into the **Pitch** input
 
-* **Sharps or Flats** - choose whether the display notes as sharps (default) or flats.
+ * **Sharps for Flats**: Choose to display notes as "sharps" (the default) or flats
 
 #### Differences from the Real Thing
 
