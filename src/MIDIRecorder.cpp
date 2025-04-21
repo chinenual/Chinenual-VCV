@@ -4,6 +4,7 @@
 #include "MIDIBuffer.hpp"
 #include "MIDIRecorderBase.hpp"
 #include "MidiFile.h"
+#include "Style.hpp"
 #include "plugin.hpp"
 
 namespace Chinenual {
@@ -52,6 +53,9 @@ namespace MIDIRecorder {
         void drawLayer(const DrawArgs& args, int layer) override
         {
             if (layer == 1) {
+
+                NVGcolor ledTextColor = Style::getNVGColor(Style::Style::getTextColor());
+
                 if (!(font = APP->window->loadFont(fontPath))) {
                     return;
                 }
@@ -804,6 +808,8 @@ namespace MIDIRecorder {
             menu->addChild(createBoolMenuItem(
                 "MW is 14bit", "", [=]() { return module->mwIs14bit; },
                 [=](bool val) { module->mwIs14bit = val; }));
+
+            STYLE_MENUS();
         }
     };
 

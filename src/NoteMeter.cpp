@@ -1,6 +1,7 @@
 #include <osdialog.h>
 
 #include "PitchNote.hpp"
+#include "Style.hpp"
 #include "logger.hpp"
 #include "plugin.hpp"
 
@@ -105,9 +106,6 @@ namespace NoteMeter {
         }
     };
 
-    static const NVGcolor textColor_red = nvgRGB(0xff, 0x33, 0x33);
-    static const NVGcolor ledTextColor = textColor_red;
-
     struct NoteDisplayWidget : TransparentWidget {
         std::shared_ptr<Font> font;
         std::string fontPath;
@@ -123,6 +121,8 @@ namespace NoteMeter {
 
         void drawLayer(const DrawArgs& args, int layer) override
         {
+            NVGcolor ledTextColor = Style::getNVGColor(Style::Style::getTextColor());
+
             if (layer == 1) {
                 if (!(font = APP->window->loadFont(fontPath))) {
                     return;
@@ -220,6 +220,7 @@ namespace NoteMeter {
                     module->params[NoteMeter::VOLTAGE_DECIMALS_PARAM].setValue((int)val);
                     module->onReset();
                 }));
+            STYLE_MENUS();
         }
     };
 

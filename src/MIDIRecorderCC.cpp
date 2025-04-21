@@ -1,5 +1,6 @@
 #include "CVRange.hpp"
 #include "MIDIRecorderBase.hpp"
+#include "Style.hpp"
 #include "plugin.hpp"
 
 namespace Chinenual {
@@ -290,6 +291,8 @@ namespace MIDIRecorder {
         void drawLayer(const DrawArgs& args, int layer) override
         {
             if (layer == 1) {
+                NVGcolor ledTextColor = Style::getNVGColor(Style::Style::getTextColor());
+
                 if (!(font = APP->window->loadFont(fontPath))) {
                     return;
                 }
@@ -396,6 +399,7 @@ namespace MIDIRecorder {
                         }
                     }));
             }
+            STYLE_MENUS();
         }
     };
 

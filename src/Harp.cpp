@@ -2,6 +2,7 @@
 
 #include "CVRange.hpp"
 #include "PitchNote.hpp"
+#include "Style.hpp"
 #include "plugin.hpp"
 
 namespace Chinenual {
@@ -157,9 +158,6 @@ namespace Harp {
         }
     };
 
-    static const NVGcolor textColor_red = nvgRGB(0xff, 0x33, 0x33);
-    static const NVGcolor ledTextColor = textColor_red;
-
     struct NoteDisplayWidget : TransparentWidget {
         std::shared_ptr<Font> font;
         std::string fontPath;
@@ -178,6 +176,8 @@ namespace Harp {
         void drawLayer(const DrawArgs& args, int layer) override
         {
             if (layer == 1) {
+                NVGcolor ledTextColor = Style::getNVGColor(Style::Style::getTextColor());
+
                 if (!(font = APP->window->loadFont(fontPath))) {
                     return;
                 }
@@ -229,6 +229,7 @@ namespace Harp {
         {
             if (layer != 1)
                 return;
+            NVGcolor ledTextColor = Style::getNVGColor(Style::Style::getTextColor());
 
             if ((!module) || module->notePlaying) {
 
@@ -340,6 +341,7 @@ namespace Harp {
                 [=](int val) {
                     module->params[Harp::NOTE_ACCIDENTAL_PARAM].setValue((Chinenual::NoteAccidental)val);
                 }));
+            STYLE_MENUS();
         }
     };
 
