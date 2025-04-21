@@ -113,7 +113,7 @@ namespace NoteMeter {
         {
             text = t;
             fontPath = std::string(
-                asset::plugin(pluginInstance, "res/fonts/opensans/OpenSans-Bold.ttf"));
+                asset::plugin(pluginInstance, "res/fonts/opensans/OpenSans-Regular.ttf"));
         }
 
         void drawLayer(const DrawArgs& args, int layer) override
@@ -151,7 +151,7 @@ namespace NoteMeter {
 #define LABEL_OFFSET_Y_OUT (LABEL_OFFSET_Y - 0.5) // leave space for the shading under the output jacks
 
 #define LED_OFFSET_X 5.0
-#define LED_OFFSET_Y -5.0
+#define LED_OFFSET_Y -5.5
 
     struct NoteMeterWidget : ModuleWidget {
         NoteMeterWidget(NoteMeter* module)

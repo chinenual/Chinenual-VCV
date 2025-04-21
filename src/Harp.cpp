@@ -172,7 +172,7 @@ namespace Harp {
             text = t;
             this->fakeData = fakeData;
             fontPath = std::string(
-                asset::plugin(pluginInstance, "res/fonts/opensans/OpenSans-Bold.ttf"));
+                asset::plugin(pluginInstance, "res/fonts/opensans/OpenSans-Regular.ttf"));
         }
 
         void drawLayer(const DrawArgs& args, int layer) override
