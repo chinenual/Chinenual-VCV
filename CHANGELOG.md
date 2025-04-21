@@ -1,5 +1,9 @@
 # Change log for Chinenual-VCV
 
+## 2.7.2
+
+* Fixes [issue #11](https://github.com/chinenual/Chinenual-VCV/issues/11) Notemeter did not initialize its text format to match the selected parameter value after the module was duplicated.
+
 ## 2.7.1
 
 * Implements [issue #9](https://github.com/chinenual/Chinenual-VCV/issues/9): New option for Harp and NoteMeter - choose between displaying notes with Sharps vs. Flats via a new context menu option.

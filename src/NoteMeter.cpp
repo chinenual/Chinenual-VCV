@@ -53,7 +53,6 @@ namespace NoteMeter {
         }
 
         std::string text[NUM_INPUTS];
-        std::string voltagePrintfFormat = "% 2.6f";
 
         void onReset() override
         {
@@ -65,6 +64,14 @@ namespace NoteMeter {
                 for (int i = 0; i < NUM_INPUTS; i++) {
                     text[i] = "";
                 }
+                std::string voltagePrintfFormat = "% 2.6f";
+                if (params[VOLTAGE_MODE_PARAM].getValue()) {
+                    // recompute the printformat to match the current param value
+                    char buff[40];
+                    std::snprintf(buff, sizeof(buff), "%% 2.%df", (int)params[VOLTAGE_DECIMALS_PARAM].getValue());
+                    voltagePrintfFormat = buff;
+                }
+
                 for (int i = 0; i < NUM_INPUTS; i++) {
                     int label_i = i;
                     auto in = inputs[PITCH_INPUT_1 + i];
@@ -205,9 +212,7 @@ namespace NoteMeter {
                 [=]() { return module->params[NoteMeter::VOLTAGE_DECIMALS_PARAM].getValue(); },
                 [=](int val) {
                     module->params[NoteMeter::VOLTAGE_DECIMALS_PARAM].setValue((int)val);
-                    char buff[40];
-                    std::snprintf(buff, sizeof(buff), "%% 2.%df", (int)val);
-                    module->voltagePrintfFormat = buff;
+                    module->onReset();
                 }));
         }
     };
