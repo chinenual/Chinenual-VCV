@@ -84,6 +84,9 @@
         "iterator": "cpp",
         "utility": "cpp",
         "future": "cpp",
-        "regex": "cpp"
+        "regex": "cpp",
+        "__verbose_abort": "cpp",
+        "cfenv": "cpp",
+        "charconv": "cpp"
     }
 }

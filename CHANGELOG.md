@@ -6,6 +6,8 @@
 
 * Fixes [issue #13](https://github.com/chinenual/Chinenual-VCV/issues/13) Notemeter and Harp use a thinner weight font for Note display, tweaks vertical alignment of text to better match the port locations.
 
+* Implements [issue #14](https://github.com/chinenual/Chinenual-VCV/issues/14) Notemeter now shows 16 channels - not just the first 12.
+
 ## 2.7.1
 
 * Implements [issue #9](https://github.com/chinenual/Chinenual-VCV/issues/9): New option for Harp and NoteMeter - choose between displaying notes with Sharps vs. Flats via a new context menu option.

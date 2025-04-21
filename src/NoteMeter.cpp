@@ -1,9 +1,10 @@
 #include <osdialog.h>
 
 #include "PitchNote.hpp"
+#include "logger.hpp"
 #include "plugin.hpp"
 
-#define NUM_INPUT_ROWS 12
+#define NUM_INPUT_ROWS 16
 #define NUM_INPUT_COLS 1
 #define NUM_INPUTS (NUM_INPUT_ROWS * NUM_INPUT_COLS)
 
@@ -30,6 +31,10 @@ namespace NoteMeter {
             PITCH_INPUT_10,
             PITCH_INPUT_11,
             PITCH_INPUT_12,
+            PITCH_INPUT_13,
+            PITCH_INPUT_14,
+            PITCH_INPUT_15,
+            PITCH_INPUT_16,
             INPUTS_LEN
         };
         enum OutputId {
@@ -45,7 +50,7 @@ namespace NoteMeter {
 
             config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
             for (int i = PITCH_INPUT_1; i < PITCH_INPUT_1 + NUM_INPUTS; i++) {
-                configInput(i, string::f("Pitch %d", i - PITCH_INPUT_1));
+                configInput(i, string::f("Pitch %d", i - PITCH_INPUT_1 + 1));
             }
             configParam(NOTE_ACCIDENTAL_PARAM, 0.f, 1.f, 0.f, "Display notes as sharps or flats");
             configParam(VOLTAGE_MODE_PARAM, 0.f, 1.f, 0.f, "Display voltage value rather than note name");
@@ -138,7 +143,8 @@ namespace NoteMeter {
 #define FIRST_X -14.0
 #define FIRST_Y 12.0
 #define SPACING_X 20.0
-#define SPACING_Y 9.5
+// #define SPACING_Y 9.5
+#define SPACING_Y 7.125
 #define FIRST_X_OUT -8.0
 #define PAIR_SPACING 0.42
 #define LABEL_OFFSET_X -19.0
