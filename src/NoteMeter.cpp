@@ -13,6 +13,11 @@ namespace Chinenual {
 namespace NoteMeter {
 
     struct NoteMeter : Module {
+        enum VoltageModeEnum {
+            VOLTAGE_MODE_NOTENAME = 0,
+            VOLTAGE_MODE_VOLTAGE = 1,
+            VOLTAGE_MODE_VOCT_FREQUENCY = 2
+        };
         enum ParamId {
             NOTE_ACCIDENTAL_PARAM,
             VOLTAGE_MODE_PARAM,
@@ -64,6 +69,11 @@ namespace NoteMeter {
         {
         }
 
+        inline float voct_to_hz(float v)
+        {
+            return powf(2, v) * 261.625565;
+        }
+
         void process(const ProcessArgs& args) override
         {
             if ((args.frame % 100) == 0) { // throttle
@@ -71,11 +81,13 @@ namespace NoteMeter {
                     text[i] = "";
                 }
                 std::string voltagePrintfFormat = "% 2.6f";
-                if (params[VOLTAGE_MODE_PARAM].getValue()) {
+                if (params[VOLTAGE_MODE_PARAM].getValue() == VOLTAGE_MODE_VOLTAGE) {
                     // recompute the printformat to match the current param value
                     char buff[40];
                     std::snprintf(buff, sizeof(buff), "%% 2.%df", (int)params[VOLTAGE_DECIMALS_PARAM].getValue());
                     voltagePrintfFormat = buff;
+                } else if (params[VOLTAGE_MODE_PARAM].getValue() == VOLTAGE_MODE_VOCT_FREQUENCY) {
+                    voltagePrintfFormat = "% 4.2f";
                 }
 
                 for (int i = 0; i < NUM_INPUTS; i++) {
@@ -83,9 +95,13 @@ namespace NoteMeter {
                     auto in = inputs[PITCH_INPUT_1 + i];
                     if (in.isConnected()) {
                         for (int c = 0; c < in.getChannels(); c++) {
-                            if (params[VOLTAGE_MODE_PARAM].getValue()) {
+                            if (params[VOLTAGE_MODE_PARAM].getValue() == VOLTAGE_MODE_VOLTAGE) {
                                 char buff[40];
                                 std::snprintf(buff, sizeof(buff), voltagePrintfFormat.c_str(), in.getVoltage(c));
+                                text[label_i] = buff;
+                            } else if (params[VOLTAGE_MODE_PARAM].getValue() == VOLTAGE_MODE_VOCT_FREQUENCY) {
+                                char buff[40];
+                                std::snprintf(buff, sizeof(buff), voltagePrintfFormat.c_str(), voct_to_hz(in.getVoltage(c)));
                                 text[label_i] = buff;
                             } else {
                                 // we assume inputs are in +/-10V
@@ -199,7 +215,18 @@ namespace NoteMeter {
                 [=](int val) {
                     module->params[NoteMeter::NOTE_ACCIDENTAL_PARAM].setValue((bool)val);
                 }));
-            menu->addChild(createBoolMenuItem("Display voltage instead of note name", "", [=]() { return module->params[NoteMeter::VOLTAGE_MODE_PARAM].getValue(); }, [=](int val) { module->params[NoteMeter::VOLTAGE_MODE_PARAM].setValue((bool)val); }));
+            menu->addChild(createIndexSubmenuItem(
+                "Display type",
+                {
+                    "Note Name",
+                    "Voltage (V)",
+                    "V/Oct as Frequency (Hz)",
+                },
+                [=]() { return module->params[NoteMeter::VOLTAGE_MODE_PARAM].getValue(); },
+                [=](int val) {
+                    module->params[NoteMeter::VOLTAGE_MODE_PARAM].setValue((int)val);
+                    module->onReset();
+                }));
             /* Grrr, no ready-made way to get numeric input via text box or slider.   Punt and just produce a list of likely options. */
             menu->addChild(createIndexSubmenuItem(
                 "Number decimal places in voltage display",

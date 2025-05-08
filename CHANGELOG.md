@@ -1,8 +1,14 @@
 # Change log for Chinenual-VCV
 
+## 2.7.3
+
+* Implements [issue #15](https://github.com/chinenual/Chinenual-VCV/issues/15)  Notemeter can now display "V/Oct as frequency".  So there are now three options: Note Name, Voltage (V), V/Oct as Frequency (Hz)
+
 ## 2.7.2
 
 * Fixes [issue #11](https://github.com/chinenual/Chinenual-VCV/issues/11) Notemeter did not initialize its text format to match the selected parameter value after the module was duplicated.
+
+* Implements [issue #12](https://github.com/chinenual/Chinenual-VCV/issues/12)  All modules that display values as text support a global style to change that color. Red remains the default.
 
 * Fixes [issue #13](https://github.com/chinenual/Chinenual-VCV/issues/13) Notemeter and Harp use a thinner weight font for Note display, tweaks vertical alignment of text to better match the port locations.
 
