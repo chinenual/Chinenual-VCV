@@ -250,7 +250,7 @@ Outputs:
 
 ### NoteMeter
 
-![module-screenshot](./doc/NoteMeter.png) 
+![module-screenshot](./doc/NoteMeter-modes.png) 
 
 NoteMeter is a polyphonic metering module that displays note names
 from V/Oct inputs.	If the input voltage does not align exactly with a
@@ -259,9 +259,9 @@ note voltage it indicates the deviance from the closest note as
  
  Context menu:
 
- * **Sharps for Flats**: Choose to display notes as "sharps" (the default) or flats
- * **Display voltage instead of note name**: Choose to display the raw voltage value instead of a note name.
- * **Number decimal places in voltage display**: Set the precision of the numbers displayed for voltages.
+ * **Sharps for Flats**: Choose to display accidentals as "sharps" (the default) or flats
+ * **Display type**: Display Note Name, Voltage or V/Oct as Frequency (Hz)
+ * **Number decimal places in voltage/frequency display**: Set the precision of the numbers displayed for voltages and frequencies.
 
 
 ### Inv
