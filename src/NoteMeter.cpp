@@ -24,6 +24,7 @@ namespace NoteMeter {
             NOTE_ACCIDENTAL_PARAM,
             VOLTAGE_MODE_PARAM,
             VOLTAGE_DECIMALS_PARAM,
+            STYLE_PARAM,
             PARAMS_LEN
         };
         enum InputId {
@@ -63,6 +64,7 @@ namespace NoteMeter {
             configParam(NOTE_ACCIDENTAL_PARAM, 0.f, 1.f, 0.f, "Display notes as sharps or flats");
             configParam(VOLTAGE_MODE_PARAM, 0.f, 2.f, 0.f, "Display voltage value rather than note name");
             configParam(VOLTAGE_DECIMALS_PARAM, 0.f, 8.f, 6.f, "Number of decimal places to display in voltage value");
+            CONFIG_STYLE(STYLE_PARAM);
         }
 
         std::string text[NUM_INPUTS];
@@ -162,17 +164,19 @@ namespace NoteMeter {
         std::string fontPath;
         char displayStr[16];
         std::string* text;
+        NoteMeter* module;
 
-        NoteDisplayWidget(std::string* t)
+        NoteDisplayWidget(NoteMeter* m, std::string* t)
         {
             text = t;
+            module = m;
             fontPath = std::string(
                 asset::plugin(pluginInstance, "res/fonts/opensans/OpenSans-Regular.ttf"));
         }
 
         void drawLayer(const DrawArgs& args, int layer) override
         {
-            NVGcolor ledTextColor = Style::getNVGColor(Style::Style::getTextColor());
+            NVGcolor ledTextColor = Style::getNVGColor(module ? (Style::Color)module->params[NoteMeter::STYLE_PARAM].getValue() : Style::DEFAULT_COLOR);
 
             if (layer == 1) {
                 if (!(font = APP->window->loadFont(fontPath))) {
@@ -241,7 +245,7 @@ namespace NoteMeter {
                     addInput(createInputCentered<PJ301MPort>(
                         mm2px(Vec(x, y)), module, in));
 
-                    auto noteDisplay = new NoteDisplayWidget(module ? &module->text[row] : NULL);
+                    auto noteDisplay = new NoteDisplayWidget(module, module ? &module->text[row] : NULL);
                     noteDisplay->box.size = Vec(30, 10);
                     noteDisplay->box.pos = mm2px(Vec(x + LED_OFFSET_X, y + LED_OFFSET_Y));
                     addChild(noteDisplay);
@@ -291,7 +295,7 @@ namespace NoteMeter {
                     module->params[NoteMeter::VOLTAGE_DECIMALS_PARAM].setValue((int)val);
                     module->onReset();
                 }));
-            STYLE_MENUS();
+            STYLE_MENUS(NoteMeter::STYLE_PARAM);
         }
     };
 

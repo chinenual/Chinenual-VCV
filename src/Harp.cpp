@@ -13,6 +13,7 @@ namespace Harp {
             NOTE_RANGE_PARAM,
             PITCH_CV_RANGE_PARAM,
             NOTE_ACCIDENTAL_PARAM,
+            STYLE_PARAM,
             PARAMS_LEN
         };
         enum InputId {
@@ -60,6 +61,8 @@ namespace Harp {
             configParam(NOTE_ACCIDENTAL_PARAM, 0.f, 1.f, 0.f, "Display notes as sharps or flats");
             configParam(NOTE_RANGE_PARAM, 2.f, 16.f, 48.f,
                 "Number of notes in pitch range");
+            CONFIG_STYLE(STYLE_PARAM);
+
             configSwitch(PITCH_CV_RANGE_PARAM,
                 0.f,
                 MIDIRecorder::CVRangeNames.size() - 1,
@@ -164,10 +167,12 @@ namespace Harp {
         char displayStr[16];
         std::string* text;
         std::string fakeData;
+        Harp* module;
 
-        NoteDisplayWidget(std::string* t, std::string fakeData)
+        NoteDisplayWidget(Harp* m, std::string* t, std::string fakeData)
         {
             text = t;
+            module = m;
             this->fakeData = fakeData;
             fontPath = std::string(
                 asset::plugin(pluginInstance, "res/fonts/opensans/OpenSans-Regular.ttf"));
@@ -176,7 +181,7 @@ namespace Harp {
         void drawLayer(const DrawArgs& args, int layer) override
         {
             if (layer == 1) {
-                NVGcolor ledTextColor = Style::getNVGColor(Style::Style::getTextColor());
+                NVGcolor ledTextColor = Style::getNVGColor(module ? (Style::Color)module->params[Harp::STYLE_PARAM].getValue() : Style::DEFAULT_COLOR);
 
                 if (!(font = APP->window->loadFont(fontPath))) {
                     return;
@@ -229,7 +234,7 @@ namespace Harp {
         {
             if (layer != 1)
                 return;
-            NVGcolor ledTextColor = Style::getNVGColor(Style::Style::getTextColor());
+            NVGcolor ledTextColor = Style::getNVGColor(module ? (Style::Color)module->params[Harp::STYLE_PARAM].getValue() : Style::DEFAULT_COLOR);
 
             if ((!module) || module->notePlaying) {
 
@@ -289,17 +294,17 @@ namespace Harp {
             addOutput(createOutputCentered<PJ301MPort>(
                 mm2px(Vec(FIRST_X_OUT + SPACING_X_OUT + 0 * SPACING_X_OUT, FIRST_Y + SPACING_Y * 7)), module, Harp::GATE_OUTPUT));
 
-            auto rootNoteDisplay = new NoteDisplayWidget(module ? &module->rootNote_text : NULL, "C4");
+            auto rootNoteDisplay = new NoteDisplayWidget(module, module ? &module->rootNote_text : NULL, "C4");
             rootNoteDisplay->box.size = Vec(30, 10);
             rootNoteDisplay->box.pos = mm2px(Vec(LED_OFFSET_X + FIRST_X_OUT + SPACING_X_OUT + 0 * SPACING_X_OUT, LED_OFFSET_Y + FIRST_Y + SPACING_Y * 1));
             addChild(rootNoteDisplay);
 
-            auto playingNoteDisplay = new NoteDisplayWidget(module ? &module->playingNote_text : NULL, "E4");
+            auto playingNoteDisplay = new NoteDisplayWidget(module, module ? &module->playingNote_text : NULL, "E4");
             playingNoteDisplay->box.size = Vec(30, 10);
             playingNoteDisplay->box.pos = mm2px(Vec(LED_OFFSET_X + FIRST_X_OUT + SPACING_X_OUT + 0 * SPACING_X_OUT, LED_OFFSET_Y + FIRST_Y + SPACING_Y * 5));
             addChild(playingNoteDisplay);
 
-            auto debugDisplay = new NoteDisplayWidget(module ? &module->debug_text : NULL, "");
+            auto debugDisplay = new NoteDisplayWidget(module, module ? &module->debug_text : NULL, "");
             debugDisplay->box.size = Vec(30, 10);
             debugDisplay->box.pos = mm2px(Vec(LED_OFFSET_X + FIRST_X_OUT + SPACING_X_OUT + 0 * SPACING_X_OUT, LED_OFFSET_Y + FIRST_Y + SPACING_Y * 4.5));
             addChild(debugDisplay);
@@ -341,7 +346,7 @@ namespace Harp {
                 [=](int val) {
                     module->params[Harp::NOTE_ACCIDENTAL_PARAM].setValue((Chinenual::NoteAccidental)val);
                 }));
-            STYLE_MENUS();
+            STYLE_MENUS(Harp::STYLE_PARAM);
         }
     };
 

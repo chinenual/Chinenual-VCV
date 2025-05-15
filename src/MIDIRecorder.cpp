@@ -37,44 +37,6 @@ namespace MIDIRecorder {
         void reset() { MidiGenerator::reset(); }
     };
 
-    struct BPMDisplayWidget : TransparentWidget {
-        std::shared_ptr<Font> font;
-        std::string fontPath;
-        char displayStr[16];
-        double* bpmPtr;
-
-        BPMDisplayWidget(double* bpm)
-        {
-            bpmPtr = bpm;
-            fontPath = std::string(
-                asset::plugin(pluginInstance, "res/fonts/DSEG14Modern-BoldItalic.ttf"));
-        }
-
-        void drawLayer(const DrawArgs& args, int layer) override
-        {
-            if (layer == 1) {
-
-                NVGcolor ledTextColor = Style::getNVGColor(Style::Style::getTextColor());
-
-                if (!(font = APP->window->loadFont(fontPath))) {
-                    return;
-                }
-                nvgFontSize(args.vg, 17);
-                nvgFontFaceId(args.vg, font->handle);
-
-                Vec textPos = Vec(6, 24);
-
-                nvgFillColor(args.vg, ledTextColor);
-
-                unsigned int bpm = bpmPtr ? std::round(*bpmPtr) : 120;
-                snprintf(displayStr, 16, "%3u", bpm);
-
-                nvgTextAlign(args.vg, NVG_ALIGN_RIGHT | NVG_ALIGN_BOTTOM);
-                nvgText(args.vg, textPos.x, textPos.y, displayStr, NULL);
-            }
-        }
-    };
-
     static void selectPath(Module* module);
 
     struct MIDIClock {
@@ -124,8 +86,11 @@ namespace MIDIRecorder {
         MasterToExpanderMessage master_to_expander_message_a;
         MasterToExpanderMessage master_to_expander_message_b;
 
-        enum ParamId { RUN_PARAM,
-            PARAMS_LEN };
+        enum ParamId {
+            RUN_PARAM,
+            STYLE_PARAM,
+            PARAMS_LEN
+        };
         enum InputId {
             BPM_INPUT,
             RUN_INPUT,
@@ -249,6 +214,7 @@ namespace MIDIRecorder {
             onReset();
 
             config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
+            CONFIG_STYLE(STYLE_PARAM);
             configInput(BPM_INPUT, "Tempo/BPM");
             configInput(RUN_INPUT, "Start/Stop Gate");
             configOutput(RUNNING_OUTPUT, "Is Actively Recording Gate");
@@ -699,6 +665,46 @@ namespace MIDIRecorder {
         }
     };
 
+    struct BPMDisplayWidget : TransparentWidget {
+        std::shared_ptr<Font> font;
+        std::string fontPath;
+        char displayStr[16];
+        double* bpmPtr;
+        MIDIRecorder* module;
+
+        BPMDisplayWidget(MIDIRecorder* m, double* bpm)
+        {
+            module = m;
+            bpmPtr = bpm;
+            fontPath = std::string(
+                asset::plugin(pluginInstance, "res/fonts/DSEG14Modern-BoldItalic.ttf"));
+        }
+
+        void drawLayer(const DrawArgs& args, int layer) override
+        {
+            if (layer == 1) {
+
+                NVGcolor ledTextColor = Style::getNVGColor(module ? (Style::Color)module->params[MIDIRecorder::STYLE_PARAM].getValue() : Style::DEFAULT_COLOR);
+
+                if (!(font = APP->window->loadFont(fontPath))) {
+                    return;
+                }
+                nvgFontSize(args.vg, 17);
+                nvgFontFaceId(args.vg, font->handle);
+
+                Vec textPos = Vec(6, 24);
+
+                nvgFillColor(args.vg, ledTextColor);
+
+                unsigned int bpm = bpmPtr ? std::round(*bpmPtr) : 120;
+                snprintf(displayStr, 16, "%3u", bpm);
+
+                nvgTextAlign(args.vg, NVG_ALIGN_RIGHT | NVG_ALIGN_BOTTOM);
+                nvgText(args.vg, textPos.x, textPos.y, displayStr, NULL);
+            }
+        }
+    };
+
 #define FIRST_X 10.0
 #define FIRST_Y 20.0
 #define SPACING_X 10.0
@@ -759,7 +765,7 @@ namespace MIDIRecorder {
             addInput(createInputCentered<PJ301MPort>(
                 mm2px(Vec(FIRST_COL_X, FIRST_Y + 9 * SPACING_Y)), module,
                 MIDIRecorder::BPM_INPUT));
-            auto bpmDisplay = new BPMDisplayWidget(module ? &module->clock.bpm : NULL);
+            auto bpmDisplay = new BPMDisplayWidget(module, module ? &module->clock.bpm : NULL);
             bpmDisplay->box.size = Vec(30, 10);
             bpmDisplay->box.pos = mm2px(Vec(FIRST_X + LED_OFFSET_X, FIRST_Y + 8 * SPACING_Y + LED_OFFSET_Y));
             addChild(bpmDisplay);
@@ -809,7 +815,7 @@ namespace MIDIRecorder {
                 "MW is 14bit", "", [=]() { return module->mwIs14bit; },
                 [=](bool val) { module->mwIs14bit = val; }));
 
-            STYLE_MENUS();
+            STYLE_MENUS(MIDIRecorder::STYLE_PARAM);
         }
     };
 

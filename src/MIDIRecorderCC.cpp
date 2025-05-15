@@ -23,7 +23,10 @@ namespace MIDIRecorder {
         ExpanderToMasterMessage expanderToMasterMessage_a;
         ExpanderToMasterMessage expanderToMasterMessage_b;
 
-        enum ParamId { PARAMS_LEN };
+        enum ParamId {
+            STYLE_PARAM,
+            PARAMS_LEN
+        };
         enum InputId {
             T1_CC_1_INPUT,
             T1_CC_2_INPUT,
@@ -103,6 +106,7 @@ namespace MIDIRecorder {
             onReset();
 
             config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
+            CONFIG_STYLE(STYLE_PARAM);
 
             int i, t;
             for (t = 0; t < NUM_TRACKS; t++) {
@@ -280,9 +284,11 @@ namespace MIDIRecorder {
         std::string fontPath;
         char displayStr[16];
         CCConfig* ccConfigPtr;
+        MIDIRecorderCC* module;
 
-        CCDisplayWidget(CCConfig* ccConfig)
+        CCDisplayWidget(MIDIRecorderCC* m, CCConfig* ccConfig)
         {
+            module = m;
             ccConfigPtr = ccConfig;
             fontPath = std::string(
                 asset::plugin(pluginInstance, "res/fonts/DSEG14Modern-BoldItalic.ttf"));
@@ -291,7 +297,7 @@ namespace MIDIRecorder {
         void drawLayer(const DrawArgs& args, int layer) override
         {
             if (layer == 1) {
-                NVGcolor ledTextColor = Style::getNVGColor(Style::Style::getTextColor());
+                NVGcolor ledTextColor = Style::getNVGColor(module ? (Style::Color)module->params[MIDIRecorderCC::STYLE_PARAM].getValue() : Style::DEFAULT_COLOR);
 
                 if (!(font = APP->window->loadFont(fontPath))) {
                     return;
@@ -347,7 +353,7 @@ namespace MIDIRecorder {
                 }
             }
             for (i = 0; i < MIDIRecorderCC::COLS_PER_TRACK; i++) {
-                auto ccDisplay = new CCDisplayWidget(module ? &module->ccConfig[i] : NULL);
+                auto ccDisplay = new CCDisplayWidget(module, module ? &module->ccConfig[i] : NULL);
                 ccDisplay->box.size = Vec(30, 10);
                 const int CCDISPLAY_Y = FIRST_Y - SPACING_Y + LED_OFFSET_Y;
                 ccDisplay->box.pos = mm2px(Vec(FIRST_X + i * SPACING_X + LED_OFFSET_X, CCDISPLAY_Y));
@@ -399,7 +405,7 @@ namespace MIDIRecorder {
                         }
                     }));
             }
-            STYLE_MENUS();
+            STYLE_MENUS(MIDIRecorderCC::STYLE_PARAM);
         }
     };
 

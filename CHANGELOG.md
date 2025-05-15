@@ -2,7 +2,9 @@
 
 ## 2.7.4
 
-* Implements [issue #17](https://github.com/chinenual/Chinenual-VCV/issues/17)  Notemeter now display a label indicating display units ("V" or "Hz") when displaying those values.
+* Implements [issue #16](https://github.com/chinenual/Chinenual-VCV/issues/16)  Text color style is now "per module" not global to all Chinenual modules.
+
+* Implements [issue #17](https://github.com/chinenual/Chinenual-VCV/issues/17)  Notemeter now displays a label indicating display units ("V" or "Hz") when displaying those values.
 
 ## 2.7.3
 
