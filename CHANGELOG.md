@@ -1,5 +1,9 @@
 # Change log for Chinenual-VCV
 
+## 2.7.4
+
+* Implements [issue #17](https://github.com/chinenual/Chinenual-VCV/issues/17)  Notemeter now display a label indicating display units ("V" or "Hz") when displaying those values.
+
 ## 2.7.3
 
 * Implements [issue #15](https://github.com/chinenual/Chinenual-VCV/issues/15)  Notemeter can now display "V/Oct as frequency".  So there are now three options: Note Name, Voltage (V), V/Oct as Frequency (Hz)

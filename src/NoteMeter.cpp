@@ -18,6 +18,8 @@ namespace NoteMeter {
             VOLTAGE_MODE_VOLTAGE = 1,
             VOLTAGE_MODE_VOCT_FREQUENCY = 2
         };
+        const char* modeLabel[3] = { "", "V", "Hz" };
+
         enum ParamId {
             NOTE_ACCIDENTAL_PARAM,
             VOLTAGE_MODE_PARAM,
@@ -122,6 +124,39 @@ namespace NoteMeter {
         }
     };
 
+    struct ModeLabelDisplayWidget : TransparentWidget {
+        std::shared_ptr<Font> font;
+        std::string fontPath;
+        char displayStr[16];
+        NoteMeter* module;
+
+        ModeLabelDisplayWidget(NoteMeter* m)
+        {
+            module = m;
+            fontPath = std::string(
+                asset::plugin(pluginInstance, "res/fonts/opensans/OpenSans-Regular.ttf"));
+        }
+
+        void drawLayer(const DrawArgs& args, int layer) override
+        {
+            NVGcolor labelTextColor = nvgRGB(0xff, 0xd4, 0x56); // yellow
+
+            if (layer == 1) {
+                if (!(font = APP->window->loadFont(fontPath))) {
+                    return;
+                }
+                nvgFontSize(args.vg, 15.0);
+                nvgFontFaceId(args.vg, font->handle);
+
+                Vec textPos = Vec(6, 24);
+
+                nvgFillColor(args.vg, labelTextColor);
+
+                nvgTextAlign(args.vg, NVG_ALIGN_RIGHT | NVG_ALIGN_BOTTOM);
+                nvgText(args.vg, textPos.x, textPos.y, module ? module->modeLabel[(int)(module->params[NoteMeter::VOLTAGE_MODE_PARAM].getValue())] : "", NULL);
+            }
+        }
+    };
     struct NoteDisplayWidget : TransparentWidget {
         std::shared_ptr<Font> font;
         std::string fontPath;
@@ -168,6 +203,9 @@ namespace NoteMeter {
 #define LABEL_HEIGHT 22
 #define LABEL_WIDTH 55
 
+#define MODE_X 37
+#define MODE_Y -0.3
+
 #define SPACING_X_OUT 14.1
 #define LABEL_OFFSET_X_OUT (LABEL_OFFSET_X + 2.0)
 #define LABEL_OFFSET_Y_OUT (LABEL_OFFSET_Y - 0.5) // leave space for the shading under the output jacks
@@ -188,6 +226,12 @@ namespace NoteMeter {
                 Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
             addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH,
                 RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+
+            auto modeDisplay = new ModeLabelDisplayWidget(module);
+            modeDisplay->box.size = Vec(30, 10);
+            modeDisplay->box.pos = mm2px(Vec(MODE_X, MODE_Y));
+            addChild(modeDisplay);
+
             int row, col;
             for (row = 0; row < NUM_INPUT_ROWS; row++) {
                 auto y = FIRST_Y + row * SPACING_Y;
