@@ -6,6 +6,9 @@
 
 * Implements [issue #17](https://github.com/chinenual/Chinenual-VCV/issues/17)  Notemeter now displays a label indicating display units ("V" or "Hz") when displaying those values.
 
+* Implements [issue #18](https://github.com/chinenual/Chinenual-VCV/issues/18)  The "number of decimal places" precision param now controls both the voltage and frequency modes.  The default is changed from "6" to "5" to more comfortably display high frequency values.
+
+
 ## 2.7.3
 
 * Implements [issue #15](https://github.com/chinenual/Chinenual-VCV/issues/15)  Notemeter can now display "V/Oct as frequency".  So there are now three options: Note Name, Voltage (V), V/Oct as Frequency (Hz)

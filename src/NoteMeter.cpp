@@ -63,7 +63,7 @@ namespace NoteMeter {
             }
             configParam(NOTE_ACCIDENTAL_PARAM, 0.f, 1.f, 0.f, "Display notes as sharps or flats");
             configParam(VOLTAGE_MODE_PARAM, 0.f, 2.f, 0.f, "Display voltage value rather than note name");
-            configParam(VOLTAGE_DECIMALS_PARAM, 0.f, 8.f, 6.f, "Number of decimal places to display in voltage value");
+            configParam(VOLTAGE_DECIMALS_PARAM, 0.f, 8.f, 5.f, "Number of decimal places to display in voltage/frequency value");
             CONFIG_STYLE(STYLE_PARAM);
         }
 
@@ -85,13 +85,11 @@ namespace NoteMeter {
                     text[i] = "";
                 }
                 std::string voltagePrintfFormat = "% 2.6f";
-                if (params[VOLTAGE_MODE_PARAM].getValue() == VOLTAGE_MODE_VOLTAGE) {
+                if (params[VOLTAGE_MODE_PARAM].getValue() != VOLTAGE_MODE_NOTENAME) {
                     // recompute the printformat to match the current param value
                     char buff[40];
                     std::snprintf(buff, sizeof(buff), "%% 2.%df", (int)params[VOLTAGE_DECIMALS_PARAM].getValue());
                     voltagePrintfFormat = buff;
-                } else if (params[VOLTAGE_MODE_PARAM].getValue() == VOLTAGE_MODE_VOCT_FREQUENCY) {
-                    voltagePrintfFormat = "% 4.2f";
                 }
 
                 for (int i = 0; i < NUM_INPUTS; i++) {
@@ -277,7 +275,7 @@ namespace NoteMeter {
                 }));
             /* Grrr, no ready-made way to get numeric input via text box or slider.   Punt and just produce a list of likely options. */
             menu->addChild(createIndexSubmenuItem(
-                "Number decimal places in voltage display",
+                "Number decimal places in voltage/frequency display",
                 {
                     "0",
                     "1",
