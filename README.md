@@ -30,7 +30,7 @@ The [Changelog](./CHANGELOG.md) describes changes.
 
 * [Tintinnabulator](#tintinnabulator) - Produce a harmonized pitch from an input chord and melody using Arvo Pärt-style tintinnabulation.
 
-* [NoteMeter](#notemeter) - a polyphonic metering module that displays note names from V/Oct inputs.
+* [NoteMeter](#notemeter) - a polyphonic metering module that displays note names, voltages or frequencies from V/Oct inputs.
 
 * [Inv](#inv) - Produce a chromatically inverted V/oct pitch relative to a specified "pivot" pitch.
 
@@ -252,7 +252,7 @@ Outputs:
 
 ![module-screenshot](./doc/NoteMeter-modes.png) 
 
-NoteMeter is a polyphonic metering module that displays note names
+NoteMeter is a polyphonic metering module that displays note names, voltages or frequencies
 from V/Oct inputs.	If the input voltage does not align exactly with a
 note voltage it indicates the deviance from the closest note as
 "cents". 
